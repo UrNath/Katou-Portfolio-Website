@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { flushSync } from 'preact/compat';
-import { editCredit, youtubeId, type ViewerClip } from '../lib/clip-shared';
+import { editCredit, tiktokId, youtubeId, type ViewerClip } from '../lib/clip-shared';
 
 interface Props {
   clips: ViewerClip[];
@@ -16,9 +16,7 @@ export default function ClipViewer({ clips }: Props) {
   const pushed = useRef(false);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
-  const [muted, setMuted] = useState(true);
-  const [embeds, setEmbeds] = useState<Record<string, boolean>>({});
-  const [motion, setMotion] = useState(true);
+  const [failed, setFailed] = useState<Record<string, boolean>>({});
   const openRef = useRef(false);
   const dragStart = useRef(0);
 
@@ -92,7 +90,6 @@ export default function ClipViewer({ clips }: Props) {
   };
 
   useEffect(() => {
-    setMotion(!reduce());
     const pending = (window as Window & { __nkClip?: string }).__nkClip;
     if (pending) show(pending);
 
@@ -187,34 +184,22 @@ export default function ClipViewer({ clips }: Props) {
         <p class="viewer-count" aria-live="polite">
           {clips.length ? `${index + 1} / ${clips.length}` : ''}
         </p>
-        <button
-          class="icon-btn"
-          type="button"
-          aria-pressed={muted}
-          aria-label={muted ? 'Unmute' : 'Mute'}
-          onClick={() => setMuted((value) => !value)}
-        >
-          {muted ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
-              <path d="M11 5 6 9H3v6h3l5 4V5z" />
-              <path d="m22 9-6 6" />
-              <path d="m16 9 6 6" />
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
-              <path d="M11 5 6 9H3v6h3l5 4V5z" />
-              <path d="M16 9a5 5 0 0 1 0 6" />
-              <path d="M19 7a8 8 0 0 1 0 10" />
-            </svg>
-          )}
-        </button>
+        <span aria-hidden="true"></span>
       </div>
       <div class="viewer-scroller" ref={scrollerRef} onScroll={onScroll}>
         {clips.map((clip, clipIndex) => {
           const yt = youtubeId(clip.youtube);
-          const showEmbed = Boolean(embeds[clip.id] && yt);
+          const tt = tiktokId(clip.tiktok);
+          const embed = yt
+            ? `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&playsinline=1`
+            : tt
+              ? `https://www.tiktok.com/embed/v2/${tt}`
+              : null;
+          const activeSlide = open && clipIndex === index;
+          const showEmbed = Boolean(activeSlide && embed && !failed[clip.id]);
+          const showFallback = activeSlide && !showEmbed;
           const near = open && Math.abs(clipIndex - index) <= 1;
-          const showVideo = open && motion && Boolean(clip.previewSrc) && clipIndex === index && !showEmbed;
+          const original = !placeholder(clip.youtube) ? clip.youtube : clip.tiktok;
           return (
             <section class="viewer-slide" data-slide={clip.id} key={clip.id} aria-label={clip.title}>
               <div class="viewer-stage">
@@ -222,29 +207,29 @@ export default function ClipViewer({ clips }: Props) {
                   class={clip.wide ? 'viewer-frame is-landscape' : 'viewer-frame'}
                   data-slide-media={clip.id}
                 >
-                  {showEmbed && yt ? (
+                  {near && !showEmbed && <img src={clip.poster} alt="" decoding="async" />}
+                  {showEmbed && embed ? (
                     <iframe
-                      src={`https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0`}
-                      title={`YouTube embed of ${clip.title}`}
-                      allow="autoplay; encrypted-media; picture-in-picture"
+                      class="embed-frame"
+                      src={embed}
+                      title={`Player for ${clip.title}`}
+                      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                       allowFullScreen
-                      loading="lazy"
                       referrerPolicy="strict-origin-when-cross-origin"
+                      onError={() => setFailed((current) => ({ ...current, [clip.id]: true }))}
                     />
-                  ) : (
-                    <>
-                      {near && <img src={clip.poster} alt="" decoding="async" />}
-                      {showVideo && (
-                        <video
-                          src={clip.previewSrc}
-                          muted={muted}
-                          playsInline
-                          loop
-                          autoPlay
-                          preload="none"
-                        />
+                  ) : null}
+                  {showFallback && (
+                    <div class="embed-fallback">
+                      <p>This player couldn't open here.</p>
+                      {original && !placeholder(original) ? (
+                        <a class="watch-link" href={original}>
+                          Open the original
+                        </a>
+                      ) : (
+                        <p>No YouTube or TikTok link on this clip yet.</p>
                       )}
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
@@ -264,15 +249,6 @@ export default function ClipViewer({ clips }: Props) {
                   <a class="watch-link" href={clip.tiktok}>
                     Watch on TikTok
                   </a>
-                )}
-                {yt && !showEmbed && (
-                  <button
-                    class="embed-btn"
-                    type="button"
-                    onClick={() => setEmbeds((current) => ({ ...current, [clip.id]: true }))}
-                  >
-                    Play YouTube embed
-                  </button>
                 )}
               </div>
             </section>

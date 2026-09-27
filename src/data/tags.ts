@@ -1,11 +1,14 @@
 import rawClips from './clips.json';
 
 interface ClipMeta {
+  id?: string;
   tags: string[];
   creator: string;
 }
 
-const clips = rawClips as ClipMeta[];
+const omittedClipIds = new Set(['miu-ms25', 'miu-mv1', 'miu-mv40', 'pidge-p6']);
+const clipList = (Array.isArray(rawClips) ? rawClips : rawClips.clips) as ClipMeta[];
+const clips = clipList.filter((clip) => !omittedClipIds.has(clip.id ?? ''));
 
 export function tagSlug(label: string): string {
   return label

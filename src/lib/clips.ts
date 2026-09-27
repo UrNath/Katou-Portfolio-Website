@@ -2,6 +2,7 @@ import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { z } from 'astro/zod';
 import rawClips from '../data/clips.json';
+import hubOrder from '../data/hub-order.json';
 import { site } from '../data/site';
 import { tagSlug } from '../data/tags';
 import { formatDuration, type ViewerClip } from './clip-shared';
@@ -53,8 +54,23 @@ export function loadClips(): Promise<ClipRecord[]> {
   return cached;
 }
 
+/**
+ * Not Katou's edits. Dropped in cursor/remove-uncredited-works-f0de.
+ * Filtered here as well so a later merge cannot put them back on the site.
+ */
+const OMITTED_CLIP_IDS = new Set(['miu-ms25', 'miu-mv1', 'miu-mv40', 'pidge-p6']);
+
+function clipEntries(raw: unknown): unknown[] {
+  const list = Array.isArray(raw) ? raw : raw && typeof raw === 'object' && 'clips' in raw ? (raw as { clips: unknown }).clips : null;
+  if (!Array.isArray(list)) throw new Error('clips.json must be a list, or { clips: [] }.');
+  return list.filter((item) => {
+    const id = item && typeof item === 'object' && item !== null && 'id' in item ? String((item as { id: unknown }).id) : '';
+    return !OMITTED_CLIP_IDS.has(id);
+  });
+}
+
 async function buildClips(): Promise<ClipRecord[]> {
-  const parsed = z.array(clipSchema).parse(rawClips);
+  const parsed = z.array(clipSchema).parse(clipEntries(rawClips));
   const heroes = parsed.filter((clip) => clip.heroFeatured);
   if (heroes.length !== 1) {
     throw new Error(`Expected one heroFeatured clip, found ${heroes.length}.`);
@@ -113,26 +129,16 @@ export function toViewerClip(clip: ClipRecord): ViewerClip {
  * and does not appear in the hero, the dimmed neighbors, the Works thumbnails,
  * or the hub viewer. Order is Katou's, not the catalog order.
  */
-export const HUB_FEATURED_ORDER = [
-  'chi-c3',
-  'chi-c4',
-  'pidge-p7',
-  'pidge-p8',
-  'pidge-p3',
-] as const;
-
 export function hubClips(clips: ClipRecord[]): ClipRecord[] {
   const featured = new Map(clips.filter((clip) => clip.featured).map((clip) => [clip.id, clip]));
-  const ordered = HUB_FEATURED_ORDER.map((id) => {
+  const ordered: ClipRecord[] = [];
+  for (const id of hubOrder.order) {
+    if (OMITTED_CLIP_IDS.has(id)) continue;
     const clip = featured.get(id);
-    if (!clip) throw new Error(`Featured hub clip ${id} is missing from clips data.`);
-    return clip;
-  });
-  const extras = [...featured.keys()].filter(
-    (id) => !HUB_FEATURED_ORDER.includes(id as (typeof HUB_FEATURED_ORDER)[number]),
-  );
-  if (extras.length > 0) {
-    throw new Error(`Hub is featured-only. Unexpected featured clips: ${extras.join(', ')}.`);
+    if (clip) ordered.push(clip);
+  }
+  for (const clip of featured.values()) {
+    if (!ordered.some((item) => item.id === clip.id)) ordered.push(clip);
   }
   return ordered;
 }

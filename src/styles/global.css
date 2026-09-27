@@ -2077,3 +2077,19 @@ body:has(dialog[open]) { overflow: hidden; }
 @media (max-width: 959px) {
   .is-hub .footer-inner { padding-block: 10px; gap: 2px; }
 }
+
+.viewer-frame .embed-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+  background: #111;
+  color: #fff;
+}
+.viewer-frame .embed-fallback p { margin: 0; font-size: 14px; line-height: 1.4; }

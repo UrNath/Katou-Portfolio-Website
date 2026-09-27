@@ -35,6 +35,21 @@ export function youtubeId(url: string): string | null {
   }
 }
 
+/** Numeric id from a tiktok.com /@user/video/{id} URL. */
+export function tiktokId(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.replace(/^www\./, '') !== 'tiktok.com') return null;
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    const index = parts.indexOf('video');
+    const id = index >= 0 ? (parts[index + 1] ?? '') : '';
+    return /^\d+$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
 export function formatDuration(seconds: number): string {
   const total = Math.max(0, Math.round(seconds));
   const minutes = Math.floor(total / 60);

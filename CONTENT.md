@@ -50,7 +50,7 @@ Creator chips are `/works?creator=pidge`, `/works?creator=chi`, and `/works?crea
 2. Add a muted H.264 MP4, about 5 seconds, faststart, no audio, to `public/media/previews/{id}.mp4`.
 3. Append an object to `src/data/clips.json` (newest at the top). Fields the site reads: `id`, `creator`, `channelHandle`, `title`, `youtubeUrl`, `tiktokUrl` (or `null`), `uploadDate`, `durationSec`, `orientation` (`vertical` or `landscape`), `aspectRatio`, `poster`, `preview`, `tags`, `featured`, `heroFeatured`. Leave `viewCount` and `tiktokMatchConfidence` out of the UI.
 4. Only one clip should have `heroFeatured: true`. That clip also gets the page-transition name. Other `featured` clips are the hub’s previous and next.
-5. A YouTube watch, Shorts, or youtu.be URL turns on “Play YouTube embed” inside the viewer. A null `tiktokUrl` hides the TikTok button. Previews stay `preload="none"` until the card is on screen, and only one plays. `prefers-reduced-motion` and Save-Data stay on the poster.
+5. Tapping a clip embeds the original YouTube or TikTok post, with sound. The hover loops stay silent. A null `tiktokUrl` hides the TikTok button. Previews stay `preload="none"` until the card is on screen, and only one plays. `prefers-reduced-motion` and Save-Data stay on the poster.
 
 ### Move previews to Vercel Blob or a CDN
 
@@ -60,3 +60,11 @@ The loops are about 13 MB and are committed under `public/media/previews/` for n
 2. Set `previewBase` in `src/data/site.ts` to the origin with no trailing slash, for example `https://….public.blob.vercel-storage.com/previews`. `src/lib/clips.ts` then requests `{previewBase}/{filename}` instead of `/media/previews/{filename}`.
 3. Delete `public/media/previews/` from the repo so the static build stops shipping the MP4s.
 4. Leave the posters in `src/assets/posters/`. Those stay in the image pipeline.
+
+## Editor
+
+`/admin` opens Keystatic. It is unlisted and `noindex`. The README has the one-time GitHub App steps.
+
+Do not add these clip ids back. They are not Katou’s edits: `miu-ms25` (ROSÉ & Bruno Mars APT. Valorant parody), `miu-mv1` (Miu's London Anime and Gaming Con 2026 Performance), `miu-mv40` (kawaikute gomen HoneyWorks cover), `pidge-p6` (pidge stream core no. 1). They are also filtered out in `src/lib/clips.ts`, and `pidge-p6` is not in `src/data/hub-order.json`.
+
+Saving Editing or Web design rewrites that markdown file. Comments in the frontmatter are not kept. The “I take” and “I don’t take” fields are marked as drafts in the editor.

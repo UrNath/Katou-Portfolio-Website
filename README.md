@@ -20,7 +20,7 @@ Astro, Tailwind CSS, TypeScript, and Preact islands for the clip preview, the fu
 
 ## Deploy to Vercel
 
-Framework preset: **Astro**. The project is a static site (`output: 'static'` in `astro.config.mjs`), so it does not need a Vercel adapter.
+Framework preset: **Astro**. Public pages are still static HTML. A Vercel adapter is included only so the private editor at `/admin` can sign in.
 
 | Setting | Value |
 |---|---|
@@ -29,6 +29,37 @@ Framework preset: **Astro**. The project is a static site (`output: 'static'` in
 | Output directory | `dist` |
 | Install command | `npm install` |
 
-Set `site` in `astro.config.mjs` to the real domain when you have one.
+`site` is `https://nassukatou-site.vercel.app`. Change it in `astro.config.mjs` if the domain changes.
 
-Preview MP4s live in `public/media/previews/`. The build copies them to `dist/media/previews/`, and the site requests them at `/media/previews/`. `vercel.json` caches that path for a year. CONTENT.md explains how to move the loops to Vercel Blob or another CDN later (`previewBase` in `src/data/site.ts`).
+Preview MP4s live in `public/media/previews/`. The build copies them to `dist/media/previews/`, and the site requests them at `/media/previews/`. `vercel.json` caches that path for a year. CONTENT.md explains how to move the loops to Vercel Blob or another CDN later (`previewBase` in `src/data/site-settings.json`).
+
+## Editing the site
+
+Open `/admin` (it is not linked from the public pages). That opens Keystatic. With no env vars, Save on your computer writes the files in this repo. On the live site, Save commits to `main` after the one-time GitHub setup below, and Vercel rebuilds.
+
+The editor is [Keystatic](https://keystatic.com). It has an Astro integration, so the public pages stay prebuilt and only the sign-in routes run on the server. Decap CMS would need a separate GitHub OAuth service on Vercel, and its admin screen is a worse fit on a phone.
+
+### One-time GitHub setup
+
+Do this once, signed in as **UrNath**. Do not commit the secrets.
+
+1. Open [New GitHub App](https://github.com/settings/apps/new). Name it `NassuKatou editor`. Homepage URL: `https://nassukatou-site.vercel.app/keystatic`. Turn on “Request user authorization (OAuth) during installation”. Turn the webhook off. Permissions: Contents read and write, Pull requests read-only, Metadata read-only. Install it only on this account.
+2. Callback URLs, added one at a time:
+   - `https://nassukatou-site.vercel.app/api/keystatic/github/oauth/callback`
+   - `http://127.0.0.1:4321/api/keystatic/github/oauth/callback`
+   - `http://localhost:4321/api/keystatic/github/oauth/callback`
+   - `http://127.0.0.1/api/keystatic/github/oauth/callback`
+3. Copy the Client ID, generate a client secret, and copy the app slug from the end of `https://github.com/apps/…`.
+4. Install the app on `UrNath/Katou-Portfolio-Website` only.
+5. In Vercel → Settings → Environment Variables, add these, then redeploy (the slug is read when the site builds):
+
+| Name | Value |
+| --- | --- |
+| `KEYSTATIC_GITHUB_CLIENT_ID` | Client ID |
+| `KEYSTATIC_GITHUB_CLIENT_SECRET` | Client secret |
+| `KEYSTATIC_SECRET` | Output of `openssl rand -hex 32` (at least 32 characters) |
+| `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` | App slug |
+
+6. Bookmark `https://nassukatou-site.vercel.app/admin` and sign in as UrNath.
+
+Four clips are not Katou’s edits and must not be added back: `miu-ms25`, `miu-mv1`, `miu-mv40`, and `pidge-p6`. The site drops them even if they show up in the data again. `pidge-p6` is also not in the home order.
