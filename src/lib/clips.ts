@@ -119,7 +119,6 @@ export const HUB_FEATURED_ORDER = [
   'pidge-p7',
   'pidge-p8',
   'pidge-p3',
-  'pidge-p6',
 ] as const;
 
 export function hubClips(clips: ClipRecord[]): ClipRecord[] {

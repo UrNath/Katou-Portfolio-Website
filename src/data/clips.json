@@ -196,31 +196,6 @@
     "credit": "Edit by NassuKatou"
   },
   {
-    "id": "miu-mv1",
-    "creator": "Miu",
-    "channelHandle": "@miuonivt",
-    "title": "Miu's London Anime and Gaming Con 2026 Performance",
-    "youtubeUrl": "https://www.youtube.com/watch?v=YcszM5AkiPc",
-    "tiktokUrl": null,
-    "tiktokMatchConfidence": null,
-    "uploadDate": "2026-02-24",
-    "durationSec": 549,
-    "viewCount": 152,
-    "orientation": "landscape",
-    "aspectRatio": "16:9",
-    "type": "video",
-    "poster": "posters/miu-mv1.webp",
-    "preview": "previews/miu-mv1.mp4",
-    "tags": [
-      "Karaoke/Music",
-      "Highlights"
-    ],
-    "tagsSuggested": true,
-    "featured": false,
-    "heroFeatured": false,
-    "credit": "Edit by NassuKatou"
-  },
-  {
     "id": "miu-ms5",
     "creator": "Miu",
     "channelHandle": "@miuonivt",
@@ -316,31 +291,6 @@
     ],
     "tagsSuggested": true,
     "featured": false,
-    "heroFeatured": false,
-    "credit": "Edit by NassuKatou"
-  },
-  {
-    "id": "pidge-p6",
-    "creator": "Pidge",
-    "channelHandle": "@pidgeira",
-    "title": "pidge stream core no. 1 #vtuber #vtuberclips #valorant #valorantclips #envtuber #phvtuber #twitch",
-    "youtubeUrl": "https://www.youtube.com/shorts/HacUQ75IZoE",
-    "tiktokUrl": "https://www.tiktok.com/@pidgeira/video/7595943493663493397",
-    "tiktokMatchConfidence": "medium",
-    "uploadDate": "2026-01-21",
-    "durationSec": 60,
-    "viewCount": 1024,
-    "orientation": "vertical",
-    "aspectRatio": "9:16",
-    "type": "short",
-    "poster": "posters/pidge-p6.webp",
-    "preview": "previews/pidge-p6.mp4",
-    "tags": [
-      "Gaming",
-      "Highlights"
-    ],
-    "tagsSuggested": true,
-    "featured": true,
     "heroFeatured": false,
     "credit": "Edit by NassuKatou"
   },
@@ -1105,31 +1055,6 @@
     "credit": "Edit by NassuKatou"
   },
   {
-    "id": "miu-mv40",
-    "creator": "Miu",
-    "channelHandle": "@miuonivt",
-    "title": "kawaikute gomen 可愛くてごめん  HoneyWorks - miuoni ver. 🌻",
-    "youtubeUrl": "https://www.youtube.com/watch?v=Scjxs2_pT2M",
-    "tiktokUrl": null,
-    "tiktokMatchConfidence": null,
-    "uploadDate": "2025-02-14",
-    "durationSec": 217,
-    "viewCount": 542,
-    "orientation": "landscape",
-    "aspectRatio": "16:9",
-    "type": "video",
-    "poster": "posters/miu-mv40.webp",
-    "preview": "previews/miu-mv40.mp4",
-    "tags": [
-      "MV",
-      "Karaoke/Music"
-    ],
-    "tagsSuggested": true,
-    "featured": false,
-    "heroFeatured": false,
-    "credit": "Edit by NassuKatou"
-  },
-  {
     "id": "miu-mv41",
     "creator": "Miu",
     "channelHandle": "@miuonivt",
@@ -1147,32 +1072,6 @@
     "preview": "previews/miu-mv41.mp4",
     "tags": [
       "Highlights"
-    ],
-    "tagsSuggested": true,
-    "featured": false,
-    "heroFeatured": false,
-    "credit": "Edit by NassuKatou"
-  },
-  {
-    "id": "miu-ms25",
-    "creator": "Miu",
-    "channelHandle": "@miuonivt",
-    "title": "ROSÉ & Bruno Mars - APT. ✨ Valorant Edition - 【Miuoni PARODY COVER】",
-    "youtubeUrl": "https://www.youtube.com/shorts/D86AShL1h0E",
-    "tiktokUrl": null,
-    "tiktokMatchConfidence": null,
-    "uploadDate": "2024-12-03",
-    "durationSec": 52,
-    "viewCount": 637,
-    "orientation": "vertical",
-    "aspectRatio": "9:16",
-    "type": "short",
-    "poster": "posters/miu-ms25.webp",
-    "preview": "previews/miu-ms25.mp4",
-    "tags": [
-      "MV",
-      "Karaoke/Music",
-      "Gaming"
     ],
     "tagsSuggested": true,
     "featured": false,

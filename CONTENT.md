@@ -36,9 +36,9 @@ Status is one value per service: `'open'`, `'waitlist'`, or `'closed'`. The visi
 
 ## Clips
 
-`src/data/clips.json` is the list, newest first. The hub and Works counts (`51 edits`) are `clips.length`. View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. A filter chip is omitted when no clip uses that tag.
+`src/data/clips.json` is the list, newest first. The hub and Works counts (`47 edits`) are `clips.length`. View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. A filter chip is omitted when no clip uses that tag.
 
-The hub is featured-only. It centers `chi-c3` (`heroFeatured`). The dimmed neighbors, the Works thumbnails, and the hub viewer use only the featured clips, in this order: `chi-c3`, `chi-c4`, `pidge-p7`, `pidge-p8`, `pidge-p3`, `pidge-p6`. Miu stays on `/works`, newest first. Cards read `Edit for @handle` (Pidge `@pidgeira`, Chi `@chiseyi`, Miu `@miuonivt`).
+The hub is featured-only. It centers `chi-c3` (`heroFeatured`). The dimmed neighbors, the Works thumbnails, and the hub viewer use only the featured clips, in this order: `chi-c3`, `chi-c4`, `pidge-p7`, `pidge-p8`, `pidge-p3`. Miu stays on `/works`, newest first. Cards read `Edit for @handle` (Pidge `@pidgeira`, Chi `@chiseyi`, Miu `@miuonivt`).
 
 Landscape items (`orientation: "landscape"`, 16:9) render in the Longer edits row on `/works`. `miu-ms17` is square in the source and already padded to 9:16, and its `orientation` is `vertical`, so it stays in the short grid. The viewer sizes the frame to 9:16 or 16:9 from that same flag.
 
