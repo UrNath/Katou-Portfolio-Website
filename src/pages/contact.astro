@@ -1,0 +1,148 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import BrandIcon from '../components/BrandIcon.astro';
+import Icon from '../components/Icon.astro';
+import StatusChip from '../components/StatusChip.astro';
+import { contactServices, guidelines } from '../data/contact';
+import { status } from '../data/status';
+import { isPlaceholder, site, socials } from '../data/site';
+---
+
+<BaseLayout
+  title="Contact"
+  description="Send Katou a sample booking note. The form opens an email draft and stores nothing on a server."
+>
+  <article class="contact">
+    <a class="back" href="/">← Home</a>
+    <h1 class="page-title">Contact</h1>
+    <p class="page-sub">
+      One message to Katou. Submitting opens an email draft to {site.email}. Nothing is stored on a server.
+    </p>
+    <div class="status-row" aria-label="Service status">
+      <StatusChip status={status.editing} />
+      <StatusChip status={status.webDesign} />
+    </div>
+
+    <section class="surface-card guidelines">
+      <h2>Before you write</h2>
+      <ul>
+        {guidelines.map((item) => <li>{item}</li>)}
+      </ul>
+    </section>
+
+    <form
+      id="contact-form"
+      action={`mailto:${site.email}`}
+      method="post"
+      enctype="text/plain"
+    >
+      <label class="field">
+        <span>Name</span>
+        <input name="name" autocomplete="name" required />
+      </label>
+      <label class="field">
+        <span>Handle / channel</span>
+        <input name="handle" autocomplete="nickname" required />
+      </label>
+      <label class="field">
+        <span>Service</span>
+        <select name="service" id="service">
+          {contactServices.map((option) => <option value={option.value}>{option.label}</option>)}
+        </select>
+      </label>
+      <label class="field">
+        <span>Links</span>
+        <input name="links" type="text" inputmode="url" placeholder="VOD or reference (optional)" />
+      </label>
+      <label class="field">
+        <span>Message</span>
+        <textarea name="message" required></textarea>
+      </label>
+      <p class="form-hint">Sample form. It does not send mail by itself. Your email app does.</p>
+      <div class="block">
+        <button class="cta" type="submit">Email Katou</button>
+      </div>
+      <p class="form-status" id="form-status" role="status"></p>
+      <textarea class="draft" id="draft" hidden readonly></textarea>
+    </form>
+
+    <section class="block">
+      <h2 class="kicker">Elsewhere</h2>
+      <div class="social-row">
+        {
+          socials.map((item) => (
+            <a
+              class="icon-btn"
+              href={item.href}
+              aria-label={isPlaceholder(item.href) ? `${item.label}, placeholder link` : item.label}
+            >
+              <BrandIcon name={item.id} />
+            </a>
+          ))
+        }
+      </div>
+      <div class="copy-row">
+        <a class="copy-email" href={`mailto:${site.email}`}>{site.email}</a>
+        <button class="copy-btn" type="button" id="copy-email">
+          <Icon name="copy" size={14} />
+          Copy
+        </button>
+        <span class="copied" id="copied" hidden>Copied</span>
+      </div>
+    </section>
+  </article>
+  <script define:vars={{ email: site.email }}>
+    const params = new URLSearchParams(location.search);
+    const requested = params.get('service');
+    const select = document.querySelector('#service');
+    if (requested && select instanceof HTMLSelectElement) {
+      const match = Array.from(select.options).some((option) => option.value === requested);
+      if (match) select.value = requested;
+    }
+
+    const form = document.querySelector('#contact-form');
+    const status = document.querySelector('#form-status');
+    const draft = document.querySelector('#draft');
+    if (form instanceof HTMLFormElement && status && draft instanceof HTMLTextAreaElement) {
+      form.addEventListener('submit', (event) => {
+        if (!form.reportValidity()) return;
+        event.preventDefault();
+        const data = new FormData(form);
+        const body = [
+          `Name: ${String(data.get('name') ?? '')}`,
+          `Handle: ${String(data.get('handle') ?? '')}`,
+          `Service: ${String(data.get('service') ?? '')}`,
+          `Links: ${String(data.get('links') || '(none)')}`,
+          '',
+          String(data.get('message') ?? ''),
+        ].join('\n');
+        draft.hidden = false;
+        draft.value = body;
+        status.textContent = 'Opening your email app with this draft. If nothing opens, copy the message below.';
+        const href = `mailto:${email}?subject=${encodeURIComponent('Booking request (sample)')}&body=${encodeURIComponent(body)}`;
+        window.location.href = href;
+      });
+    }
+
+    const copyBtn = document.querySelector('#copy-email');
+    const copied = document.querySelector('#copied');
+    copyBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(email);
+      } catch {
+        const fallback = document.createElement('textarea');
+        fallback.value = email;
+        document.body.append(fallback);
+        fallback.select();
+        document.execCommand('copy');
+        fallback.remove();
+      }
+      if (copied instanceof HTMLElement) {
+        copied.hidden = false;
+        window.setTimeout(() => {
+          copied.hidden = true;
+        }, 1600);
+      }
+    });
+  </script>
+</BaseLayout>

@@ -1,0 +1,83 @@
+---
+import { Picture } from 'astro:assets';
+import Icon from './Icon.astro';
+import { editCredit } from '../lib/clip-shared';
+import type { ClipRecord } from '../lib/clips';
+
+interface Props {
+  clip: ClipRecord;
+  variant?: 'grid' | 'hero' | 'neighbor';
+  eager?: boolean;
+  priority?: boolean;
+  sizes: string;
+}
+
+const { clip, variant = 'grid', eager = false, priority = false, sizes } = Astro.props;
+const widths = clip.wide ? [480, 960] : [270, 540];
+const credit = editCredit(clip.channelHandle);
+const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
+---
+
+<article
+  class:list={['clip-card', variant === 'hero' && 'is-feature', clip.wide && 'is-wide', !clip.previewSrc && 'no-preview']}
+  data-clip-id={clip.id}
+  data-tags={clip.tags.join(' ')}
+  data-creator={clip.creatorId}
+>
+  <div class="clip-anim">
+    <div class:list={['clip-frame', clip.wide && 'is-wide']} style={morph ? `view-transition-name: ${morph}` : undefined}>
+      <button class="clip-open" type="button" data-open-clip={clip.id}>
+        <span class="sr-only">Play {clip.title}, {credit}, {clip.duration}</span>
+      </button>
+      <span class="clip-poster">
+        <Picture
+          src={clip.posterImage}
+          formats={['avif', 'webp']}
+          fallbackFormat="webp"
+          widths={widths}
+          sizes={sizes}
+          alt=""
+          quality={55}
+          loading={eager || priority ? 'eager' : 'lazy'}
+          fetchpriority={priority ? 'high' : 'auto'}
+        />
+      </span>
+      {
+        variant !== 'neighbor' && clip.previewSrc && (
+          <video
+            class="clip-video"
+            data-preview
+            data-src={clip.previewSrc}
+            data-hero={variant === 'hero' ? 'true' : undefined}
+            muted
+            playsinline
+            loop
+            preload="none"
+            disablepictureinpicture
+          />
+        )
+      }
+      {
+        variant === 'hero' && (
+          <button
+            class="clip-pause"
+            type="button"
+            data-pause
+            aria-pressed="false"
+            aria-label="Pause preview"
+          >
+            <span class="when-playing"><Icon name="pause" size={18} /></span>
+            <span class="when-paused"><Icon name="play" size={18} /></span>
+          </button>
+        )
+      }
+      <span class="play-badge" aria-hidden="true"><Icon name="play" size={14} /></span>
+      <span class="clip-duration" aria-hidden="true">{clip.duration}</span>
+      <span class="clip-meta" aria-hidden="true">
+        {variant === 'grid' && <span class="clip-title">{clip.title}</span>}
+        <span class="clip-credit">{credit}</span>
+      </span>
+      <span class="clip-progress" aria-hidden="true"></span>
+    </div>
+  </div>
+</article>

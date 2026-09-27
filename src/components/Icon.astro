@@ -1,0 +1,58 @@
+---
+import film from 'lucide-static/icons/film.svg?raw';
+import scissors from 'lucide-static/icons/scissors.svg?raw';
+import codeXml from 'lucide-static/icons/code-xml.svg?raw';
+import fileText from 'lucide-static/icons/file-text.svg?raw';
+import mail from 'lucide-static/icons/mail.svg?raw';
+import chevronRight from 'lucide-static/icons/chevron-right.svg?raw';
+import chevronDown from 'lucide-static/icons/chevron-down.svg?raw';
+import check from 'lucide-static/icons/check.svg?raw';
+import x from 'lucide-static/icons/x.svg?raw';
+import menu from 'lucide-static/icons/menu.svg?raw';
+import pause from 'lucide-static/icons/pause.svg?raw';
+import play from 'lucide-static/icons/play.svg?raw';
+import volume2 from 'lucide-static/icons/volume-2.svg?raw';
+import volumeX from 'lucide-static/icons/volume-x.svg?raw';
+import arrowUpRight from 'lucide-static/icons/arrow-up-right.svg?raw';
+import copy from 'lucide-static/icons/copy.svg?raw';
+import heart from 'lucide-static/icons/heart.svg?raw';
+import sparkles from 'lucide-static/icons/sparkles.svg?raw';
+
+const icons: Record<string, string> = {
+  film,
+  scissors,
+  'code-xml': codeXml,
+  'file-text': fileText,
+  mail,
+  'chevron-right': chevronRight,
+  'chevron-down': chevronDown,
+  check,
+  x,
+  menu,
+  pause,
+  play,
+  'volume-2': volume2,
+  'volume-x': volumeX,
+  'arrow-up-right': arrowUpRight,
+  copy,
+  heart,
+  sparkles,
+};
+
+interface Props {
+  name: keyof typeof icons | string;
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 20, class: className } = Astro.props;
+const raw = icons[name];
+if (!raw) throw new Error(`Unknown icon: ${name}`);
+
+let svg = raw.replace(/<!--[\s\S]*?-->\s*/, '');
+svg = svg.replace(/\swidth="24"/, '').replace(/\sheight="24"/, '');
+svg = svg.replace('stroke-width="2"', 'stroke-width="1.75"');
+svg = svg.replace('<svg', `<svg width="${size}" height="${size}" aria-hidden="true" focusable="false"`);
+---
+
+<span class:list={['icon', className]} style={`width:${size}px;height:${size}px`} set:html={svg} />

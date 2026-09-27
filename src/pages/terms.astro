@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { status } from '../data/status';
+import { termsSections } from '../data/terms';
+---
+
+<BaseLayout
+  title="Terms"
+  description="Sample terms and FAQ for booking an edit or a site with Katou. Not a real policy."
+>
+  <article class="narrow">
+    <a class="back" href="/">← Home</a>
+    <h1 class="page-title">Terms</h1>
+    <p class="page-sub">Sample terms for this portfolio. Not a real policy.</p>
+    <p class="updated" style="margin-top: 12px">Terms updated {status.termsUpdated}</p>
+    <div class="terms-list">
+      {
+        termsSections.map((section) => (
+          <details class="terms" id={section.id} name="terms">
+            <summary>
+              <h2 class="term-title">{section.title}</h2>
+              <span class="chevron">
+                <Icon name="chevron-down" size={18} />
+              </span>
+            </summary>
+            <div class="terms-body">
+              {section.paragraphs.map((paragraph) => (
+                <p>{paragraph}</p>
+              ))}
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </article>
+  <script>
+    function openFromHash() {
+      const id = location.hash.replace('#', '');
+      if (!id) return;
+      const target = document.getElementById(id);
+      if (target instanceof HTMLDetailsElement) {
+        target.open = true;
+      }
+    }
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+  </script>
+</BaseLayout>

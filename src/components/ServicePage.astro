@@ -1,0 +1,252 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Icon from './Icon.astro';
+import StatusChip from './StatusChip.astro';
+import { status, type ServiceStatus, type StatusKey } from '../data/status';
+import { termsSections } from '../data/terms';
+import type { ServiceEntry } from '../lib/services';
+
+interface Props {
+  service: ServiceEntry;
+}
+
+const { service } = Astro.props;
+const data = service.data;
+const statusKey: StatusKey = service.id === 'web-design' ? 'webDesign' : 'editing';
+const serviceStatus: ServiceStatus = status[statusKey];
+const ctaLabel = serviceStatus === 'closed' ? 'Join the waitlist' : data.cta;
+const popularSeen = { value: false };
+const severalTiers = data.tiers.length > 1;
+const stagePackage = data.track === 'lavender' && !severalTiers;
+const revisions = termsSections.find((section) => section.id === 'revisions');
+
+function addonLabel(price: string) {
+  if (price.startsWith('+') || price.startsWith('$') || price.startsWith('≈')) return price;
+  return `+ ${price}`;
+}
+---
+
+<BaseLayout title={data.title} description={`${data.subtitle} From ${data.fromPrice}.`}>
+  <article class="service" data-track={data.track}>
+    <a class="back" href="/">← Home</a>
+    <h1 class="page-title reveal">{data.title}</h1>
+    <p class="page-sub">{data.subtitle}</p>
+
+    <div class="status-row">
+      <StatusChip status={serviceStatus} />
+      <p class="updated">Prices updated {status.updated}</p>
+    </div>
+
+    <section class="block">
+      <h2 class="kicker">Includes</h2>
+      <div class="surface-card">
+        <ul class="check-list">
+          {
+            data.includes.map((item) => (
+              <li>
+                <Icon name="check" size={18} />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    {
+      data.process && data.process.length > 0 && (
+        <section class="block">
+          <h2 class="kicker">Process</h2>
+          <ol class="process">
+            {data.process.map((step) => (
+              <li>{step}</li>
+            ))}
+          </ol>
+          {data.proof && <p class="proof">{data.proof}</p>}
+        </section>
+      )
+    }
+
+    <section class="block">
+      <h2 class="sr-only">Scope</h2>
+      <div class="scope">
+        <div class="surface-card">
+          <h3>I take</h3>
+          <ul class="plain-list take-list">
+            {
+              data.take.map((item) => (
+                <li>
+                  <Icon name="check" size={16} />
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class="surface-card">
+          <h3>I don't take</h3>
+          <ul class="plain-list dont-list">
+            {
+              data.dont.map((item) => (
+                <li>
+                  <Icon name="x" size={16} />
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+      <p class="pick-note">{data.pickNote}</p>
+    </section>
+
+    <section class="block">
+      <h2 class="kicker">{severalTiers ? 'Tiers' : 'Package'}</h2>
+      <div class="tier-scroller" data-count={data.tiers.length}>
+        {
+          data.tiers.map((tier, index) => {
+            const showPopular = tier.popular && !popularSeen.value;
+            if (showPopular) popularSeen.value = true;
+            return (
+              <article class:list={['tier', stagePackage ? 'stage-tier' : 'paper-tier']}>
+                {
+                  stagePackage ? (
+                    <>
+                      <p class="price-chip">Real price</p>
+                      <h3>{tier.name}</h3>
+                      <p class="stage-figure">
+                        {tier.price} {tier.unit && <span>/ {tier.unit}</span>}
+                      </p>
+                      <dl class="spec-rows">
+                        {data.compare.map((row) => (
+                          <div>
+                            <dt>{row.feature}</dt>
+                            <dd>{row.values[0]}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                      {revisions && (
+                        <details class="compare">
+                          <summary>
+                            <span>What counts as minor vs major?</span>
+                            <span class="chevron"><Icon name="chevron-down" size={18} /></span>
+                          </summary>
+                          <div class="terms-body">
+                            {revisions.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+                          </div>
+                        </details>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div class="tier-top">
+                        <div>
+                          <span class="tier-num">{String(index + 1).padStart(2, '0')}</span>
+                          <h3>{tier.name}</h3>
+                          {showPopular && <span class="popular">Popular</span>}
+                        </div>
+                        <p class="tier-price">
+                          {
+                            tier.approx ? (
+                              <>
+                                <span class="tier-usd">{tier.price}</span>
+                                <span class="tier-approx">{tier.approx}</span>
+                              </>
+                            ) : (
+                              <>
+                                from {tier.price}
+                                {tier.unit ? ` / ${tier.unit}` : ''}
+                              </>
+                            )
+                          }
+                        </p>
+                      </div>
+                      <ul class="check-list">
+                        {tier.points.map((point) => (
+                          <li>
+                            <Icon name="check" size={16} />
+                            <span>{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {tier.note && <p class="tier-note">{tier.note}</p>}
+                    </>
+                  )
+                }
+              </article>
+            );
+          })
+        }
+      </div>
+
+      {
+        severalTiers && (
+      <details class="compare">
+        <summary>
+          <span>Compare tiers</span>
+          <span class="chevron"><Icon name="chevron-down" size={18} /></span>
+        </summary>
+        <div class="compare-stack">
+          {
+            data.tiers.map((tier, index) => (
+              <section>
+                <h3>{tier.name}</h3>
+                <dl>
+                  {data.compare.map((row) => (
+                    <div class="compare-row">
+                      <dt>{row.feature}</dt>
+                      <dd>{row.values[index]}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ))
+          }
+        </div>
+        <div class="compare-table-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th scope="col">Feature</th>
+                {data.tiers.map((tier) => <th scope="col">{tier.name}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {
+                data.compare.map((row) => (
+                  <tr>
+                    <th scope="row">{row.feature}</th>
+                    {row.values.map((value) => <td>{value}</td>)}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </details>
+        )
+      }
+    </section>
+
+    <section class="block">
+      <h2 class="kicker">Add-ons</h2>
+      <ul class="addon-list">
+        {
+          data.addons.map((addon) => (
+            <li>
+              <span>{addon.name}</span>
+              <span class="addon-price">{addonLabel(addon.price)}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="block">
+      <a class="cta" href={`/contact?service=${data.contactService}`}>{ctaLabel}</a>
+      <p class="terms-nudge">
+        <a href="/terms">Before you book: read the Terms</a>
+      </p>
+    </section>
+  </article>
+</BaseLayout>
