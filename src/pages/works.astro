@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import ClipCard from '../components/ClipCard.astro';
+import ClipPreview from '../islands/ClipPreview';
+import ClipViewer from '../islands/ClipViewer';
+import WorksFilters from '../islands/WorksFilters';
+import { clipTags, creators, filterBoot, filterCss } from '../data/tags';
+import { loadClips, toViewerClip } from '../lib/clips';
+
+const clips = await loadClips();
+const shorts = clips.filter((clip) => !clip.wide);
+const longer = clips.filter((clip) => clip.wide);
+const editLabel = `${clips.length} ${clips.length === 1 ? 'edit' : 'edits'}`;
+const cardSizes = '(min-width: 1280px) 220px, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 46vw';
+const wideSizes = '(min-width: 768px) 46vw, 100vw';
+---
+
+<BaseLayout
+  title="Works"
+  description={`${editLabel} for Pidge, Chi, and Miu. Shorts and longer edits, with creator and tag filters.`}
+>
+  <style slot="head" is:inline set:html={filterCss()} />
+  <script slot="head" is:inline set:html={filterBoot()} />
+  <section class="works">
+    <header class="works-head">
+      <h1 class="page-title reveal">Works</h1>
+      <p class="clip-count" data-clip-count aria-live="polite">{editLabel}</p>
+    </header>
+    <div class="filters" role="toolbar" aria-label="Filter edits by creator or tag">
+      <button class="filter-chip" type="button" data-filter="" aria-pressed="true">All</button>
+      {
+        creators.map((creator) => (
+          <button class="filter-chip" type="button" data-filter={`creator:${creator.id}`} aria-pressed="false">
+            {creator.label}
+          </button>
+        ))
+      }
+      <span class="filter-gap" aria-hidden="true"></span>
+      {
+        clipTags.map((tag) => (
+          <button class="filter-chip" type="button" data-filter={tag.id} aria-pressed="false">
+            {tag.label}
+          </button>
+        ))
+      }
+    </div>
+    <WorksFilters client:visible />
+    <ClipPreview client:visible />
+    <div class="works-block" data-block="shorts">
+      <div class="works-grid">
+        {
+          shorts.map((clip, index) => (
+            <ClipCard
+              clip={clip}
+              sizes={cardSizes}
+              eager={index < 2}
+              priority={index === 0}
+            />
+          ))
+        }
+      </div>
+    </div>
+    {
+      longer.length > 0 && (
+        <div class="works-block" data-block="longer">
+          <h2 class="works-kicker">Longer edits</h2>
+          <div class="works-grid works-grid-wide">
+            {longer.map((clip) => (
+              <ClipCard clip={clip} sizes={wideSizes} />
+            ))}
+          </div>
+        </div>
+      )
+    }
+    <p class="works-empty" data-empty hidden>No edits for that filter.</p>
+    <ClipViewer client:idle clips={clips.map(toViewerClip)} />
+  </section>
+  <script is:inline>
+    (function () {
+      var filter = document.documentElement.getAttribute('data-filter') || '';
+      document.querySelectorAll('[data-filter]').forEach(function (chip) {
+        var value = chip.getAttribute('data-filter') || '';
+        chip.setAttribute('aria-pressed', value === filter ? 'true' : 'false');
+      });
+      var shown = 0;
+      document.querySelectorAll('.clip-card').forEach(function (card) {
+        if (getComputedStyle(card).display !== 'none') shown += 1;
+      });
+      var count = document.querySelector('[data-clip-count]');
+      if (count) count.textContent = shown + (shown === 1 ? ' edit' : ' edits');
+      var empty = document.querySelector('[data-empty]');
+      if (empty) empty.hidden = shown !== 0;
+    })();
+  </script>
+</BaseLayout>

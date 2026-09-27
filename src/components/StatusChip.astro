@@ -1,0 +1,15 @@
+---
+import { labelFor, type ServiceStatus } from '../data/status';
+
+interface Props {
+  status: ServiceStatus;
+  size?: 'md' | 'lg';
+}
+
+const { status, size = 'md' } = Astro.props;
+---
+
+<span class:list={['status-chip', size === 'lg' && 'status-chip-lg']}>
+  <span class={`status-dot status-dot-${status}`} aria-hidden="true"></span>
+  <span>{labelFor(status)}</span>
+</span>

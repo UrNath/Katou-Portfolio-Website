@@ -1,0 +1,41 @@
+---
+import Icon from './Icon.astro';
+import StatusChip from './StatusChip.astro';
+import { status } from '../data/status';
+import type { RouteItem } from '../data/routes';
+import { isCurrent } from '../data/site';
+
+interface Props {
+  route: RouteItem;
+  pathname: string;
+  menu?: boolean;
+}
+
+const { route, pathname, menu = false } = Astro.props;
+const serviceStatus = route.statusKey ? status[route.statusKey] : undefined;
+const current = isCurrent(pathname, route.href);
+---
+
+<a
+  class:list={[
+    'route',
+    route.primary && 'route-primary',
+    route.primary && 'route-span',
+    menu && 'route-menu',
+  ]}
+  href={route.href}
+  aria-current={current ? 'page' : undefined}
+>
+  <Icon name={route.icon} size={20} />
+  <span class="route-text">
+    <span class="route-label">{route.label}</span>
+    <span class="route-meta">{route.meta}</span>
+  </span>
+  {
+    serviceStatus ? (
+      <StatusChip status={serviceStatus} />
+    ) : (
+      <Icon name="chevron-right" size={18} />
+    )
+  }
+</a>

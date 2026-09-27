@@ -1,0 +1,22 @@
+---
+import { site } from '../data/site';
+
+const art = site.characterArt;
+const show = art.enabled && Boolean(art.src);
+---
+
+{
+  show && art.src && (
+    <img
+      class="character-art"
+      src={art.src}
+      alt=""
+      aria-hidden="true"
+      width="200"
+      height="260"
+      loading="lazy"
+      decoding="async"
+      fetchpriority="low"
+    />
+  )
+}

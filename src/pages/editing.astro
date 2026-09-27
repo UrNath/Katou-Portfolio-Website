@@ -1,0 +1,8 @@
+---
+import ServicePage from '../components/ServicePage.astro';
+import { loadService } from '../lib/services';
+
+const service = await loadService('editing');
+---
+
+<ServicePage service={service} />

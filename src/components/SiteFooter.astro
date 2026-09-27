@@ -1,0 +1,30 @@
+---
+import BrandIcon from './BrandIcon.astro';
+import Icon from './Icon.astro';
+import { isPlaceholder, site, socials } from '../data/site';
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="social-row">
+      {
+        socials.map((item) => (
+          <a
+            class="icon-btn"
+            href={item.href}
+            aria-label={
+              isPlaceholder(item.href) ? `${item.label}, placeholder link` : item.label
+            }
+            title={isPlaceholder(item.href) ? 'TODO: add the real profile URL' : undefined}
+          >
+            <BrandIcon name={item.id} />
+          </a>
+        ))
+      }
+      <a class="icon-btn" href={`mailto:${site.email}`} aria-label={`Email ${site.email}`}>
+        <Icon name="mail" size={18} />
+      </a>
+    </div>
+    <a class="footer-email" href={`mailto:${site.email}`}>{site.email}</a>
+  </div>
+</footer>

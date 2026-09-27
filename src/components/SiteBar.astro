@@ -1,0 +1,148 @@
+---
+import BrandIcon from './BrandIcon.astro';
+import Icon from './Icon.astro';
+import RouteButton from './RouteButton.astro';
+import Wordmark from './Wordmark.astro';
+import { getRoutes } from '../data/routes';
+import { isCurrent, isPlaceholder, navLinks, site, socials } from '../data/site';
+
+interface Props {
+  pathname: string;
+  prices: { editing: string; web: string };
+}
+
+const { pathname, prices } = Astro.props;
+const routes = getRoutes(prices);
+---
+
+<header class="site-bar">
+  <a class="brand" href="/" aria-label="NassuKatou, home">
+    <span class="nk-tile" aria-hidden="true">NK</span>
+    <span class="wordmark-lockup"><Wordmark /></span>
+  </a>
+  <nav class="desk-nav" aria-label="Primary">
+    {
+      navLinks.map((link) => (
+        <a
+          class="bar-link"
+          href={link.href}
+          aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
+        >
+          {link.label}
+        </a>
+      ))
+    }
+  </nav>
+  <button
+    class="menu-btn"
+    type="button"
+    id="menu-open"
+    aria-label="Open menu"
+    aria-expanded="false"
+    aria-controls="site-menu"
+  >
+    <Icon name="menu" size={22} />
+  </button>
+</header>
+
+<dialog class="sheet" id="site-menu" aria-label="Menu">
+  <div class="sheet-bar" data-sheet-grab>
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <button class="sheet-close" type="button" data-sheet-close aria-label="Close menu">
+      <Icon name="x" size={20} />
+    </button>
+  </div>
+  <nav class="sheet-routes" aria-label="Mobile">
+    {routes.map((route) => <RouteButton route={route} pathname={pathname} menu />)}
+  </nav>
+  <div class="sheet-foot">
+    <div class="social-row">
+      {
+        socials.map((item) => (
+          <a
+            class="icon-btn"
+            href={item.href}
+            aria-label={
+              isPlaceholder(item.href) ? `${item.label}, placeholder link` : item.label
+            }
+          >
+            <BrandIcon name={item.id} />
+          </a>
+        ))
+      }
+    </div>
+    <a class="footer-email" href={`mailto:${site.email}`}>{site.email}</a>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('site-menu');
+  const openBtn = document.getElementById('menu-open');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (dialog instanceof HTMLDialogElement && openBtn instanceof HTMLButtonElement) {
+    const finishClose = () => {
+      dialog.classList.remove('is-closing');
+      dialog.close();
+      openBtn.setAttribute('aria-expanded', 'false');
+      openBtn.focus();
+    };
+
+    const closeSheet = () => {
+      if (!dialog.open || dialog.classList.contains('is-closing')) return;
+      if (reduce) {
+        finishClose();
+        return;
+      }
+      dialog.classList.add('is-closing');
+      const done = () => {
+        dialog.removeEventListener('animationend', done);
+        finishClose();
+      };
+      dialog.addEventListener('animationend', done);
+      window.setTimeout(done, 280);
+    };
+
+    openBtn.addEventListener('click', () => {
+      dialog.showModal();
+      openBtn.setAttribute('aria-expanded', 'true');
+    });
+
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      closeSheet();
+    });
+
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) closeSheet();
+    });
+
+    dialog.querySelector('[data-sheet-close]')?.addEventListener('click', closeSheet);
+
+    const grab = dialog.querySelector('[data-sheet-grab]');
+    let startY = 0;
+    let dragging = false;
+
+    grab?.addEventListener('pointerdown', (event) => {
+      if (!(event instanceof PointerEvent)) return;
+      dragging = true;
+      startY = event.clientY;
+      dialog.style.transition = 'none';
+    });
+
+    window.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      const dy = Math.max(0, event.clientY - startY);
+      dialog.style.transform = `translateY(${dy}px)`;
+    });
+
+    window.addEventListener('pointerup', (event) => {
+      if (!dragging) return;
+      dragging = false;
+      const dy = event.clientY - startY;
+      dialog.style.transition = '';
+      dialog.style.transform = '';
+      if (dy > 72) closeSheet();
+    });
+  }
+</script>

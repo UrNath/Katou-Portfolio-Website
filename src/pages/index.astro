@@ -1,0 +1,132 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../components/BaseLayout.astro';
+import CharacterArt from '../components/CharacterArt.astro';
+import ClipCard from '../components/ClipCard.astro';
+import Icon from '../components/Icon.astro';
+import StatusChip from '../components/StatusChip.astro';
+import Wordmark from '../components/Wordmark.astro';
+import ClipPreview from '../islands/ClipPreview';
+import ClipViewer from '../islands/ClipViewer';
+import { status } from '../data/status';
+import { site } from '../data/site';
+import { editCredit } from '../lib/clip-shared';
+import { heroReel, hubClips, loadClips, toViewerClip } from '../lib/clips';
+import { loadService, loadServicePrices } from '../lib/services';
+
+const clips = await loadClips();
+// Hub content is featured-only by design. See hubClips() in src/lib/clips.ts.
+const featured = hubClips(clips);
+const { hero, prev, next, position, total } = heroReel(clips);
+const pager = `${String(position).padStart(2, '0')} — ${String(total).padStart(2, '0')}`;
+const editCount = `${clips.length} ${clips.length === 1 ? 'edit' : 'edits'}`;
+const prices = await loadServicePrices();
+const editing = await loadService('editing');
+const turnaround = editing.data.compare.find((row) => row.feature === 'Turnaround')?.values[0];
+const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
+const minis = featured.slice(0, 3);
+---
+
+<BaseLayout>
+  <div class="hub">
+    <section class:list={['stage-banner', artOn && 'has-character']} aria-label="Featured edit">
+      <CharacterArt />
+      <div class="stage-top">
+        <div>
+          <p class="stage-mark stage-line"><Wordmark /></p>
+          <p class="stage-role stage-line stage-line-2">{site.role}</p>
+        </div>
+        <div class="stage-corner">
+          <p class="stage-now">Now playing · {hero.title}</p>
+          <Icon name="sparkles" size={18} />
+          <span class="heart"><Icon name="heart" size={16} /></span>
+          <span class="pager">{pager}</span>
+        </div>
+      </div>
+      <div class="reel-wrap">
+        <p class="ghost-word" aria-hidden="true">shorts</p>
+        <div class="reel">
+          <ClipCard clip={prev} variant="neighbor" sizes="118px" />
+          <ClipCard
+            clip={hero}
+            variant="hero"
+            eager
+            priority
+            sizes="(min-width: 960px) 196px, 136px"
+          />
+          <ClipCard clip={next} variant="neighbor" sizes="118px" />
+        </div>
+      </div>
+      <a class="stage-cta" href="/works">Watch Works</a>
+      <ClipPreview client:visible />
+    </section>
+
+    <div class="bento-side">
+      <section class="tile status-tile" aria-label="Service status">
+        <div class="status-tile-head">
+          <p class="kicker">Status</p>
+          <p class="kicker">updated {status.updated}</p>
+        </div>
+        <div class="status-line">
+          <span class="status-name">Editing</span>
+          <StatusChip status={status.editing} />
+        </div>
+        <div class="status-line">
+          <span class="status-name">Web design</span>
+          <StatusChip status={status.webDesign} />
+        </div>
+      </section>
+      <a class="tile works-tile" href="/works">
+        <span class="works-copy">
+          <span class="works-label">Works</span>
+          <span class="works-meta">{editCount}</span>
+        </span>
+        <span class="works-minis" aria-hidden="true">
+          {
+            minis.map((clip) => (
+              <span class="mini-clip">
+                <Picture
+                  src={clip.posterImage}
+                  formats={['webp']}
+                  fallbackFormat="webp"
+                  widths={[160]}
+                  sizes="80px"
+                  alt=""
+                  quality={50}
+                />
+                <span>{editCredit(clip.channelHandle)}</span>
+              </span>
+            ))
+          }
+        </span>
+      </a>
+    </div>
+
+    <div class="bento-nums">
+      <a class="tile num-tile" href="/editing">
+        <span class="numeral">01</span>
+        <span>
+          <span class="num-label">Editing</span>
+          <span class="num-meta">{prices.editing}{turnaround ? ` · ${turnaround}` : ''}</span>
+        </span>
+      </a>
+      <a class="tile num-tile" href="/web-design">
+        <span class="numeral">02</span>
+        <span>
+          <span class="num-label">Web design</span>
+          <span class="num-meta">from {prices.web}</span>
+          {prices.webApprox && <span class="num-approx">{prices.webApprox}</span>}
+        </span>
+      </a>
+      <a class="tile num-tile slim" href="/terms">
+        <span class="numeral">03</span>
+        <span class="num-label">Terms</span>
+      </a>
+      <a class="tile num-tile slim" href="/contact">
+        <span class="numeral">04</span>
+        <span class="num-label">Contact</span>
+      </a>
+    </div>
+  </div>
+  <ClipViewer client:idle clips={featured.map(toViewerClip)} />
+</BaseLayout>
