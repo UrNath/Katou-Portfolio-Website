@@ -1,0 +1,11 @@
+{
+  "email": "hello@nassukatou.example",
+  "role": "Short-form VTuber clip editor & creator web designer.",
+  "description": "Katou edits short-form vertical VTuber clips and designs portfolio sites for creators. This is a sample portfolio.",
+  "previewBase": "",
+  "socials": [
+    { "id": "youtube", "label": "YouTube", "href": "#" },
+    { "id": "tiktok", "label": "TikTok", "href": "#" },
+    { "id": "x", "label": "X", "href": "#" }
+  ]
+}

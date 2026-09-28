@@ -1,11 +1,12 @@
+import settings from './site-settings.json';
+
 /** Site-wide identity and placeholder contact points. */
 export const site = {
   name: 'NassuKatou',
   shortName: 'Katou',
-  email: 'hello@nassukatou.example',
-  role: 'Short-form VTuber clip editor & creator web designer.',
-  description:
-    'Katou edits short-form vertical VTuber clips and designs portfolio sites for creators. This is a sample portfolio.',
+  email: settings.email,
+  role: settings.role,
+  description: settings.description,
   /**
    * Optional character art on the stage banner. Off until human-drawn art exists.
    * No AI-generated art and no third-party characters.
@@ -20,7 +21,7 @@ export const site = {
    * Preview loops are served from /media/previews/ until this is a CDN origin
    * (no trailing slash), for example a Vercel Blob base URL. See CONTENT.md.
    */
-  previewBase: '',
+  previewBase: settings.previewBase,
 };
 
 export type SocialId = 'youtube' | 'tiktok' | 'x';
@@ -32,11 +33,11 @@ export interface SocialLink {
   href: string;
 }
 
-export const socials: SocialLink[] = [
-  { id: 'youtube', label: 'YouTube', href: '#' },
-  { id: 'tiktok', label: 'TikTok', href: '#' },
-  { id: 'x', label: 'X', href: '#' },
-];
+export const socials: SocialLink[] = settings.socials.map((item) => ({
+  id: item.id as SocialId,
+  label: item.label,
+  href: item.href,
+}));
 
 export const navLinks = [
   { href: '/', label: 'Home' },
