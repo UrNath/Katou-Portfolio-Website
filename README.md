@@ -1,6 +1,6 @@
 # NassuKatou
 
-Portfolio for Katou: short-form VTuber edits, plus design and build of portfolio sites for creators. The site is a mobile-first hub. Prices and service status are filled in. Social links are still placeholders. See [CONTENT.md](CONTENT.md) before changing content.
+Portfolio for Katou: short-form VTuber edits, plus design and build of portfolio sites for creators. The site is a mobile-first hub. Prices, service status, email, and social links are filled in. See [CONTENT.md](CONTENT.md) before changing content.
 
 ## Scripts
 

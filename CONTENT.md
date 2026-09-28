@@ -2,7 +2,7 @@
 
 Placeholder copy, prices, statuses, and clips live in data files. Components read those files. Do not hardcode a price or a status in a component.
 
-Nothing here is a real testimonial or profile link. The email is `hello@nassukatou.example`. Social URLs are `#` until you replace them. Clip pages are real edits for Pidge, Chi, and Miu.
+The contact email is `nassukatou@gmail.com`. Socials are Discord, YouTube, TikTok, and X, all under `nassukatou`, in `src/data/site-settings.json`. Clip pages are real edits for Pidge, Chi, and Miu.
 
 Editing has one real package: **Short edit**, PHP 1,000, up to 1 minute, for YouTube Shorts or TikTok (9:16), unlimited minor revisions, 2 major revisions, and a 1 to 3 day turnaround. Includes lists those lines without placeholder markers. Editing add-on prices are still `PHP Z`.
 

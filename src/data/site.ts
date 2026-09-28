@@ -1,6 +1,6 @@
 import settings from './site-settings.json';
 
-/** Site-wide identity and placeholder contact points. */
+/** Site-wide identity. Email and social URLs come from site-settings.json. */
 export const site = {
   name: 'NassuKatou',
   shortName: 'Katou',
@@ -24,12 +24,11 @@ export const site = {
   previewBase: settings.previewBase,
 };
 
-export type SocialId = 'youtube' | 'tiktok' | 'x';
+export type SocialId = 'discord' | 'youtube' | 'tiktok' | 'x';
 
 export interface SocialLink {
   id: SocialId;
   label: string;
-  /** TODO: replace "#" with the real profile URL. */
   href: string;
 }
 
