@@ -56,4 +56,4 @@ addons:
 pickNote: Katou reads each request. A yes is not first-come. (Sample note.)
 ---
 
-One real package: PHP 1,000, up to 1 minute, YouTube Shorts or TikTok (9:16), unlimited minor revisions, 2 major revisions, 1 to 3 day turnaround. The minor/major definition is a draft in src/data/terms.ts. Add-on prices are still placeholders. Add another tier here, plus one compare value per row, and Compare tiers shows again.
+One real package: PHP 1,000, up to 1 minute, YouTube Shorts or TikTok (9:16), unlimited minor revisions, 2 major revisions, 1 to 3 day turnaround. The minor/major definition is in src/data/terms.json. Add-on prices are still placeholders. Add another tier here, plus one compare value per row, and Compare tiers shows again.

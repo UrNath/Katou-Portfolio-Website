@@ -4,36 +4,40 @@
       "id": "general",
       "title": "General",
       "paragraphs": [
-        "These are sample terms for the portfolio build. They are not a contract and not legal advice.",
-        "Katou edits short-form vertical clips and designs small sites for creators. A request is reviewed. It is not first-come, first-served.",
-        "Older sample clips on this site are placeholders. They do not represent a finished client list."
+        "These terms cover an edit or a site booked with Katou.",
+        "Katou edits short-form vertical clips for VTubers and builds small sites for creators. Each request is reviewed, and a project can be declined when it is outside what Katou can do.",
+        "Edits stay in Katou’s own style: fast-paced, high-retention, and expressive. Copying another editor’s exact style is outside the work."
       ]
     },
     {
       "id": "editing",
       "title": "Editing",
       "paragraphs": [
-        "Editing covers short-form 9:16 clips for YouTube Shorts and TikTok: highlights, karaoke cuts, collabs, and subtitled versions, within the scope on the Editing page.",
-        "Send footage you have the right to use. Unlicensed replays, NSFW or shock content, and rushes under 48 hours are out of scope in this sample.",
-        "PHP 1,000 covers one short up to 1 minute, for YouTube Shorts or TikTok (9:16), with unlimited minor revisions, 2 major revisions, and a 1 to 3 day turnaround. What counts as minor or major is a draft in the Revisions section."
+        "A standard edit is a stream highlight up to 60 seconds, in 9:16, for YouTube Shorts or TikTok. It includes fast cutting and comedic timing, text that tracks the action, expressive captions, zooms, and split screens.",
+        "Send the raw clip or the timestamps, any assets you want in the edit (model PNGs, overlays), and a reference if you have one. Clear files and high-resolution transparent art make the edit faster.",
+        "The listed price covers a standard highlight. Heavy motion graphics or complex VFX are quoted before work starts. Repeat jobs and larger edits are priced per project.",
+        "Katou sends rough previews along the way so you can check the pacing and direction.",
+        "The finished video or thumbnail arrives as a Google Drive or Mega link, so the file stays full quality.",
+        "Please credit Katou (NassuKatou) when you post the video or use the thumbnail.",
+        "Katou may post the finished edit or thumbnail on socials and on this portfolio, unless you say otherwise before work begins."
       ]
     },
     {
       "id": "revisions",
       "title": "Revisions",
       "paragraphs": [
-        "DRAFT. Katou has not confirmed this definition yet.",
-        "A Short edit includes unlimited minor revisions and 2 major revisions.",
-        "Minor means caption and typo fixes, small timing tweaks, or a sound or SFX swap.",
-        "Major means re-cutting or restructuring the clip, or changing the concept."
+        "A standard edit includes unlimited minor revisions and 2 major revisions.",
+        "Minor means a text or typo fix, swapping a quick clip, or an audio-balance change.",
+        "Major means a structural re-edit after the video is fully rendered.",
+        "Another major revision after those 2 is an extra fee."
       ]
     },
     {
       "id": "web-design",
       "title": "Web design",
       "paragraphs": [
-        "Web design covers a mobile-first page or a small creator site, designed and built as a static site. This portfolio is a sample of that work.",
-        "Stores, checkout, and full web apps are out of scope in this sample.",
+        "Web design covers a mobile-first page or a small creator site, designed and built as a static site. This portfolio is an example of that work.",
+        "Stores, checkout, and full web apps are outside this work.",
         "The process on the Web design page is Brief, then Design, then Build, then Launch."
       ]
     },
@@ -41,26 +45,27 @@
       "id": "refunds",
       "title": "Payment & refunds",
       "paragraphs": [
-        "Payment and refund language is a placeholder. Replace this section before anyone pays.",
-        "No amount, deposit, or refund window is stated here on purpose. Do not invent one in the page layout. Edit this file."
+        "You can cancel any time before the commission has started and before payment has been made.",
+        "The final video is delivered without a watermark once the project is paid.",
+        "Edits and thumbnails are for streaming, personal branding, and content. Say so before work starts if the files will be used for merchandise or advertising, so that use can be agreed."
       ]
     },
     {
       "id": "turnaround",
       "title": "Turnaround",
       "paragraphs": [
-        "A Short edit has a 1 to 3 day turnaround.",
-        "A booked edit starts when the footage and notes are both in. Waiting on files pauses the clock."
+        "A booked edit starts when the footage and the notes are both in. Waiting on files pauses the clock."
       ]
     },
     {
       "id": "faq",
       "title": "FAQ",
       "paragraphs": [
-        "How do I send a project? Use the contact form. It opens an email draft to nassukatou@gmail.com. Nothing is stored on a server.",
-        "Will my name appear on a clip? Only if you add it. Each card is credited as “Edit for” plus the creator’s handle.",
-        "Can I book while a service says Closed? The button becomes “Join the waitlist”. Waitlist still uses the normal booking label.",
-        "Where do I change prices, status, or clips? See CONTENT.md in the project root."
+        "How do I send a project? Use the contact form. It opens an email to nassukatou@gmail.com. Discord is nassukatou.",
+        "What should I include? The raw clip or timestamps, the assets you want on screen, and a reference if you have one.",
+        "Do I need to credit the edit? Yes. Credit Katou (NassuKatou) when you post it. Cards on this site read “Edit for” plus the creator’s handle.",
+        "Can I cancel? Yes, until work has started and payment has been made.",
+        "Can I book while a service says Closed? The button becomes “Join the waitlist”."
       ]
     }
   ]
