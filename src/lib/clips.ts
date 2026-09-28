@@ -5,11 +5,12 @@ import rawClips from '../data/clips.json';
 import hubOrder from '../data/hub-order.json';
 import { site } from '../data/site';
 import { tagSlug } from '../data/tags';
-import { formatDuration, type ViewerClip } from './clip-shared';
+import { formatDuration, youtubeId, type ViewerClip } from './clip-shared';
 
 export type { ViewerClip } from './clip-shared';
 
 const posters = import.meta.glob<{ default: ImageMetadata }>('../assets/posters/*.webp', { eager: true });
+const previewFiles = import.meta.glob('../../public/media/previews/*.mp4', { eager: true, query: '?url' });
 
 const clipSchema = z.object({
   id: z.string(),
@@ -27,18 +28,32 @@ const clipSchema = z.object({
   tags: z.array(z.string()),
   featured: z.boolean(),
   heroFeatured: z.boolean(),
+  section: z.string().optional(),
+  posterUrl: z.string().optional(),
 });
 
 export interface ClipRecord extends ViewerClip {
   featured: boolean;
-  posterImage: ImageMetadata;
+  posterImage: ImageMetadata | null;
+  section?: string;
 }
 
-function posterFor(file: string): ImageMetadata {
+function posterFor(file: string): ImageMetadata | null {
   const base = file.split('/').pop();
+  if (!base) return null;
   const found = Object.entries(posters).find(([key]) => key.endsWith(`/${base}`));
-  if (!found) throw new Error(`Missing poster for ${file}. Expected src/assets/posters/${base}.`);
-  return found[1].default;
+  return found ? found[1].default : null;
+}
+
+function previewExists(file: string): boolean {
+  const base = file.split('/').pop();
+  if (!base) return false;
+  return Object.keys(previewFiles).some((key) => key.endsWith(`/${base}`));
+}
+
+function youtubePoster(url: string): string | null {
+  const id = youtubeId(url);
+  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
 }
 
 function previewUrl(file: string): string {
@@ -80,27 +95,34 @@ async function buildClips(): Promise<ClipRecord[]> {
     parsed.map(async (clip) => {
       const posterImage = posterFor(clip.poster);
       const wide = clip.orientation === 'landscape';
-      const image = await getImage({
-        src: posterImage,
-        width: wide ? 960 : 540,
-        format: 'webp',
-      });
+      const image = posterImage
+        ? await getImage({
+            src: posterImage,
+            width: wide ? 960 : 540,
+            format: 'webp',
+          })
+        : null;
+      const remote =
+        (typeof clip.posterUrl === 'string' && clip.posterUrl) ||
+        youtubePoster(clip.youtubeUrl) ||
+        '/og.png';
       return {
         id: clip.id,
         title: clip.title,
         creator: clip.creator,
         channelHandle: clip.channelHandle,
-        creatorId: clip.creator.toLowerCase(),
+        creatorId: tagSlug(clip.creator),
         duration: formatDuration(clip.durationSec),
         tags: clip.tags.map((tag) => tagSlug(tag)),
-        poster: image.src,
+        poster: image?.src ?? remote,
         posterImage,
-        previewSrc: previewUrl(clip.preview),
+        previewSrc: clip.preview && previewExists(clip.preview) ? previewUrl(clip.preview) : undefined,
         youtube: clip.youtubeUrl,
         tiktok: clip.tiktokUrl,
         wide,
         featured: clip.featured,
         heroFeatured: clip.heroFeatured,
+        section: clip.section || undefined,
       } satisfies ClipRecord;
     }),
   );

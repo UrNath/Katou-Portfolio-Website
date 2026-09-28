@@ -35,9 +35,9 @@ Preview MP4s live in `public/media/previews/`. The build copies them to `dist/me
 
 ## Editing the site
 
-Open `/admin` (it is not linked from the public pages). That opens Keystatic. With no env vars, Save on your computer writes the files in this repo. On the live site, Save commits to `main` after the one-time GitHub setup below, and Vercel rebuilds.
+Open `/admin` (it is not linked from the public pages). That editor is for Works: add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), and add thumbnails. Save on your computer writes the files in this repo.
 
-The editor is [Keystatic](https://keystatic.com). It has an Astro integration, so the public pages stay prebuilt and only the sign-in routes run on the server. Decap CMS would need a separate GitHub OAuth service on Vercel, and its admin screen is a worse fit on a phone.
+Prices, terms, status, and contact notes stay in [Keystatic](https://keystatic.com) at `/keystatic`. On the live site, Keystatic commits to `main` after the one-time GitHub setup below, and Vercel rebuilds. The Works editor does the same when `ADMIN_GITHUB_TOKEN` is set in Vercel.
 
 ### One-time GitHub setup
 

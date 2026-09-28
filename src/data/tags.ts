@@ -1,4 +1,5 @@
 import rawClips from './clips.json';
+import layout from './works-layout.json';
 
 interface ClipMeta {
   id?: string;
@@ -43,20 +44,8 @@ export const clipTags = [...seen.values()]
   })
   .map(({ id, label }) => ({ id, label }));
 
-const creatorOrder = [
-  { id: 'pidge', label: 'Pidge' },
-  { id: 'chi', label: 'Chi' },
-  { id: 'miu', label: 'Miu' },
-] as const;
-
-const creatorCounts = new Map<string, number>();
-for (const clip of clips) {
-  const id = clip.creator.toLowerCase();
-  creatorCounts.set(id, (creatorCounts.get(id) ?? 0) + 1);
-}
-
-/** Creator chips, in Katou's order, omitted when that creator has no clips. */
-export const creators = creatorOrder.filter((creator) => (creatorCounts.get(creator.id) ?? 0) > 0);
+/** Creator chips, in the order set in the editor, including a new client with no videos yet. */
+export const creators = layout.creators;
 
 export type ClipTagId = (typeof clipTags)[number]['id'];
 

@@ -1,0 +1,33 @@
+{
+  "creators": [
+    {
+      "id": "pidge",
+      "label": "Pidge"
+    },
+    {
+      "id": "chi",
+      "label": "Chi"
+    },
+    {
+      "id": "miu",
+      "label": "Miu"
+    }
+  ],
+  "sections": [
+    {
+      "id": "shorts",
+      "label": "Shorts",
+      "kind": "vertical"
+    },
+    {
+      "id": "longer",
+      "label": "Longer edits",
+      "kind": "landscape"
+    },
+    {
+      "id": "thumbnails",
+      "label": "Thumbnails",
+      "kind": "thumbnail"
+    }
+  ]
+}
