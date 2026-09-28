@@ -35,7 +35,7 @@ Preview MP4s live in `public/media/previews/`. The build copies them to `dist/me
 
 ## Editing the site
 
-Open `/admin` (it is not linked from the public pages). That editor is for Works: add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), and add thumbnails. Save on your computer writes the files in this repo.
+Open `/admin` (it is not linked from the public pages). That editor is for Works: add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), and add thumbnails. Save on your computer writes the files in this repo. On Vercel the editor reads the catalog from the deploy, because the function has no `src/data` folder on disk.
 
 Prices, terms, status, and contact notes stay in [Keystatic](https://keystatic.com) at `/keystatic`. On the live site, Keystatic commits to `main` after the one-time GitHub setup below, and Vercel rebuilds. The Works editor does the same when `ADMIN_GITHUB_TOKEN` is set in Vercel.
 

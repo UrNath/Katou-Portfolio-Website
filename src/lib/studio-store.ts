@@ -1,5 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import clipsBundled from '../data/clips.json';
+import hubBundled from '../data/hub-order.json';
+import layoutBundled from '../data/works-layout.json';
+import thumbsBundled from '../data/thumbnails.json';
 import { normalizeStudio, type StudioPayload } from './studio-shared';
 
 const repo = 'UrNath/Katou-Portfolio-Website';
@@ -39,17 +43,12 @@ function sameDoc(current: string, next: string): boolean {
   }
 }
 
-async function readLocal(rel: string): Promise<unknown> {
-  const text = await readFile(path.join(process.cwd(), rel), 'utf8');
-  return JSON.parse(text);
-}
-
-export async function readStudioFiles(): Promise<StudioPayload> {
-  const clipsFile = (await readLocal(files.clips)) as { clips?: StudioPayload['clips'] } | StudioPayload['clips'];
-  const clips = Array.isArray(clipsFile) ? clipsFile : (clipsFile.clips ?? []);
-  const hub = (await readLocal(files.hubOrder)) as { order?: string[] };
-  const layout = (await readLocal(files.layout)) as Pick<StudioPayload, 'creators' | 'sections'>;
-  const thumbnails = (await readLocal(files.thumbnails)) as StudioPayload['thumbnails'];
+function toPayload(clipsFile: unknown, hubFile: unknown, layoutFile: unknown, thumbsFile: unknown): StudioPayload {
+  const clipsRaw = clipsFile as { clips?: StudioPayload['clips'] } | StudioPayload['clips'];
+  const clips = Array.isArray(clipsRaw) ? clipsRaw : (clipsRaw.clips ?? []);
+  const hub = hubFile as { order?: string[] };
+  const layout = layoutFile as Pick<StudioPayload, 'creators' | 'sections'>;
+  const thumbnails = thumbsFile as StudioPayload['thumbnails'];
   const hero = clips.find((clip) => clip.heroFeatured)?.id ?? hub.order?.[0] ?? clips[0]?.id ?? '';
   return {
     clips,
@@ -59,6 +58,59 @@ export async function readStudioFiles(): Promise<StudioPayload> {
     sections: layout.sections ?? [],
     thumbnails: Array.isArray(thumbnails) ? thumbnails : [],
   };
+}
+
+/** The catalog shipped with this deploy. Vercel does not keep src/data on disk. */
+function bundledPayload(): StudioPayload {
+  return toPayload(clipsBundled, hubBundled, layoutBundled, thumbsBundled);
+}
+
+async function readLocal(rel: string): Promise<unknown> {
+  const text = await readFile(path.join(process.cwd(), rel), 'utf8');
+  return JSON.parse(text);
+}
+
+async function githubGet(rel: string, token: string): Promise<unknown> {
+  const response = await fetch(`https://api.github.com/repos/${repo}/contents/${rel}?ref=main`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'nassukatou-editor',
+    },
+  });
+  if (!response.ok) throw new Error(`GitHub could not read ${rel}.`);
+  const body = (await response.json()) as { content?: string };
+  if (!body.content) throw new Error(`GitHub could not read ${rel}.`);
+  return JSON.parse(Buffer.from(body.content.replace(/\n/g, ''), 'base64').toString('utf8'));
+}
+
+export async function readStudioFiles(): Promise<StudioPayload> {
+  const token = process.env.ADMIN_GITHUB_TOKEN;
+  if (process.env.VERCEL && token) {
+    try {
+      return toPayload(
+        await githubGet(files.clips, token),
+        await githubGet(files.hubOrder, token),
+        await githubGet(files.layout, token),
+        await githubGet(files.thumbnails, token),
+      );
+    } catch {
+      return bundledPayload();
+    }
+  }
+  if (process.env.VERCEL) return bundledPayload();
+  try {
+    return toPayload(
+      await readLocal(files.clips),
+      await readLocal(files.hubOrder),
+      await readLocal(files.layout),
+      await readLocal(files.thumbnails),
+    );
+  } catch (error) {
+    const missing = error instanceof Error && 'code' in error && error.code === 'ENOENT';
+    if (missing) return bundledPayload();
+    throw error;
+  }
 }
 
 async function githubPut(rel: string, content: string, token: string): Promise<void> {
