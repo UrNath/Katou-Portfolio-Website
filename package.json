@@ -16,11 +16,11 @@
     "@astrojs/preact": "^6.0.5",
     "@astrojs/react": "^7.0.0",
     "@astrojs/vercel": "^11.0.11",
-    "@keystatic/astro": "^6.0.0",
-    "@keystatic/core": "^0.6.9",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource/geist-mono": "^5.3.0",
     "@fontsource/instrument-serif": "^5.3.0",
+    "@keystatic/astro": "^6.0.0",
+    "@keystatic/core": "^0.6.9",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.5",
     "lucide-static": "^1.48.0",
@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.6.3",
     "sharp": "^0.35.4",
     "typescript": "^6.0.3"
   }

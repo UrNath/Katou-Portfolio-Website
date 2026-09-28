@@ -30,17 +30,23 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
         <span class="sr-only">Play {clip.title}, {credit}, {clip.duration}</span>
       </button>
       <span class="clip-poster">
-        <Picture
-          src={clip.posterImage}
-          formats={['avif', 'webp']}
-          fallbackFormat="webp"
-          widths={widths}
-          sizes={sizes}
-          alt=""
-          quality={55}
-          loading={eager || priority ? 'eager' : 'lazy'}
-          fetchpriority={priority ? 'high' : 'auto'}
-        />
+        {
+          clip.posterImage ? (
+            <Picture
+              src={clip.posterImage}
+              formats={['avif', 'webp']}
+              fallbackFormat="webp"
+              widths={widths}
+              sizes={sizes}
+              alt=""
+              quality={55}
+              loading={eager || priority ? 'eager' : 'lazy'}
+              fetchpriority={priority ? 'high' : 'auto'}
+            />
+          ) : (
+            <img src={clip.poster} alt="" loading={eager || priority ? 'eager' : 'lazy'} />
+          )
+        }
       </span>
       {
         variant !== 'neighbor' && clip.previewSrc && (

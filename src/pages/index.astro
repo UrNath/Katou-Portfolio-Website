@@ -85,15 +85,21 @@ const minis = featured.slice(0, 3);
           {
             minis.map((clip) => (
               <span class="mini-clip">
-                <Picture
-                  src={clip.posterImage}
-                  formats={['webp']}
-                  fallbackFormat="webp"
-                  widths={[160]}
-                  sizes="80px"
-                  alt=""
-                  quality={50}
-                />
+                {
+                  clip.posterImage ? (
+                    <Picture
+                      src={clip.posterImage}
+                      formats={['webp']}
+                      fallbackFormat="webp"
+                      widths={[160]}
+                      sizes="80px"
+                      alt=""
+                      quality={50}
+                    />
+                  ) : (
+                    <img src={clip.poster} alt="" />
+                  )
+                }
                 <span>{editCredit(clip.channelHandle)}</span>
               </span>
             ))

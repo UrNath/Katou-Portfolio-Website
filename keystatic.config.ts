@@ -157,6 +157,11 @@ export default config({
               directory: 'public/media/previews',
               publicPath: 'previews/',
             }),
+            section: fields.text({
+              label: 'Works section',
+              description: 'Leave blank to use Shorts or Longer edits. Set a custom section id to file the clip there.',
+              defaultValue: '',
+            }),
             tags: lines('Tags'),
             tagsSuggested: fields.checkbox({ label: 'Tags are suggestions', defaultValue: true }),
             featured: fields.checkbox({

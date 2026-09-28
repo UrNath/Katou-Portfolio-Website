@@ -3,21 +3,33 @@ import BaseLayout from '../components/BaseLayout.astro';
 import ClipCard from '../components/ClipCard.astro';
 import ClipPreview from '../islands/ClipPreview';
 import ClipViewer from '../islands/ClipViewer';
+import ThumbnailViewer from '../islands/ThumbnailViewer';
 import WorksFilters from '../islands/WorksFilters';
 import { clipTags, creators, filterBoot, filterCss } from '../data/tags';
 import { loadClips, toViewerClip } from '../lib/clips';
+import { clipsInSection, creatorIdOf, loadThumbnails, workSections } from '../lib/works-layout';
 
 const clips = await loadClips();
-const shorts = clips.filter((clip) => !clip.wide);
-const longer = clips.filter((clip) => clip.wide);
-const editLabel = `${clips.length} ${clips.length === 1 ? 'edit' : 'edits'}`;
+const thumbnails = loadThumbnails();
+const blocks = workSections
+  .map((section) => {
+    if (section.kind === 'thumbnail') {
+      return { section, clips: [], thumbs: thumbnails };
+    }
+    return { section, clips: clipsInSection(section, clips), thumbs: [] };
+  })
+  .filter((block) => block.clips.length > 0 || block.thumbs.length > 0);
+const total = clips.length + thumbnails.length;
+const editLabel = `${total} ${total === 1 ? 'edit' : 'edits'}`;
+const names = creators.map((creator) => creator.label).join(', ');
+const sectionNames = blocks.map((block) => block.section.label).join(', ');
 const cardSizes = '(min-width: 1280px) 220px, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 46vw';
 const wideSizes = '(min-width: 768px) 46vw, 100vw';
 ---
 
 <BaseLayout
   title="Works"
-  description={`${editLabel} for Pidge, Chi, and Miu. Shorts and longer edits, with creator and tag filters.`}
+  description={`${editLabel} for ${names}. ${sectionNames}, with creator and tag filters.`}
 >
   <style slot="head" is:inline set:html={filterCss()} />
   <script slot="head" is:inline set:html={filterBoot()} />
@@ -46,34 +58,46 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
     </div>
     <WorksFilters client:visible />
     <ClipPreview client:visible />
-    <div class="works-block" data-block="shorts">
-      <div class="works-grid">
-        {
-          shorts.map((clip, index) => (
-            <ClipCard
-              clip={clip}
-              sizes={cardSizes}
-              eager={index < 2}
-              priority={index === 0}
-            />
-          ))
-        }
-      </div>
-    </div>
     {
-      longer.length > 0 && (
-        <div class="works-block" data-block="longer">
-          <h2 class="works-kicker">Longer edits</h2>
-          <div class="works-grid works-grid-wide">
-            {longer.map((clip) => (
-              <ClipCard clip={clip} sizes={wideSizes} />
-            ))}
-          </div>
+      blocks.map((block) => (
+        <div class="works-block" data-block={block.section.id}>
+          <h2 class="works-kicker">{block.section.label}</h2>
+          {
+            block.section.kind === 'thumbnail' ? (
+              <div class="works-grid works-grid-wide thumb-grid">
+                {block.thumbs.map((thumb) => (
+                  <article class="clip-card thumb-card" data-creator={creatorIdOf(thumb.creator)} data-tags="">
+                    <button class="thumb-open" type="button" data-open-thumb={thumb.id}>
+                      <span class="clip-frame is-wide">
+                        <img src={thumb.image} alt="" />
+                        <span class="clip-meta">
+                          <span class="clip-title">{thumb.title}</span>
+                          <span class="clip-credit">{thumb.creator}</span>
+                        </span>
+                      </span>
+                    </button>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div class:list={['works-grid', block.section.kind === 'landscape' && 'works-grid-wide']}>
+                {block.clips.map((clip, index) => (
+                  <ClipCard
+                    clip={clip}
+                    sizes={block.section.kind === 'landscape' ? wideSizes : cardSizes}
+                    eager={index < 2 && block.section.kind === 'vertical'}
+                    priority={index === 0 && block.section.kind === 'vertical'}
+                  />
+                ))}
+              </div>
+            )
+          }
         </div>
-      )
+      ))
     }
     <p class="works-empty" data-empty hidden>No edits for that filter.</p>
     <ClipViewer client:idle clips={clips.map(toViewerClip)} />
+    <ThumbnailViewer client:idle items={thumbnails} />
   </section>
   <script is:inline>
     (function () {

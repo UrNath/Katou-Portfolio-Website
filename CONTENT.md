@@ -42,7 +42,9 @@ The hub is featured-only. It centers `chi-c3` (`heroFeatured`). The dimmed neigh
 
 Landscape items (`orientation: "landscape"`, 16:9) render in the Longer edits row on `/works`. `miu-ms17` is square in the source and already padded to 9:16, and its `orientation` is `vertical`, so it stays in the short grid. The viewer sizes the frame to 9:16 or 16:9 from that same flag.
 
-Creator chips are `/works?creator=pidge`, `/works?creator=chi`, and `/works?creator=miu`. Tag chips use `/works?tag=` plus the slug (`highlights`, `gaming`, `funny`, `karaoke-music`, `mv`, `collab`). One filter is active at a time.
+Creator chips come from `src/data/works-layout.json`, in that order, and stay visible even when a new client has no videos yet. The current chips are `/works?creator=pidge`, `/works?creator=chi`, and `/works?creator=miu`. Tag chips use `/works?tag=` plus the slug (`highlights`, `gaming`, `funny`, `karaoke-music`, `mv`, `collab`). One filter is active at a time.
+
+Works sections also come from `works-layout.json`. Shorts hold vertical clips, Longer edits hold landscape clips, and a clip with `section` set is filed into that section. Thumbnails live in `src/data/thumbnails.json` and only appear once that list has an item. Empty sections stay off the page.
 
 ### Add a clip
 
@@ -63,7 +65,7 @@ The loops are about 13 MB and are committed under `public/media/previews/` for n
 
 ## Editor
 
-`/admin` opens Keystatic. It is unlisted and `noindex`. The README has the one-time GitHub App steps.
+`/admin` is the Works studio. It is unlisted and `noindex`. Use it to add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), and add thumbnails. Prices, terms, and contact stay in Keystatic at `/keystatic`. The README has the one-time GitHub App steps, plus `ADMIN_GITHUB_TOKEN` for live Works saves.
 
 Do not add these clip ids back. They are not Katou’s edits: `miu-ms25` (ROSÉ & Bruno Mars APT. Valorant parody), `miu-mv1` (Miu's London Anime and Gaming Con 2026 Performance), `miu-mv40` (kawaikute gomen HoneyWorks cover), `pidge-p6` (pidge stream core no. 1). They are also filtered out in `src/lib/clips.ts`, and `pidge-p6` is not in `src/data/hub-order.json`.
 
