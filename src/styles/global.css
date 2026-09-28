@@ -1869,19 +1869,27 @@ details[open] .chevron { transform: rotate(180deg); }
   gap: 14px;
   padding: calc(64px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .viewer-stage {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
   display: grid;
-  place-items: center;
+  place-items: end center;
+  overflow: hidden;
+  container-type: size;
 }
 
+/* Size from the leftover stage, not a fixed vh. A 68dvh frame is taller than
+   the space under the close bar once the caption and watch buttons are in,
+   and on mobile the iframe then paints over the title. */
 .viewer-frame {
-  height: min(68dvh, 760px);
+  width: min(100cqi, calc(100cqb * 9 / 16), 427.5px);
   aspect-ratio: 9 / 16;
-  max-width: 100%;
+  height: auto;
+  max-height: 100%;
   border-radius: 14px;
   overflow: hidden;
   position: relative;
@@ -1890,10 +1898,10 @@ details[open] .chevron { transform: rotate(180deg); }
 }
 
 .viewer-frame.is-landscape {
-  width: min(100%, calc(62dvh * 16 / 9));
-  height: auto;
+  width: min(100cqi, calc(100cqb * 16 / 9));
   aspect-ratio: 16 / 9;
-  max-height: 62dvh;
+  height: auto;
+  max-height: 100%;
 }
 
 .viewer-actions.one-link { grid-template-columns: 1fr; }
@@ -1910,7 +1918,12 @@ details[open] .chevron { transform: rotate(180deg); }
   background: #000;
 }
 
-.viewer-caption { margin: 0; }
+.viewer-caption {
+  margin: 0;
+  flex: none;
+  position: relative;
+  z-index: 2;
+}
 .viewer-caption strong {
   display: block;
   font-size: 16px;
@@ -1922,6 +1935,9 @@ details[open] .chevron { transform: rotate(180deg); }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  flex: none;
+  position: relative;
+  z-index: 2;
 }
 
 .watch-link,

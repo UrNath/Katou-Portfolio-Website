@@ -10,7 +10,7 @@ import { isPlaceholder, site, socials } from '../data/site';
 
 <BaseLayout
   title="Contact"
-  description="Send Katou a sample booking note. The form opens an email draft and stores nothing on a server."
+  description="Send Katou a booking note. The form opens an email draft and stores nothing on a server."
 >
   <article class="contact">
     <a class="back" href="/">← Home</a>
@@ -58,7 +58,7 @@ import { isPlaceholder, site, socials } from '../data/site';
         <span>Message</span>
         <textarea name="message" required></textarea>
       </label>
-      <p class="form-hint">Sample form. It does not send mail by itself. Your email app does.</p>
+      <p class="form-hint">This opens a draft in your email app. It does not send mail by itself.</p>
       <div class="block">
         <button class="cta" type="submit">Email Katou</button>
       </div>
@@ -74,6 +74,8 @@ import { isPlaceholder, site, socials } from '../data/site';
             <a
               class="icon-btn"
               href={item.href}
+              target={item.href.startsWith('http') ? '_blank' : undefined}
+              rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
               aria-label={isPlaceholder(item.href) ? `${item.label}, placeholder link` : item.label}
             >
               <BrandIcon name={item.id} />
@@ -119,7 +121,7 @@ import { isPlaceholder, site, socials } from '../data/site';
         draft.hidden = false;
         draft.value = body;
         status.textContent = 'Opening your email app with this draft. If nothing opens, copy the message below.';
-        const href = `mailto:${email}?subject=${encodeURIComponent('Booking request (sample)')}&body=${encodeURIComponent(body)}`;
+        const href = `mailto:${email}?subject=${encodeURIComponent('Booking request')}&body=${encodeURIComponent(body)}`;
         window.location.href = href;
       });
     }

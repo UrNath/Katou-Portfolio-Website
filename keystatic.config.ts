@@ -270,9 +270,9 @@ export default config({
         }),
         socials: fields.array(
           fields.object({
-            id: fields.text({ label: 'Id', description: 'youtube, tiktok, or x.' }),
+            id: fields.text({ label: 'Id', description: 'discord, youtube, tiktok, or x.' }),
             label: fields.text({ label: 'Label' }),
-            href: fields.text({ label: 'URL', description: 'Use # until the real profile exists.' }),
+            href: fields.text({ label: 'URL' }),
           }),
           { label: 'Social links', itemLabel: (props) => props.fields.label.value || 'Link' },
         ),

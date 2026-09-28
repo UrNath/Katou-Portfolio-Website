@@ -12,6 +12,8 @@ import { isPlaceholder, site, socials } from '../data/site';
           <a
             class="icon-btn"
             href={item.href}
+            target={item.href.startsWith('http') ? '_blank' : undefined}
+            rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
             aria-label={
               isPlaceholder(item.href) ? `${item.label}, placeholder link` : item.label
             }
