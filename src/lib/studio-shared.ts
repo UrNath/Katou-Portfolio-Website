@@ -40,6 +40,12 @@ export interface StudioClip extends Record<string, unknown> {
   section?: string;
 }
 
+export interface StudioTerm {
+  id: string;
+  title: string;
+  paragraphs: string[];
+}
+
 export interface StudioPayload {
   clips: StudioClip[];
   order: string[];
@@ -47,6 +53,7 @@ export interface StudioPayload {
   creators: StudioCreator[];
   sections: StudioSection[];
   thumbnails: StudioThumbnail[];
+  terms: StudioTerm[];
 }
 
 export function slugify(value: string): string {
@@ -67,11 +74,36 @@ function kindOf(value: unknown): SectionKind {
   return 'custom';
 }
 
+function normalizeTerms(input: StudioTerm[] | undefined): StudioTerm[] {
+  const terms: StudioTerm[] = [];
+  const ids = new Set<string>();
+  for (const raw of input ?? []) {
+    const title = String(raw?.title ?? '').trim();
+    if (!title) continue;
+    let id = slugify(String(raw?.id ?? '')) || slugify(title);
+    if (!id) continue;
+    if (ids.has(id)) {
+      let n = 2;
+      while (ids.has(`${id}-${n}`)) n += 1;
+      id = `${id}-${n}`;
+    }
+    ids.add(id);
+    const paragraphs = (Array.isArray(raw?.paragraphs) ? raw.paragraphs : [])
+      .map((paragraph) => String(paragraph ?? '').trim())
+      .filter(Boolean);
+    if (paragraphs.length === 0) continue;
+    terms.push({ id, title, paragraphs });
+  }
+  if (terms.length === 0) throw new Error('Keep at least one terms section.');
+  return terms;
+}
+
 export function normalizeStudio(input: StudioPayload): {
   clips: StudioClip[];
   hubOrder: { order: string[] };
   layout: { creators: StudioCreator[]; sections: StudioSection[] };
   thumbnails: StudioThumbnail[];
+  terms: { sections: StudioTerm[] };
 } {
   const seen = new Set<string>();
   const clips: StudioClip[] = [];
@@ -197,5 +229,6 @@ export function normalizeStudio(input: StudioPayload): {
     hubOrder: { order },
     layout: { creators, sections },
     thumbnails,
+    terms: { sections: normalizeTerms(input.terms) },
   };
 }

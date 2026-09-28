@@ -1,6 +1,6 @@
 ---
 title: Web design
-subtitle: Portfolio sites for creators, designed and built.
+subtitle: Sites, stores, and web apps for creators, designed and built.
 track: sakura
 icon: code-xml
 cta: Start a site brief
@@ -12,15 +12,13 @@ includes:
   - Clips on every package
   - Revision rounds included
   - Turnaround listed on each tier
-# TODO: Katou must review this drafted "I take" list before it is treated as policy.
 take:
   - Link hubs
   - Creator portfolios
   - Full custom sites
-# TODO: Katou must review this drafted "I don't take" list before it is treated as policy.
-dont:
-  - Stores or checkout
+  - Stores and checkout
   - Full web apps
+dont: []
 process:
   - Brief
   - Design

@@ -4,13 +4,13 @@ Placeholder copy, prices, statuses, and clips live in data files. Components rea
 
 The contact email is `nassukatou@gmail.com`. Socials are Discord, YouTube, TikTok, and X, all under `nassukatou`, in `src/data/site-settings.json`. Clip pages are real edits for Pidge, Chi, and Miu.
 
-Editing has one real package: **Short edit**, PHP 1,000, up to 1 minute, for YouTube Shorts or TikTok (9:16), unlimited minor revisions, 2 major revisions, and a 1 to 3 day turnaround. Includes lists those lines without placeholder markers. Editing add-on prices are still `PHP Z`.
+Editing has one real package: **Short edit**, PHP 1,000, up to 1 minute, for YouTube Shorts or TikTok (9:16), unlimited minor revisions, 2 major revisions, and a 1 to 3 day turnaround. Includes lists those lines without placeholder markers. Add-ons: an extra major revision is PHP 250 (≈ $4), and a thumbnail is PHP 500 each (≈ $8). The dollar lines use the web design rate, ₱3,800 = $60.
 
 Web design prices are real, in `src/content/services/web-design.md`. USD is the listed price. Each tier has `approx` for the smaller muted peso line (`≈ ₱…`). Link Hub is $60 (≈ ₱3,800), Portfolio is $200 (≈ ₱12,500), Full Custom is $450 (≈ ₱28,000). Add-ons: Extra page $15, Rush +50%, Extra revision round $10, Maintenance $20/month. There is no launch discount. `Prices updated Sep 2026` comes from `src/data/status.ts`. Editing and web design are both `open`, shown as “Open”.
 
-The visual layer is Paper & Stage: cream page, white tiles, and a dark stage for the hub banner, the editing price card, the footer, and the clip viewer. `characterArt` in `src/data/site.ts` is off. Turn it on only for human-drawn art. The “I take” and “I don’t take” lists are marked with a TODO in each service file for Katou to review.
+The visual layer is Paper & Stage: cream page, white tiles, and a dark stage for the hub banner, the editing price card, the footer, and the clip viewer. `characterArt` in `src/data/site.ts` is off. Turn it on only for human-drawn art. Editing’s “I take” and “I don’t take” lists are marked with a TODO for Katou to review. Web design takes link hubs, portfolios, custom sites, stores and checkout, and full web apps, and its “I don’t take” list is empty.
 
-`/terms` follows the VGen terms at vgen.co/ByAvery, including the Shorts scope and the revision split. The 50% down payment from that page is omitted. `/terms#refunds` is the payment section. `/terms#revisions` defines minor and major.
+`/terms` follows the VGen terms at vgen.co/ByAvery, including the Shorts scope and the revision split. The 50% down payment from that page is omitted. The general section does not call the style high-retention or fast-paced. `/terms#refunds` is the payment section. `/terms#revisions` defines minor and major, and prices an extra major revision at PHP 250 (≈ $4). Public copy says commission, not booking.
 
 Compare tiers is hidden while a service has only one tier. To add a package, append a tier and one value on every `compare` row. The disclosure and the swipe row come back when there are two or more tiers.
 
@@ -65,8 +65,8 @@ The loops are about 13 MB and are committed under `public/media/previews/` for n
 
 ## Editor
 
-`/admin` is the Works studio. It is unlisted and `noindex`. Use it to add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), and add thumbnails. Prices, terms, and contact stay in Keystatic at `/keystatic`. The README has the one-time GitHub App steps, plus `ADMIN_GITHUB_TOKEN` for live Works saves.
+`/admin` is the studio. It is unlisted and `noindex`. Use it to add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), add thumbnails, and edit the Terms page (`src/data/terms.json`). Prices and contact stay in Keystatic at `/keystatic`. The README has the one-time GitHub App steps, plus `ADMIN_GITHUB_TOKEN` for live saves.
 
 Do not add these clip ids back. They are not Katou’s edits: `miu-ms25` (ROSÉ & Bruno Mars APT. Valorant parody), `miu-mv1` (Miu's London Anime and Gaming Con 2026 Performance), `miu-mv40` (kawaikute gomen HoneyWorks cover), `pidge-p6` (pidge stream core no. 1). They are also filtered out in `src/lib/clips.ts`, and `pidge-p6` is not in `src/data/hub-order.json`.
 
-Saving Editing or Web design rewrites that markdown file. Comments in the frontmatter are not kept. The “I take” and “I don’t take” fields are marked as drafts in the editor.
+Saving Editing or Web design rewrites that markdown file. Comments in the frontmatter are not kept. Editing’s “I take” and “I don’t take” fields are marked as drafts in the editor.

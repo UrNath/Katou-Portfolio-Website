@@ -4,9 +4,9 @@
       "id": "general",
       "title": "General",
       "paragraphs": [
-        "These terms cover an edit or a site booked with Katou.",
-        "Katou edits short-form vertical clips for VTubers and builds small sites for creators. Each request is reviewed, and a project can be declined when it is outside what Katou can do.",
-        "Edits stay in Katou’s own style: fast-paced, high-retention, and expressive. Copying another editor’s exact style is outside the work."
+        "These terms cover an edit or a site commissioned from Katou.",
+        "Katou edits short-form vertical clips for VTubers and builds sites for creators, including stores, checkout, and full web apps. Each request is reviewed, and a project can be declined when it is outside what Katou can do.",
+        "Edits stay in Katou’s own style. Copying another editor’s exact style is outside the work."
       ]
     },
     {
@@ -29,15 +29,14 @@
         "A standard edit includes unlimited minor revisions and 2 major revisions.",
         "Minor means a text or typo fix, swapping a quick clip, or an audio-balance change.",
         "Major means a structural re-edit after the video is fully rendered.",
-        "Another major revision after those 2 is an extra fee."
+        "Another major revision after those 2 is PHP 250 (≈ $4)."
       ]
     },
     {
       "id": "web-design",
       "title": "Web design",
       "paragraphs": [
-        "Web design covers a mobile-first page or a small creator site, designed and built as a static site. This portfolio is an example of that work.",
-        "Stores, checkout, and full web apps are outside this work.",
+        "Web design covers a mobile-first page, a creator site, a store with checkout, or a full web app. This portfolio is an example of the site work.",
         "The process on the Web design page is Brief, then Design, then Build, then Launch."
       ]
     },
@@ -54,7 +53,7 @@
       "id": "turnaround",
       "title": "Turnaround",
       "paragraphs": [
-        "A booked edit starts when the footage and the notes are both in. Waiting on files pauses the clock."
+        "A commission starts when the footage and the notes are both in. Waiting on files pauses the clock."
       ]
     },
     {
@@ -65,7 +64,7 @@
         "What should I include? The raw clip or timestamps, the assets you want on screen, and a reference if you have one.",
         "Do I need to credit the edit? Yes. Credit Katou (NassuKatou) when you post it. Cards on this site read “Edit for” plus the creator’s handle.",
         "Can I cancel? Yes, until work has started and payment has been made.",
-        "Can I book while a service says Closed? The button becomes “Join the waitlist”."
+        "Can I send a commission while a service says Closed? The button becomes “Join the waitlist”."
       ]
     }
   ]

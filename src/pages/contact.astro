@@ -10,7 +10,7 @@ import { isPlaceholder, site, socials } from '../data/site';
 
 <BaseLayout
   title="Contact"
-  description="Send Katou a booking note. The form opens an email draft and stores nothing on a server."
+  description="Send Katou a commission note. The form opens an email draft and stores nothing on a server."
 >
   <article class="contact">
     <a class="back" href="/">← Home</a>
@@ -121,7 +121,7 @@ import { isPlaceholder, site, socials } from '../data/site';
         draft.hidden = false;
         draft.value = body;
         status.textContent = 'Opening your email app with this draft. If nothing opens, copy the message below.';
-        const href = `mailto:${email}?subject=${encodeURIComponent('Booking request')}&body=${encodeURIComponent(body)}`;
+        const href = `mailto:${email}?subject=${encodeURIComponent('Commission request')}&body=${encodeURIComponent(body)}`;
         window.location.href = href;
       });
     }

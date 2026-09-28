@@ -6,5 +6,5 @@ export interface TermSection {
   paragraphs: string[];
 }
 
-/** Booking terms. `/terms#refunds` opens the payment section. */
+/** Commission terms. `/terms#refunds` opens the payment section. */
 export const termsSections: TermSection[] = raw.sections;
