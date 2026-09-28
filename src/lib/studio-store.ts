@@ -4,7 +4,8 @@ import clipsBundled from '../data/clips.json';
 import hubBundled from '../data/hub-order.json';
 import layoutBundled from '../data/works-layout.json';
 import thumbsBundled from '../data/thumbnails.json';
-import { normalizeStudio, type StudioPayload } from './studio-shared';
+import termsBundled from '../data/terms.json';
+import { normalizeStudio, type StudioPayload, type StudioTerm } from './studio-shared';
 
 const repo = 'UrNath/Katou-Portfolio-Website';
 
@@ -13,6 +14,7 @@ const files = {
   hubOrder: 'src/data/hub-order.json',
   layout: 'src/data/works-layout.json',
   thumbnails: 'src/data/thumbnails.json',
+  terms: 'src/data/terms.json',
 } as const;
 
 function dump(value: unknown): string {
@@ -43,7 +45,18 @@ function sameDoc(current: string, next: string): boolean {
   }
 }
 
-function toPayload(clipsFile: unknown, hubFile: unknown, layoutFile: unknown, thumbsFile: unknown): StudioPayload {
+function termsOf(file: unknown): StudioTerm[] {
+  const raw = file as { sections?: StudioTerm[] };
+  return Array.isArray(raw?.sections) ? raw.sections : [];
+}
+
+function toPayload(
+  clipsFile: unknown,
+  hubFile: unknown,
+  layoutFile: unknown,
+  thumbsFile: unknown,
+  termsFile: unknown,
+): StudioPayload {
   const clipsRaw = clipsFile as { clips?: StudioPayload['clips'] } | StudioPayload['clips'];
   const clips = Array.isArray(clipsRaw) ? clipsRaw : (clipsRaw.clips ?? []);
   const hub = hubFile as { order?: string[] };
@@ -57,12 +70,13 @@ function toPayload(clipsFile: unknown, hubFile: unknown, layoutFile: unknown, th
     creators: layout.creators ?? [],
     sections: layout.sections ?? [],
     thumbnails: Array.isArray(thumbnails) ? thumbnails : [],
+    terms: termsOf(termsFile),
   };
 }
 
 /** The catalog shipped with this deploy. Vercel does not keep src/data on disk. */
 function bundledPayload(): StudioPayload {
-  return toPayload(clipsBundled, hubBundled, layoutBundled, thumbsBundled);
+  return toPayload(clipsBundled, hubBundled, layoutBundled, thumbsBundled, termsBundled);
 }
 
 async function readLocal(rel: string): Promise<unknown> {
@@ -93,6 +107,7 @@ export async function readStudioFiles(): Promise<StudioPayload> {
         await githubGet(files.hubOrder, token),
         await githubGet(files.layout, token),
         await githubGet(files.thumbnails, token),
+        await githubGet(files.terms, token),
       );
     } catch {
       return bundledPayload();
@@ -105,6 +120,7 @@ export async function readStudioFiles(): Promise<StudioPayload> {
       await readLocal(files.hubOrder),
       await readLocal(files.layout),
       await readLocal(files.thumbnails),
+      await readLocal(files.terms),
     );
   } catch (error) {
     const missing = error instanceof Error && 'code' in error && error.code === 'ENOENT';
@@ -154,6 +170,7 @@ export async function writeStudio(input: StudioPayload): Promise<'local' | 'gith
     [files.hubOrder]: dump(next.hubOrder),
     [files.layout]: dump(next.layout),
     [files.thumbnails]: dump(next.thumbnails),
+    [files.terms]: dump(next.terms),
   };
   const token = process.env.ADMIN_GITHUB_TOKEN;
   if (process.env.VERCEL && token) {

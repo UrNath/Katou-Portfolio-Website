@@ -3,7 +3,7 @@ title: Editing
 subtitle: Short-form 9:16 edits for VTuber clips.
 track: lavender
 icon: scissors
-cta: Book an edit
+cta: Commission an edit
 contactService: editing
 fromPrice: PHP 1,000
 includes:
@@ -47,13 +47,11 @@ compare:
     values:
       - 1 to 3 days
 addons:
-  - name: Extra revision
-    price: PHP Z
-  - name: Translated subtitles
-    price: PHP Z
-  - name: Cover / thumbnail frame
-    price: PHP Z
+  - name: Extra major revision
+    price: PHP 250 (≈ $4)
+  - name: Thumbnail
+    price: PHP 500 each (≈ $8)
 pickNote: Katou reads each request. A yes is not first-come. (Sample note.)
 ---
 
-One real package: PHP 1,000, up to 1 minute, YouTube Shorts or TikTok (9:16), unlimited minor revisions, 2 major revisions, 1 to 3 day turnaround. The minor/major definition is in src/data/terms.json. Add-on prices are still placeholders. Add another tier here, plus one compare value per row, and Compare tiers shows again.
+One real package: PHP 1,000, up to 1 minute, YouTube Shorts or TikTok (9:16), unlimited minor revisions, 2 major revisions, 1 to 3 day turnaround. The minor/major definition is in src/data/terms.json. An extra major revision is PHP 250 (≈ $4). A thumbnail is PHP 500 (≈ $8). The dollar lines use the same rate as web design, ₱3,800 = $60. Add another tier here, plus one compare value per row, and Compare tiers shows again.

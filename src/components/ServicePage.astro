@@ -69,7 +69,7 @@ function addonLabel(price: string) {
 
     <section class="block">
       <h2 class="sr-only">Scope</h2>
-      <div class="scope">
+      <div class="scope" data-count={data.dont.length > 0 ? 2 : 1}>
         <div class="surface-card">
           <h3>I take</h3>
           <ul class="plain-list take-list">
@@ -83,19 +83,23 @@ function addonLabel(price: string) {
             }
           </ul>
         </div>
-        <div class="surface-card">
-          <h3>I don't take</h3>
-          <ul class="plain-list dont-list">
-            {
-              data.dont.map((item) => (
-                <li>
-                  <Icon name="x" size={16} />
-                  <span>{item}</span>
-                </li>
-              ))
-            }
-          </ul>
-        </div>
+        {
+          data.dont.length > 0 && (
+            <div class="surface-card">
+              <h3>I don't take</h3>
+              <ul class="plain-list dont-list">
+                {
+                  data.dont.map((item) => (
+                    <li>
+                      <Icon name="x" size={16} />
+                      <span>{item}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+          )
+        }
       </div>
       <p class="pick-note">{data.pickNote}</p>
     </section>
@@ -245,7 +249,7 @@ function addonLabel(price: string) {
     <section class="block">
       <a class="cta" href={`/contact?service=${data.contactService}`}>{ctaLabel}</a>
       <p class="terms-nudge">
-        <a href="/terms">Before you book: read the Terms</a>
+        <a href="/terms">Before you commission: read the Terms</a>
       </p>
     </section>
   </article>

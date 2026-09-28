@@ -1440,6 +1440,8 @@ html.poster-only .clip-pause { display: none; }
   gap: 10px;
 }
 
+.scope[data-count='1'] { grid-template-columns: 1fr; }
+
 .scope h3 {
   margin: 0 0 8px;
   font-size: 14px;
@@ -2376,6 +2378,10 @@ body:has(dialog[open]) { overflow: hidden; }
 .studio-inline .cta { width: auto; min-width: 140px; }
 
 .studio-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.studio-term { display: grid; gap: 8px; }
+.studio-term .field { margin: 0; }
+.studio-term-text { min-height: 88px; }
 
 .studio-icon {
   min-height: 44px;

@@ -8,6 +8,7 @@ import {
   type StudioCreator,
   type StudioPayload,
   type StudioSection,
+  type StudioTerm,
   type StudioThumbnail,
 } from '../lib/studio-shared';
 
@@ -18,6 +19,7 @@ const tabs = [
   { id: 'creators', label: 'Clients' },
   { id: 'sections', label: 'Sections' },
   { id: 'thumbnails', label: 'Thumbnails' },
+  { id: 'terms', label: 'Terms' },
 ] as const;
 
 type Tab = (typeof tabs)[number]['id'];
@@ -100,6 +102,7 @@ export default function AdminStudio() {
     creators: data.creators.length,
     sections: data.sections.length,
     thumbnails: data.thumbnails.length,
+    terms: data.terms.length,
   };
 
   const patch = (next: Partial<StudioPayload>) => setData({ ...data, ...next });
@@ -303,6 +306,26 @@ export default function AdminStudio() {
     setMessage('Thumbnail added. Save to show it on Works.');
   };
 
+  const setTerm = (id: string, change: Partial<StudioTerm>) => {
+    patch({ terms: data.terms.map((section) => (section.id === id ? { ...section, ...change } : section)) });
+  };
+
+  const moveTerm = (index: number, delta: number) => {
+    const next = index + delta;
+    if (next < 0 || next >= data.terms.length) return;
+    const terms = [...data.terms];
+    const [row] = terms.splice(index, 1);
+    terms.splice(next, 0, row);
+    patch({ terms });
+  };
+
+  const addTerm = () => {
+    const id = uniqueId('section', new Set(data.terms.map((section) => section.id)));
+    patch({ terms: [...data.terms, { id, title: 'New section', paragraphs: [''] }] });
+    setError('');
+    setMessage('Section added. Save to publish it on Terms.');
+  };
+
   const save = async () => {
     setSaving(true);
     setError('');
@@ -335,7 +358,7 @@ export default function AdminStudio() {
           <p class="kicker">Private</p>
           <h1 class="page-title">Studio</h1>
           <p class="studio-note">
-            Works, the home reel, and client filters. Prices and terms stay in <a href="/keystatic">Keystatic</a>.
+            Works, the home reel, client filters, and the Terms page. Prices and contact stay in <a href="/keystatic">Keystatic</a>.
           </p>
         </div>
         <div class="studio-head-actions">
@@ -691,6 +714,90 @@ export default function AdminStudio() {
               ))}
             </ul>
           </div>
+        </div>
+      )}
+
+      {tab === 'terms' && (
+        <div class="studio-panel">
+          <p class="studio-note">
+            This text is the public Terms page. Save publishes it. A blank paragraph is dropped, and a section with no text is removed. Keep at least one section.
+          </p>
+          <ul class="studio-list">
+            {data.terms.map((section, index) => (
+              <li class="studio-card studio-term" key={section.id}>
+                <label class="field">
+                  <span>Section title</span>
+                  <input
+                    aria-label={`Title for ${section.title || 'section'}`}
+                    value={section.title}
+                    onInput={(event) => setTerm(section.id, { title: event.currentTarget.value })}
+                  />
+                </label>
+                {section.paragraphs.map((paragraph, paragraphIndex) => (
+                  <label class="field" key={`${section.id}-${paragraphIndex}`}>
+                    <span>Paragraph {paragraphIndex + 1}</span>
+                    <textarea
+                      class="studio-term-text"
+                      value={paragraph}
+                      onInput={(event) => {
+                        const paragraphs = section.paragraphs.map((text, textIndex) =>
+                          textIndex === paragraphIndex ? event.currentTarget.value : text,
+                        );
+                        setTerm(section.id, { paragraphs });
+                      }}
+                    />
+                  </label>
+                ))}
+                <div class="studio-actions">
+                  <button
+                    class="studio-icon"
+                    type="button"
+                    onClick={() => setTerm(section.id, { paragraphs: [...section.paragraphs, ''] })}
+                  >
+                    Add paragraph
+                  </button>
+                  <button
+                    class="studio-icon"
+                    type="button"
+                    disabled={section.paragraphs.length <= 1}
+                    onClick={() =>
+                      setTerm(section.id, { paragraphs: section.paragraphs.slice(0, -1) })
+                    }
+                  >
+                    Remove paragraph
+                  </button>
+                  <button class="studio-icon" type="button" aria-label={`Move ${section.title} up`} onClick={() => moveTerm(index, -1)} disabled={index === 0}>
+                    Up
+                  </button>
+                  <button
+                    class="studio-icon"
+                    type="button"
+                    aria-label={`Move ${section.title} down`}
+                    onClick={() => moveTerm(index, 1)}
+                    disabled={index === data.terms.length - 1}
+                  >
+                    Down
+                  </button>
+                  <button
+                    class="studio-icon is-quiet"
+                    type="button"
+                    onClick={() => {
+                      if (data.terms.length <= 1) {
+                        setError('Keep at least one terms section.');
+                        return;
+                      }
+                      patch({ terms: data.terms.filter((item) => item.id !== section.id) });
+                      setError('');
+                    }}
+                  >
+                    Remove section
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <button class="cta" type="button" onClick={addTerm}>Add section</button>
+          <a class="studio-preview" href="/terms">View Terms</a>
         </div>
       )}
 

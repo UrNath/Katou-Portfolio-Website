@@ -36,7 +36,7 @@ export function getRoutes(prices: { editing: string; web: string }): RouteItem[]
     {
       href: '/terms',
       label: 'Terms',
-      meta: 'Read before booking',
+      meta: 'Read before a commission',
       icon: 'file-text',
     },
     {
