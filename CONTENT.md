@@ -10,7 +10,7 @@ Web design prices are real, in `src/content/services/web-design.md`. USD is the 
 
 The visual layer is Paper & Stage: cream page, white tiles, and a dark stage for the hub banner, the editing price card, the footer, and the clip viewer. `characterArt` in `src/data/site.ts` is off. Turn it on only for human-drawn art. The “I take” and “I don’t take” lists are marked with a TODO in each service file for Katou to review.
 
-`/terms#revisions` is a draft definition of minor and major. The TODO above that section in `src/data/terms.ts` is for Katou to confirm before it is treated as policy.
+`/terms` follows the VGen terms at vgen.co/ByAvery, including the Shorts scope and the revision split. The 50% down payment from that page is omitted. `/terms#refunds` is the payment section. `/terms#revisions` defines minor and major.
 
 Compare tiers is hidden while a service has only one tier. To add a package, append a tier and one value on every `compare` row. The disclosure and the swipe row come back when there are two or more tiers.
 
