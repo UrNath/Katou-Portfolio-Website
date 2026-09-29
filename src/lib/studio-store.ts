@@ -106,8 +106,7 @@ async function githubGet(rel: string, token: string): Promise<unknown> {
 }
 
 export async function readStudioFiles(githubToken = ''): Promise<StudioPayload> {
-  const provided = githubToken.trim();
-  const token = process.env.ADMIN_GITHUB_TOKEN || provided;
+  const token = githubToken.trim();
   if (process.env.VERCEL && token) {
     try {
       return toPayload(
@@ -180,7 +179,7 @@ export async function writeStudio(input: StudioPayload, githubToken = ''): Promi
     [files.thumbnails]: dump(next.thumbnails),
     [files.terms]: dump(next.terms),
   };
-  const token = process.env.ADMIN_GITHUB_TOKEN || githubToken.trim();
+  const token = githubToken.trim();
   if (process.env.VERCEL && token) {
     for (const [rel, content] of Object.entries(bodies)) {
       await githubPut(rel, content, token);

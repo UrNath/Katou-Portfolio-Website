@@ -1,8 +1,20 @@
 ---
+export const prerender = false;
+
 import BaseLayout from '../../components/BaseLayout.astro';
 import AdminStudio from '../../islands/AdminStudio';
+import { githubOAuthConfigured, readSession } from '../../lib/admin-session';
+
+const oauth = githubOAuthConfigured();
+let login = '';
+if (oauth) {
+  const session = await readSession(Astro.cookies);
+  if (!session) return Astro.redirect('/api/admin/login');
+  login = session.login;
+}
 ---
 
 <BaseLayout title="Editor" description="Private editor for Works, the home reel, client filters, tag filters, and the Terms page.">
-  <AdminStudio client:load />
+  <meta slot="head" name="robots" content="noindex, nofollow" />
+  <AdminStudio client:load oauth={oauth} login={login} />
 </BaseLayout>

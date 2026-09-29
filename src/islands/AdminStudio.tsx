@@ -79,7 +79,7 @@ function posterOf(clip: StudioClip): string {
   return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : '/og.png';
 }
 
-export default function AdminStudio() {
+export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boolean; login?: string }) {
   const [data, setData] = useState<StudioPayload | null>(null);
   const [saved, setSaved] = useState('');
   const [tab, setTab] = useState<Tab>('videos');
@@ -99,7 +99,14 @@ export default function AdminStudio() {
   const [tagName, setTagName] = useState('');
 
   useEffect(() => {
-    const token = storedToken();
+    if (oauth) {
+      try {
+        localStorage.removeItem(TOKEN_KEY);
+      } catch {
+        /* ignore */
+      }
+    }
+    const token = oauth ? '' : storedToken();
     setGithubToken(token);
     const apply = (response: Response, body: { error?: string }) => {
       setNeedsToken(response.headers.get('x-studio-save') === 'needs-token');
@@ -111,6 +118,10 @@ export default function AdminStudio() {
     };
     fetch('/api/admin/studio', { headers: studioHeaders(token) })
       .then(async (response) => {
+        if (response.status === 401 && oauth) {
+          location.href = '/api/admin/login';
+          return;
+        }
         const body = await response.json();
         if (body.error && token) {
           try {
@@ -127,28 +138,30 @@ export default function AdminStudio() {
         apply(response, body);
       })
       .catch(() => setError('Could not load the editor.'));
-  }, []);
+  }, [oauth]);
 
   if (!data) {
     return (
       <section class="studio">
         <h1 class="page-title">Studio</h1>
         <p class="studio-note">{error || 'Loading the catalog…'}</p>
-        <button
-          class="cta studio-save"
-          type="button"
-          style="margin-top: 16px"
-          onClick={() => {
-            try {
-              localStorage.removeItem(TOKEN_KEY);
-            } catch {
-              /* ignore */
-            }
-            location.reload();
-          }}
-        >
-          Forget saved token and reload
-        </button>
+        {error && !oauth && (
+          <button
+            class="cta studio-save"
+            type="button"
+            style="margin-top: 16px"
+            onClick={() => {
+              try {
+                localStorage.removeItem(TOKEN_KEY);
+              } catch {
+                /* ignore */
+              }
+              location.reload();
+            }}
+          >
+            Forget saved token and reload
+          </button>
+        )}
       </section>
     );
   }
@@ -393,9 +406,13 @@ export default function AdminStudio() {
     try {
       const response = await fetch('/api/admin/studio', {
         method: 'POST',
-        headers: studioHeaders(githubToken, true),
+        headers: studioHeaders(oauth ? '' : githubToken, true),
         body: JSON.stringify(data),
       });
+      if (response.status === 401 && oauth) {
+        location.href = '/api/admin/login';
+        return;
+      }
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Save failed.');
       setSaved(JSON.stringify(data));
@@ -468,8 +485,14 @@ export default function AdminStudio() {
           <p class="studio-note">
             Works, the home reel, client filters, tag filters, and the Terms page. Prices and contact stay in <a href="/keystatic">Keystatic</a>.
           </p>
+          {oauth && login && <p class="studio-note">Signed in as {login}.</p>}
         </div>
         <div class="studio-head-actions">
+          {oauth && (
+            <a class="studio-preview" href="/api/admin/logout">
+              Sign out
+            </a>
+          )}
           <a class="studio-preview" href="/works">View Works</a>
           <button class="cta studio-save" type="button" onClick={save} disabled={saving || !dirty}>
             {saving ? 'Saving…' : dirty ? 'Save' : 'Saved'}
@@ -477,7 +500,7 @@ export default function AdminStudio() {
         </div>
       </header>
       {(message || error) && <p class={error ? 'studio-error' : 'studio-ok'}>{error || message}</p>}
-      {(needsToken || githubToken || /token/i.test(error)) && (
+      {!oauth && (needsToken || githubToken || /token/i.test(error)) && (
         <form
           class="studio-card studio-token"
           onSubmit={(event) => {
