@@ -19,23 +19,23 @@ export function tagSlug(label: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-const layoutTags = Array.isArray(layout.tags) ? layout.tags : [];
+const layoutTags = Array.isArray(layout.tags) ? layout.tags : null;
 
 const seen = new Map<string, { id: string; label: string }>();
-for (const label of layoutTags) {
+const remember = (label: string) => {
   const id = tagSlug(label);
-  if (!id || seen.has(id)) continue;
+  if (!id || seen.has(id)) return;
   seen.set(id, { id, label });
-}
-for (const clip of clips) {
-  for (const label of clip.tags) {
-    const id = tagSlug(label);
-    if (!id || seen.has(id)) continue;
-    seen.set(id, { id, label });
+};
+if (layoutTags) {
+  for (const label of layoutTags) remember(label);
+} else {
+  for (const clip of clips) {
+    for (const label of clip.tags) remember(label);
   }
 }
 
-/** Works filter chips. Layout order wins, including a tag that no video uses yet. */
+/** Works filter chips. The studio list is the whole set, including a tag no video uses yet. An empty list shows no chips. */
 export const clipTags = [...seen.values()];
 
 /** Creator chips, in the order set in the editor, including a new client with no videos yet. */
