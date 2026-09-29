@@ -60,10 +60,14 @@ export function filterFromSearch(params: URLSearchParams): string {
   return '';
 }
 
-export function filterHref(filter: string): string {
-  if (!filter) return '/works';
-  if (filter.startsWith('creator:')) return `/works?creator=${encodeURIComponent(filter.slice('creator:'.length))}`;
-  return `/works?tag=${encodeURIComponent(filter)}`;
+export function filterHref(filter: string, query = ''): string {
+  const params = new URLSearchParams();
+  if (filter.startsWith('creator:')) params.set('creator', filter.slice('creator:'.length));
+  else if (filter) params.set('tag', filter);
+  const text = query.trim();
+  if (text) params.set('q', text);
+  const search = params.toString();
+  return search ? `/works?${search}` : '/works';
 }
 
 /** Hide non-matching cards before paint, and hide a section whose cards are all hidden. */

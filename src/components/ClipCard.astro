@@ -23,6 +23,7 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
   data-clip-id={clip.id}
   data-tags={clip.tags.join(' ')}
   data-creator={clip.creatorId}
+  data-find={`${clip.title} ${clip.creator} ${clip.channelHandle} ${clip.tags.join(' ')}`}
 >
   <div class="clip-anim">
     <div class:list={['clip-frame', clip.wide && 'is-wide']} style={morph ? `view-transition-name: ${morph}` : undefined}>

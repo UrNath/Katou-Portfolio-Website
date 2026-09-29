@@ -963,7 +963,7 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
               patch({ tags: [...data.tags, label] });
               setTagName('');
               setError('');
-              setMessage('Tag added. Save to show it on Works.');
+              setMessage('Tag added. Put it on the videos, then Save. Works shows it as a category with those videos.');
             }}
           >
             <input value={tagName} placeholder="New tag" onInput={(event) => setTagName(event.currentTarget.value)} />
