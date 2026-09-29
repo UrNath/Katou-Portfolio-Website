@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../components/BaseLayout.astro';
+---
+
+<BaseLayout title="Signed out" description="The studio is signed out.">
+  <meta slot="head" name="robots" content="noindex, nofollow" />
+  <section class="studio">
+    <h1 class="page-title">Signed out</h1>
+    <p class="studio-note">The studio asks for GitHub again the next time you open it.</p>
+    <p class="studio-actions">
+      <a class="cta" href="/api/admin/login">Sign in with GitHub</a>
+    </p>
+  </section>
+</BaseLayout>

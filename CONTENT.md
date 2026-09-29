@@ -65,7 +65,7 @@ The loops are about 13 MB and are committed under `public/media/previews/` for n
 
 ## Editor
 
-`/admin` is the studio. It is unlisted and `noindex`. Use it to add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), add thumbnails, edit the tag filters, and edit the Terms page (`src/data/terms.json`). Prices and contact stay in Keystatic at `/keystatic`. The README has the one-time GitHub App steps, plus how live saves authenticate.
+`/admin` is the studio. It is unlisted and `noindex`. Use it to add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), add thumbnails, edit the tag filters, and edit the Terms page (`src/data/terms.json`). Prices and contact stay in Keystatic at `/keystatic`. The README has the GitHub sign-in steps for the studio, and the separate Keystatic GitHub App.
 
 The chips after the client names on Works (Highlights, Gaming, Funny, Karaoke/Music, MV, Collab) are tags stored on each clip. Their order lives in `tags` inside `src/data/works-layout.json`. The Tags tab in the studio renames, reorders, and removes them. A tag with no video still shows, so a new one can be filed onto clips before it is used.
 
