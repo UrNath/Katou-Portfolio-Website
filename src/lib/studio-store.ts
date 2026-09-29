@@ -117,8 +117,7 @@ export async function readStudioFiles(githubToken = ''): Promise<StudioPayload> 
         await githubGet(files.thumbnails, token),
         await githubGet(files.terms, token),
       );
-    } catch (error) {
-      if (provided) throw error;
+    } catch {
       return bundledPayload();
     }
   }

@@ -101,17 +101,30 @@ export default function AdminStudio() {
   useEffect(() => {
     const token = storedToken();
     setGithubToken(token);
+    const apply = (response: Response, body: { error?: string }) => {
+      setNeedsToken(response.headers.get('x-studio-save') === 'needs-token');
+      if (body.error) setError(body.error);
+      else {
+        setData(body as StudioPayload);
+        setSaved(JSON.stringify(body));
+      }
+    };
     fetch('/api/admin/studio', { headers: studioHeaders(token) })
       .then(async (response) => {
-        setNeedsToken(response.headers.get('x-studio-save') === 'needs-token' && !token);
-        return response.json();
-      })
-      .then((body) => {
-        if (body.error) setError(body.error);
-        else {
-          setData(body);
-          setSaved(JSON.stringify(body));
+        const body = await response.json();
+        if (body.error && token) {
+          try {
+            localStorage.removeItem(TOKEN_KEY);
+          } catch {
+            /* ignore */
+          }
+          setGithubToken('');
+          const retry = await fetch('/api/admin/studio');
+          apply(retry, await retry.json());
+          setError('The token saved in this browser was refused. Paste the new one under Live save.');
+          return;
         }
+        apply(response, body);
       })
       .catch(() => setError('Could not load the editor.'));
   }, []);
@@ -121,6 +134,21 @@ export default function AdminStudio() {
       <section class="studio">
         <h1 class="page-title">Studio</h1>
         <p class="studio-note">{error || 'Loading the catalog…'}</p>
+        <button
+          class="cta studio-save"
+          type="button"
+          style="margin-top: 16px"
+          onClick={() => {
+            try {
+              localStorage.removeItem(TOKEN_KEY);
+            } catch {
+              /* ignore */
+            }
+            location.reload();
+          }}
+        >
+          Forget saved token and reload
+        </button>
       </section>
     );
   }
