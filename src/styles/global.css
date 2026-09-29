@@ -2379,6 +2379,11 @@ body:has(dialog[open]) { overflow: hidden; }
 
 .studio-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 
+.studio-tag-picks { display: flex; flex-wrap: wrap; gap: 6px; }
+.studio-clip .studio-tag-picks { grid-column: 1 / -1; }
+.studio-tag-picks .filter-chip { min-height: 36px; }
+.studio-token .cta { width: auto; min-width: 140px; }
+
 .studio-term { display: grid; gap: 8px; }
 .studio-term .field { margin: 0; }
 .studio-term-text { min-height: 88px; }

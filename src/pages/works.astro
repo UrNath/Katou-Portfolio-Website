@@ -47,13 +47,17 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
           </button>
         ))
       }
-      <span class="filter-gap" aria-hidden="true"></span>
       {
-        clipTags.map((tag) => (
-          <button class="filter-chip" type="button" data-filter={tag.id} aria-pressed="false">
-            {tag.label}
-          </button>
-        ))
+        clipTags.length > 0 && (
+          <>
+            <span class="filter-gap" aria-hidden="true"></span>
+            {clipTags.map((tag) => (
+              <button class="filter-chip" type="button" data-filter={tag.id} aria-pressed="false">
+                {tag.label}
+              </button>
+            ))}
+          </>
+        )
       }
     </div>
     <WorksFilters client:visible />

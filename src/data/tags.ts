@@ -19,30 +19,24 @@ export function tagSlug(label: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-const preferredTags = ['Highlights', 'Gaming', 'Funny', 'Karaoke/Music', 'MV', 'Collab'];
+const layoutTags = Array.isArray(layout.tags) ? layout.tags : [];
 
-const seen = new Map<string, { id: string; label: string; count: number }>();
+const seen = new Map<string, { id: string; label: string }>();
+for (const label of layoutTags) {
+  const id = tagSlug(label);
+  if (!id || seen.has(id)) continue;
+  seen.set(id, { id, label });
+}
 for (const clip of clips) {
   for (const label of clip.tags) {
     const id = tagSlug(label);
-    const row = seen.get(id);
-    if (row) row.count += 1;
-    else seen.set(id, { id, label, count: 1 });
+    if (!id || seen.has(id)) continue;
+    seen.set(id, { id, label });
   }
 }
 
-/** Tags that actually appear on a clip. Empty tags never become chips. */
-export const clipTags = [...seen.values()]
-  .filter((tag) => tag.count > 0)
-  .sort((a, b) => {
-    const ai = preferredTags.indexOf(a.label);
-    const bi = preferredTags.indexOf(b.label);
-    if (ai === -1 && bi === -1) return a.label.localeCompare(b.label);
-    if (ai === -1) return 1;
-    if (bi === -1) return -1;
-    return ai - bi;
-  })
-  .map(({ id, label }) => ({ id, label }));
+/** Works filter chips. Layout order wins, including a tag that no video uses yet. */
+export const clipTags = [...seen.values()];
 
 /** Creator chips, in the order set in the editor, including a new client with no videos yet. */
 export const creators = layout.creators;

@@ -35,9 +35,18 @@ Preview MP4s live in `public/media/previews/`. The build copies them to `dist/me
 
 ## Editing the site
 
-Open `/admin` (it is not linked from the public pages). That editor is for Works and the Terms page: add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), add thumbnails, and edit the terms. Save on your computer writes the files in this repo. On Vercel the editor reads those files from the deploy, because the function has no `src/data` folder on disk.
+Open `/admin` (it is not linked from the public pages). That editor is for Works and the Terms page: add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), add thumbnails, edit the tag filters, and edit the terms. Save on your computer writes the files in this repo. On Vercel the editor reads those files from the deploy, because the function has no `src/data` folder on disk.
 
-Prices, status, and contact notes stay in [Keystatic](https://keystatic.com) at `/keystatic`. Terms can also be edited there. On the live site, Keystatic commits to `main` after the one-time GitHub setup below, and Vercel rebuilds. The studio does the same when `ADMIN_GITHUB_TOKEN` is set in Vercel.
+Prices, status, and contact notes stay in [Keystatic](https://keystatic.com) at `/keystatic`. Terms can also be edited there. On the live site, Keystatic commits to `main` after the one-time GitHub setup below, and Vercel rebuilds. The studio commits the same way once it has a GitHub token.
+
+The tag chips on Works (Highlights, Gaming, and the rest) are labels on the videos, not the Shorts / Longer sections. Edit them in the studio’s Tags tab.
+
+### Live studio save
+
+The live editor cannot write the repo until GitHub accepts a token. Either:
+
+- In the studio, open **Create a token**. Make a fine-grained token for only `UrNath/Katou-Portfolio-Website`, with Contents set to Read and write. Paste it into **Live save** and press Save token. It stays in that browser. Then press Save.
+- Or set `ADMIN_GITHUB_TOKEN` to that token in Vercel → Settings → Environment Variables and redeploy. Every browser can then save without pasting.
 
 ### One-time GitHub setup
 
