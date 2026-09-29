@@ -16,10 +16,7 @@
       "type": "short",
       "poster": "posters/chi-c1.webp",
       "preview": "previews/chi-c1.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -41,10 +38,7 @@
       "type": "short",
       "poster": "posters/chi-c3.webp",
       "preview": "previews/chi-c3.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": true,
       "heroFeatured": true,
@@ -66,9 +60,7 @@
       "type": "short",
       "poster": "posters/chi-c4.webp",
       "preview": "previews/chi-c4.mp4",
-      "tags": [
-        "Funny"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": true,
       "heroFeatured": false,
@@ -90,9 +82,7 @@
       "type": "short",
       "poster": "posters/pidge-p1.webp",
       "preview": "previews/pidge-p1.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -114,9 +104,7 @@
       "type": "short",
       "poster": "posters/miu-ms1.webp",
       "preview": "previews/miu-ms1.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -138,10 +126,7 @@
       "type": "short",
       "poster": "posters/miu-ms2.webp",
       "preview": "previews/miu-ms2.mp4",
-      "tags": [
-        "Funny",
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -163,9 +148,7 @@
       "type": "short",
       "poster": "posters/miu-ms3.webp",
       "preview": "previews/miu-ms3.mp4",
-      "tags": [
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -187,10 +170,7 @@
       "type": "short",
       "poster": "posters/miu-ms4.webp",
       "preview": "previews/miu-ms4.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -212,10 +192,7 @@
       "type": "short",
       "poster": "posters/miu-ms5.webp",
       "preview": "previews/miu-ms5.mp4",
-      "tags": [
-        "Karaoke/Music",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -237,10 +214,7 @@
       "type": "video",
       "poster": "posters/miu-mv2.webp",
       "preview": "previews/miu-mv2.mp4",
-      "tags": [
-        "Karaoke/Music",
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -262,10 +236,7 @@
       "type": "short",
       "poster": "posters/pidge-p3.webp",
       "preview": "previews/pidge-p3.mp4",
-      "tags": [
-        "Gaming",
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": true,
       "heroFeatured": false,
@@ -287,9 +258,7 @@
       "type": "short",
       "poster": "posters/miu-ms6.webp",
       "preview": "previews/miu-ms6.mp4",
-      "tags": [
-        "Funny"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -311,9 +280,7 @@
       "type": "video",
       "poster": "posters/miu-mv3.webp",
       "preview": "previews/miu-mv3.mp4",
-      "tags": [
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -335,11 +302,7 @@
       "type": "short",
       "poster": "posters/miu-ms7.webp",
       "preview": "previews/miu-ms7.mp4",
-      "tags": [
-        "Collab",
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -361,9 +324,7 @@
       "type": "short",
       "poster": "posters/miu-ms8.webp",
       "preview": "previews/miu-ms8.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -385,10 +346,7 @@
       "type": "short",
       "poster": "posters/miu-ms9.webp",
       "preview": "previews/miu-ms9.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -410,9 +368,7 @@
       "type": "short",
       "poster": "posters/miu-ms10.webp",
       "preview": "previews/miu-ms10.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -434,9 +390,7 @@
       "type": "short",
       "poster": "posters/miu-ms11.webp",
       "preview": "previews/miu-ms11.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -458,10 +412,7 @@
       "type": "short",
       "poster": "posters/pidge-p7.webp",
       "preview": "previews/pidge-p7.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": true,
       "heroFeatured": false,
@@ -483,10 +434,7 @@
       "type": "short",
       "poster": "posters/miu-ms12.webp",
       "preview": "previews/miu-ms12.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -508,9 +456,7 @@
       "type": "video",
       "poster": "posters/miu-mv4.webp",
       "preview": "previews/miu-mv4.mp4",
-      "tags": [
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -532,10 +478,7 @@
       "type": "short",
       "poster": "posters/pidge-p8.webp",
       "preview": "previews/pidge-p8.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": true,
       "heroFeatured": false,
@@ -557,10 +500,7 @@
       "type": "short",
       "poster": "posters/pidge-p11.webp",
       "preview": "previews/pidge-p11.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -582,9 +522,7 @@
       "type": "short",
       "poster": "posters/pidge-p9.webp",
       "preview": "previews/pidge-p9.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -606,10 +544,7 @@
       "type": "short",
       "poster": "posters/pidge-p10.webp",
       "preview": "previews/pidge-p10.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -631,10 +566,7 @@
       "type": "short",
       "poster": "posters/pidge-p12.webp",
       "preview": "previews/pidge-p12.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -656,11 +588,7 @@
       "type": "video",
       "poster": "posters/miu-mv35.webp",
       "preview": "previews/miu-mv35.mp4",
-      "tags": [
-        "MV",
-        "Karaoke/Music",
-        "Collab"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -682,9 +610,7 @@
       "type": "video",
       "poster": "posters/miu-mv36.webp",
       "preview": "previews/miu-mv36.mp4",
-      "tags": [
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -706,9 +632,7 @@
       "type": "short",
       "poster": "posters/miu-ms13.webp",
       "preview": "previews/miu-ms13.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -730,10 +654,7 @@
       "type": "short",
       "poster": "posters/miu-ms14.webp",
       "preview": "previews/miu-ms14.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -755,10 +676,7 @@
       "type": "short",
       "poster": "posters/miu-ms15.webp",
       "preview": "previews/miu-ms15.mp4",
-      "tags": [
-        "Gaming",
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -780,10 +698,7 @@
       "type": "short",
       "poster": "posters/miu-ms16.webp",
       "preview": "previews/miu-ms16.mp4",
-      "tags": [
-        "Gaming",
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -805,9 +720,7 @@
       "type": "video",
       "poster": "posters/miu-mv37.webp",
       "preview": "previews/miu-mv37.mp4",
-      "tags": [
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -829,9 +742,7 @@
       "type": "short",
       "poster": "posters/miu-ms17.webp",
       "preview": "previews/miu-ms17.mp4",
-      "tags": [
-        "Karaoke/Music"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -853,9 +764,7 @@
       "type": "short",
       "poster": "posters/miu-ms18.webp",
       "preview": "previews/miu-ms18.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -877,9 +786,7 @@
       "type": "video",
       "poster": "posters/miu-mv38.webp",
       "preview": "previews/miu-mv38.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -901,10 +808,7 @@
       "type": "short",
       "poster": "posters/miu-ms19.webp",
       "preview": "previews/miu-ms19.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -926,9 +830,7 @@
       "type": "short",
       "poster": "posters/miu-ms20.webp",
       "preview": "previews/miu-ms20.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -950,9 +852,7 @@
       "type": "short",
       "poster": "posters/miu-ms21.webp",
       "preview": "previews/miu-ms21.mp4",
-      "tags": [
-        "Funny"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -974,10 +874,7 @@
       "type": "short",
       "poster": "posters/miu-ms22.webp",
       "preview": "previews/miu-ms22.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -999,9 +896,7 @@
       "type": "short",
       "poster": "posters/miu-ms23.webp",
       "preview": "previews/miu-ms23.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -1023,9 +918,7 @@
       "type": "video",
       "poster": "posters/miu-mv39.webp",
       "preview": "previews/miu-mv39.mp4",
-      "tags": [
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -1047,9 +940,7 @@
       "type": "short",
       "poster": "posters/miu-ms24.webp",
       "preview": "previews/miu-ms24.mp4",
-      "tags": [
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -1071,9 +962,7 @@
       "type": "video",
       "poster": "posters/miu-mv41.webp",
       "preview": "previews/miu-mv41.mp4",
-      "tags": [
-        "Highlights"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -1095,9 +984,7 @@
       "type": "short",
       "poster": "posters/miu-ms26.webp",
       "preview": "previews/miu-ms26.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -1119,10 +1006,7 @@
       "type": "short",
       "poster": "posters/miu-ms27.webp",
       "preview": "previews/miu-ms27.mp4",
-      "tags": [
-        "Funny",
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
@@ -1144,9 +1028,7 @@
       "type": "short",
       "poster": "posters/miu-ms28.webp",
       "preview": "previews/miu-ms28.mp4",
-      "tags": [
-        "Gaming"
-      ],
+      "tags": [],
       "tagsSuggested": true,
       "featured": false,
       "heroFeatured": false,
