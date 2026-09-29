@@ -13,12 +13,14 @@ import {
 } from '../lib/studio-shared';
 
 const omitted = new Set<string>(OMITTED_CLIP_IDS);
+const TOKEN_KEY = 'nk-studio-github-token';
 const tabs = [
   { id: 'videos', label: 'Videos' },
   { id: 'featured', label: 'Home' },
   { id: 'creators', label: 'Clients' },
   { id: 'sections', label: 'Sections' },
   { id: 'thumbnails', label: 'Thumbnails' },
+  { id: 'tags', label: 'Tags' },
   { id: 'terms', label: 'Terms' },
 ] as const;
 
@@ -38,7 +40,27 @@ const emptyVideo = {
   youtubeUrl: '',
   tiktokUrl: '',
   sectionId: 'shorts',
+  tags: [] as string[],
 };
+
+function storedToken(): string {
+  try {
+    return localStorage.getItem(TOKEN_KEY)?.trim() ?? '';
+  } catch {
+    return '';
+  }
+}
+
+function studioHeaders(token: string, json = false): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (json) headers['content-type'] = 'application/json';
+  if (token) headers['x-admin-token'] = token;
+  return headers;
+}
+
+function clipTagLabels(clip: StudioClip): string[] {
+  return Array.isArray(clip.tags) ? clip.tags.map(String) : [];
+}
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -71,10 +93,19 @@ export default function AdminStudio() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [githubToken, setGithubToken] = useState('');
+  const [tokenDraft, setTokenDraft] = useState('');
+  const [needsToken, setNeedsToken] = useState(false);
+  const [tagName, setTagName] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/studio')
-      .then((response) => response.json())
+    const token = storedToken();
+    setGithubToken(token);
+    fetch('/api/admin/studio', { headers: studioHeaders(token) })
+      .then(async (response) => {
+        setNeedsToken(response.headers.get('x-studio-save') === 'needs-token' && !token);
+        return response.json();
+      })
       .then((body) => {
         if (body.error) setError(body.error);
         else {
@@ -102,6 +133,7 @@ export default function AdminStudio() {
     creators: data.creators.length,
     sections: data.sections.length,
     thumbnails: data.thumbnails.length,
+    tags: data.tags.length,
     terms: data.terms.length,
   };
 
@@ -180,7 +212,7 @@ export default function AdminStudio() {
       type: orientation === 'landscape' ? 'video' : 'short',
       poster: `posters/${id}.webp`,
       preview: '',
-      tags: [],
+      tags: draft.tags,
       tagsSuggested: true,
       featured: false,
       heroFeatured: false,
@@ -333,7 +365,7 @@ export default function AdminStudio() {
     try {
       const response = await fetch('/api/admin/studio', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: studioHeaders(githubToken, true),
         body: JSON.stringify(data),
       });
       const body = await response.json();
@@ -347,6 +379,54 @@ export default function AdminStudio() {
     }
   };
 
+  const tagUses = (label: string) =>
+    data.clips.filter((clip) => clipTagLabels(clip).some((tag) => slugify(tag) === slugify(label))).length;
+
+  const renameTag = (label: string, nextLabel: string) => {
+    const next = nextLabel.trim();
+    if (!next) return;
+    if (slugify(next) !== slugify(label) && data.tags.some((tag) => slugify(tag) === slugify(next))) {
+      setError('That tag already exists.');
+      return;
+    }
+    patch({
+      tags: data.tags.map((tag) => (tag === label ? next : tag)),
+      clips: data.clips.map((clip) => ({
+        ...clip,
+        tags: clipTagLabels(clip).map((tag) => (slugify(tag) === slugify(label) ? next : tag)),
+      })),
+    });
+    setError('');
+  };
+
+  const moveTag = (index: number, delta: number) => {
+    const next = index + delta;
+    if (next < 0 || next >= data.tags.length) return;
+    const tags = [...data.tags];
+    const [row] = tags.splice(index, 1);
+    tags.splice(next, 0, row);
+    patch({ tags });
+  };
+
+  const removeTag = (label: string) => {
+    const id = slugify(label);
+    patch({
+      tags: data.tags.filter((tag) => slugify(tag) !== id),
+      clips: data.clips.map((clip) => ({
+        ...clip,
+        tags: clipTagLabels(clip).filter((tag) => slugify(tag) !== id),
+      })),
+    });
+    setError('');
+  };
+
+  const toggleClipTag = (clip: StudioClip, label: string) => {
+    const id = slugify(label);
+    const tags = clipTagLabels(clip);
+    const has = tags.some((tag) => slugify(tag) === id);
+    setClip(clip.id, { tags: has ? tags.filter((tag) => slugify(tag) !== id) : [...tags, label] });
+  };
+
   const uses = (id: string) =>
     data.clips.filter((clip) => slugify(clip.creator) === id).length +
     data.thumbnails.filter((item) => slugify(item.creator) === id).length;
@@ -358,7 +438,7 @@ export default function AdminStudio() {
           <p class="kicker">Private</p>
           <h1 class="page-title">Studio</h1>
           <p class="studio-note">
-            Works, the home reel, client filters, and the Terms page. Prices and contact stay in <a href="/keystatic">Keystatic</a>.
+            Works, the home reel, client filters, tag filters, and the Terms page. Prices and contact stay in <a href="/keystatic">Keystatic</a>.
           </p>
         </div>
         <div class="studio-head-actions">
@@ -369,6 +449,69 @@ export default function AdminStudio() {
         </div>
       </header>
       {(message || error) && <p class={error ? 'studio-error' : 'studio-ok'}>{error || message}</p>}
+      {(needsToken || githubToken || /token/i.test(error)) && (
+        <form
+          class="studio-card studio-token"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const next = tokenDraft.trim();
+            try {
+              if (next) localStorage.setItem(TOKEN_KEY, next);
+              else localStorage.removeItem(TOKEN_KEY);
+            } catch {
+              setError('This browser blocked saving the token.');
+              return;
+            }
+            setGithubToken(next);
+            setTokenDraft('');
+            setNeedsToken(!next);
+            setError('');
+            setMessage(next ? 'Token saved in this browser. Press Save again.' : 'Token removed from this browser.');
+          }}
+        >
+          <h2>Live save</h2>
+          <p class="studio-note">
+            The live site saves by committing to GitHub. Create a fine-grained token for only this repo, with Contents set to Read and write, then paste it here. It stays in this browser.
+          </p>
+          {githubToken && <p class="studio-note">A token is already saved in this browser.</p>}
+          <label class="field">
+            <span>GitHub token</span>
+            <input
+              type="password"
+              autocomplete="off"
+              value={tokenDraft}
+              placeholder="github_pat_… or ghp_…"
+              onInput={(event) => setTokenDraft(event.currentTarget.value)}
+            />
+          </label>
+          <div class="studio-actions">
+            <button class="cta" type="submit" disabled={!tokenDraft.trim()}>
+              Save token
+            </button>
+            {githubToken && (
+              <button
+                class="studio-icon is-quiet"
+                type="button"
+                onClick={() => {
+                  try {
+                    localStorage.removeItem(TOKEN_KEY);
+                  } catch {
+                    /* ignore */
+                  }
+                  setGithubToken('');
+                  setNeedsToken(true);
+                  setMessage('Token removed from this browser.');
+                }}
+              >
+                Remove token
+              </button>
+            )}
+            <a class="studio-preview" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">
+              Create a token
+            </a>
+          </div>
+        </form>
+      )}
       <div class="filters" role="tablist" aria-label="Editor sections">
         {tabs.map((item) => (
           <button
@@ -447,6 +590,28 @@ export default function AdminStudio() {
                 ))}
               </select>
             </label>
+            {data.tags.length > 0 && (
+              <div class="studio-tag-picks" role="group" aria-label="Tags for the new video">
+                {data.tags.map((tag) => {
+                  const on = draft.tags.some((item) => slugify(item) === slugify(tag));
+                  return (
+                    <button
+                      class="filter-chip"
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() =>
+                        setDraft({
+                          ...draft,
+                          tags: on ? draft.tags.filter((item) => slugify(item) !== slugify(tag)) : [...draft.tags, tag],
+                        })
+                      }
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             <button class="cta" type="submit">Add video</button>
           </form>
           <div class="studio-catalog">
@@ -495,6 +660,18 @@ export default function AdminStudio() {
                       <button class="studio-icon is-quiet" type="button" onClick={() => removeClip(clip.id)}>
                         Remove
                       </button>
+                      {data.tags.length > 0 && (
+                        <div class="studio-tag-picks" role="group" aria-label={`Tags for ${clip.title}`}>
+                          {data.tags.map((tag) => {
+                            const on = clipTagLabels(clip).some((item) => slugify(item) === slugify(tag));
+                            return (
+                              <button class="filter-chip" type="button" aria-pressed={on} onClick={() => toggleClipTag(clip, tag)}>
+                                {tag}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -714,6 +891,53 @@ export default function AdminStudio() {
               ))}
             </ul>
           </div>
+        </div>
+      )}
+
+      {tab === 'tags' && (
+        <div class="studio-panel">
+          <p class="studio-note">
+            These chips sit on Works after the client names. They were labels already stored on the videos. Rename, reorder, or remove one here. Removing a tag takes it off every video. A new tag stays visible even before a video uses it.
+          </p>
+          <form
+            class="studio-inline"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const label = tagName.trim();
+              if (!label) return;
+              if (data.tags.some((tag) => slugify(tag) === slugify(label))) {
+                setError('That tag already exists.');
+                return;
+              }
+              patch({ tags: [...data.tags, label] });
+              setTagName('');
+              setError('');
+              setMessage('Tag added. Save to show it on Works.');
+            }}
+          >
+            <input value={tagName} placeholder="New tag" onInput={(event) => setTagName(event.currentTarget.value)} />
+            <button class="cta" type="submit">Add tag</button>
+          </form>
+          <ul class="studio-list">
+            {data.tags.map((tag, index) => (
+              <li class="studio-row studio-line" key={`tag-${index}`}>
+                <input aria-label={`${tag} name`} value={tag} onInput={(event) => renameTag(tag, event.currentTarget.value)} />
+                <span class="studio-meta">{tagUses(tag)} videos</span>
+                <div class="studio-actions">
+                  <button class="studio-icon" type="button" aria-label={`Move ${tag} up`} onClick={() => moveTag(index, -1)} disabled={index === 0}>
+                    Up
+                  </button>
+                  <button class="studio-icon" type="button" aria-label={`Move ${tag} down`} onClick={() => moveTag(index, 1)} disabled={index === data.tags.length - 1}>
+                    Down
+                  </button>
+                  <button class="studio-icon is-quiet" type="button" onClick={() => removeTag(tag)}>
+                    Remove
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+          {data.tags.length === 0 && <p class="studio-note">No tags. Works will only show the client filters.</p>}
         </div>
       )}
 

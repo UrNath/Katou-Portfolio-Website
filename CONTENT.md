@@ -25,7 +25,7 @@ Compare tiers is hidden while a service has only one tier. To add a package, app
 | Web design packages, process, tiers, add-ons | `src/content/services/web-design.md` |
 | Terms and FAQ | `src/data/terms.ts` |
 | Contact form options and guidelines | `src/data/contact.ts` |
-| Filter tag labels | `src/data/tags.ts` (built from the clips, empty tags omitted) |
+| Filter tag labels | `src/data/works-layout.json` `tags`, rendered by `src/data/tags.ts` |
 | Clip list | `src/data/clips.json` |
 | Posters | `src/assets/posters/` |
 | Preview loops | `public/media/previews/` |
@@ -36,7 +36,7 @@ Status is one value per service: `'open'`, `'waitlist'`, or `'closed'`. The visi
 
 ## Clips
 
-`src/data/clips.json` is the list, newest first. The hub and Works counts (`47 edits`) are `clips.length`. View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. A filter chip is omitted when no clip uses that tag.
+`src/data/clips.json` is the list, newest first. The hub and Works counts (`47 edits`) are `clips.length`. View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. Tag chips come from `works-layout.json` and stay visible even when no clip uses that tag yet.
 
 The hub is featured-only. It centers `chi-c3` (`heroFeatured`). The dimmed neighbors, the Works thumbnails, and the hub viewer use only the featured clips, in this order: `chi-c3`, `chi-c4`, `pidge-p7`, `pidge-p8`, `pidge-p3`. Miu stays on `/works`, newest first. Cards read `Edit for @handle` (Pidge `@pidgeira`, Chi `@chiseyi`, Miu `@miuonivt`).
 
@@ -65,7 +65,9 @@ The loops are about 13 MB and are committed under `public/media/previews/` for n
 
 ## Editor
 
-`/admin` is the studio. It is unlisted and `noindex`. Use it to add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), add thumbnails, and edit the Terms page (`src/data/terms.json`). Prices and contact stay in Keystatic at `/keystatic`. The README has the one-time GitHub App steps, plus `ADMIN_GITHUB_TOKEN` for live saves.
+`/admin` is the studio. It is unlisted and `noindex`. Use it to add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), add thumbnails, edit the tag filters, and edit the Terms page (`src/data/terms.json`). Prices and contact stay in Keystatic at `/keystatic`. The README has the one-time GitHub App steps, plus how live saves authenticate.
+
+The chips after the client names on Works (Highlights, Gaming, Funny, Karaoke/Music, MV, Collab) are tags stored on each clip. Their order lives in `tags` inside `src/data/works-layout.json`. The Tags tab in the studio renames, reorders, and removes them. A tag with no video still shows, so a new one can be filed onto clips before it is used.
 
 Do not add these clip ids back. They are not Katou’s edits: `miu-ms25` (ROSÉ & Bruno Mars APT. Valorant parody), `miu-mv1` (Miu's London Anime and Gaming Con 2026 Performance), `miu-mv40` (kawaikute gomen HoneyWorks cover), `pidge-p6` (pidge stream core no. 1). They are also filtered out in `src/lib/clips.ts`, and `pidge-p6` is not in `src/data/hub-order.json`.
 

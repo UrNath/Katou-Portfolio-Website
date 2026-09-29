@@ -60,9 +60,10 @@ function toPayload(
   const clipsRaw = clipsFile as { clips?: StudioPayload['clips'] } | StudioPayload['clips'];
   const clips = Array.isArray(clipsRaw) ? clipsRaw : (clipsRaw.clips ?? []);
   const hub = hubFile as { order?: string[] };
-  const layout = layoutFile as Pick<StudioPayload, 'creators' | 'sections'>;
+  const layout = layoutFile as Pick<StudioPayload, 'creators' | 'sections' | 'tags'>;
   const thumbnails = thumbsFile as StudioPayload['thumbnails'];
   const hero = clips.find((clip) => clip.heroFeatured)?.id ?? hub.order?.[0] ?? clips[0]?.id ?? '';
+  const fromClips = clips.flatMap((clip) => (Array.isArray(clip.tags) ? clip.tags.map(String) : []));
   return {
     clips,
     order: hub.order ?? [],
@@ -71,6 +72,7 @@ function toPayload(
     sections: layout.sections ?? [],
     thumbnails: Array.isArray(thumbnails) ? thumbnails : [],
     terms: termsOf(termsFile),
+    tags: Array.isArray(layout.tags) ? layout.tags : fromClips,
   };
 }
 
@@ -92,14 +94,20 @@ async function githubGet(rel: string, token: string): Promise<unknown> {
       'User-Agent': 'nassukatou-editor',
     },
   });
-  if (!response.ok) throw new Error(`GitHub could not read ${rel}.`);
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('GitHub refused that token. It needs permission to edit this repo.');
+    }
+    throw new Error(`GitHub could not read ${rel}.`);
+  }
   const body = (await response.json()) as { content?: string };
   if (!body.content) throw new Error(`GitHub could not read ${rel}.`);
   return JSON.parse(Buffer.from(body.content.replace(/\n/g, ''), 'base64').toString('utf8'));
 }
 
-export async function readStudioFiles(): Promise<StudioPayload> {
-  const token = process.env.ADMIN_GITHUB_TOKEN;
+export async function readStudioFiles(githubToken = ''): Promise<StudioPayload> {
+  const provided = githubToken.trim();
+  const token = process.env.ADMIN_GITHUB_TOKEN || provided;
   if (process.env.VERCEL && token) {
     try {
       return toPayload(
@@ -109,7 +117,8 @@ export async function readStudioFiles(): Promise<StudioPayload> {
         await githubGet(files.thumbnails, token),
         await githubGet(files.terms, token),
       );
-    } catch {
+    } catch (error) {
+      if (provided) throw error;
       return bundledPayload();
     }
   }
@@ -163,7 +172,7 @@ async function githubPut(rel: string, content: string, token: string): Promise<v
   }
 }
 
-export async function writeStudio(input: StudioPayload): Promise<'local' | 'github'> {
+export async function writeStudio(input: StudioPayload, githubToken = ''): Promise<'local' | 'github'> {
   const next = normalizeStudio(input);
   const bodies: Record<string, string> = {
     [files.clips]: dump({ clips: next.clips }),
@@ -172,7 +181,7 @@ export async function writeStudio(input: StudioPayload): Promise<'local' | 'gith
     [files.thumbnails]: dump(next.thumbnails),
     [files.terms]: dump(next.terms),
   };
-  const token = process.env.ADMIN_GITHUB_TOKEN;
+  const token = process.env.ADMIN_GITHUB_TOKEN || githubToken.trim();
   if (process.env.VERCEL && token) {
     for (const [rel, content] of Object.entries(bodies)) {
       await githubPut(rel, content, token);
@@ -180,7 +189,7 @@ export async function writeStudio(input: StudioPayload): Promise<'local' | 'gith
     return 'github';
   }
   if (process.env.VERCEL && !token) {
-    throw new Error('This deploy cannot save yet. Add ADMIN_GITHUB_TOKEN in Vercel, then redeploy.');
+    throw new Error('This live site cannot save until you connect a GitHub token.');
   }
   for (const [rel, content] of Object.entries(bodies)) {
     const full = path.join(process.cwd(), rel);

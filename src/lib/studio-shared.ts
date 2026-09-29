@@ -54,6 +54,8 @@ export interface StudioPayload {
   sections: StudioSection[];
   thumbnails: StudioThumbnail[];
   terms: StudioTerm[];
+  /** Works filter chips, in display order. Labels, not slugs. */
+  tags: string[];
 }
 
 export function slugify(value: string): string {
@@ -98,10 +100,24 @@ function normalizeTerms(input: StudioTerm[] | undefined): StudioTerm[] {
   return terms;
 }
 
+function tagLabelsFrom(raw: unknown): string[] {
+  const labels: string[] = [];
+  const ids = new Set<string>();
+  const list = Array.isArray(raw) ? raw : [];
+  for (const item of list) {
+    const label = String(item ?? '').trim();
+    const id = slugify(label);
+    if (!label || !id || ids.has(id)) continue;
+    ids.add(id);
+    labels.push(label);
+  }
+  return labels;
+}
+
 export function normalizeStudio(input: StudioPayload): {
   clips: StudioClip[];
   hubOrder: { order: string[] };
-  layout: { creators: StudioCreator[]; sections: StudioSection[] };
+  layout: { creators: StudioCreator[]; sections: StudioSection[]; tags: string[] };
   thumbnails: StudioThumbnail[];
   terms: { sections: StudioTerm[] };
 } {
@@ -184,8 +200,23 @@ export function normalizeStudio(input: StudioPayload): {
   }
 
   const knownSections = new Set(sections.filter((section) => section.kind !== 'thumbnail').map((section) => section.id));
+  const tags = Array.isArray(input.tags)
+    ? tagLabelsFrom(input.tags)
+    : tagLabelsFrom(clips.flatMap((clip) => (Array.isArray(clip.tags) ? clip.tags : [])));
+  const tagById = new Map(tags.map((label) => [slugify(label), label]));
   for (const clip of clips) {
     if (clip.section && !knownSections.has(clip.section)) clip.section = undefined;
+    const rawTags = Array.isArray(clip.tags) ? clip.tags : [];
+    const nextTags: string[] = [];
+    const seenTags = new Set<string>();
+    for (const tag of rawTags) {
+      const id = slugify(String(tag));
+      const label = tagById.get(id);
+      if (!label || seenTags.has(id)) continue;
+      seenTags.add(id);
+      nextTags.push(label);
+    }
+    clip.tags = nextTags;
   }
 
   const byId = new Map(clips.map((clip) => [clip.id, clip]));
@@ -227,7 +258,7 @@ export function normalizeStudio(input: StudioPayload): {
   return {
     clips,
     hubOrder: { order },
-    layout: { creators, sections },
+    layout: { creators, sections, tags },
     thumbnails,
     terms: { sections: normalizeTerms(input.terms) },
   };
