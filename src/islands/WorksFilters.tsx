@@ -17,6 +17,12 @@ function apply(filter: string) {
     chip.setAttribute('aria-pressed', value === filter ? 'true' : 'false');
   });
 
+  const sync = (window as Window & { __nkWorksSync?: () => void }).__nkWorksSync;
+  if (sync) {
+    sync();
+    return;
+  }
+
   const visible = shownCards();
   const count = document.querySelector('[data-clip-count]');
   if (count) {
@@ -37,7 +43,8 @@ export default function WorksFilters() {
       if (!chip) return;
       event.preventDefault();
       const filter = chip.getAttribute('data-filter') ?? '';
-      const href = filterHref(filter);
+      const query = new URLSearchParams(location.search).get('q') ?? '';
+      const href = filterHref(filter, query);
       const next = () => {
         history.pushState(null, '', href);
         apply(filter);

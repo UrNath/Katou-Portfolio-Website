@@ -38,6 +38,12 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
       <h1 class="page-title reveal">Works</h1>
       <p class="clip-count" data-clip-count aria-live="polite">{editLabel}</p>
     </header>
+    <form class="works-search" role="search">
+      <label>
+        <span class="sr-only">Search edits</span>
+        <input id="works-search" type="search" name="q" placeholder="Search titles or clients" autocomplete="off" enterkeyhint="search" />
+      </label>
+    </form>
     <div class="filters" role="toolbar" aria-label="Filter edits by creator or tag">
       <button class="filter-chip" type="button" data-filter="" aria-pressed="true">All</button>
       {
@@ -70,7 +76,12 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
             block.section.kind === 'thumbnail' ? (
               <div class="works-grid works-grid-wide thumb-grid">
                 {block.thumbs.map((thumb) => (
-                  <article class="clip-card thumb-card" data-creator={creatorIdOf(thumb.creator)} data-tags="">
+                  <article
+                    class="clip-card thumb-card"
+                    data-creator={creatorIdOf(thumb.creator)}
+                    data-tags=""
+                    data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
+                  >
                     <button class="thumb-open" type="button" data-open-thumb={thumb.id}>
                       <span class="clip-frame is-wide">
                         <img src={thumb.image} alt="" />
@@ -99,25 +110,74 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
         </div>
       ))
     }
-    <p class="works-empty" data-empty hidden>No edits for that filter.</p>
+    <p class="works-empty" data-empty hidden>No edits match.</p>
     <ClipViewer client:idle clips={clips.map(toViewerClip)} />
     <ThumbnailViewer client:idle items={thumbnails} />
   </section>
   <script is:inline>
     (function () {
-      var filter = document.documentElement.getAttribute('data-filter') || '';
-      document.querySelectorAll('[data-filter]').forEach(function (chip) {
-        var value = chip.getAttribute('data-filter') || '';
-        chip.setAttribute('aria-pressed', value === filter ? 'true' : 'false');
+      var input = document.getElementById('works-search');
+      if (input) input.value = new URLSearchParams(location.search).get('q') || '';
+
+      function words(value) {
+        return value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      }
+
+      function hit(card, query) {
+        if (!query.length) return true;
+        var hay = (card.getAttribute('data-find') || '').toLowerCase();
+        return query.every(function (word) { return hay.indexOf(word) !== -1; });
+      }
+
+      function sync() {
+        var query = words(input ? input.value : '');
+        document.querySelectorAll('.clip-card').forEach(function (card) {
+          card.style.display = hit(card, query) ? '' : 'none';
+        });
+        document.querySelectorAll('.works-block').forEach(function (block) {
+          var any = false;
+          block.querySelectorAll('.clip-card').forEach(function (card) {
+            if (getComputedStyle(card).display !== 'none') any = true;
+          });
+          block.style.display = any ? '' : 'none';
+        });
+        var shown = 0;
+        document.querySelectorAll('.clip-card').forEach(function (card) {
+          if (getComputedStyle(card).display !== 'none') shown += 1;
+        });
+        var count = document.querySelector('[data-clip-count]');
+        if (count) count.textContent = shown + (shown === 1 ? ' edit' : ' edits');
+        var empty = document.querySelector('[data-empty]');
+        if (empty) {
+          empty.hidden = shown !== 0;
+          var filtered = document.documentElement.hasAttribute('data-filter');
+          empty.textContent = query.length && filtered
+            ? 'No edits match.'
+            : query.length
+              ? 'No edits match that search.'
+              : 'No edits for that filter.';
+        }
+      }
+
+      window.__nkWorksSync = sync;
+      if (input) {
+        input.form.addEventListener('submit', function (event) { event.preventDefault(); });
+        input.addEventListener('input', function () {
+          var params = new URLSearchParams(location.search);
+          var text = input.value.trim();
+          if (text) params.set('q', text);
+          else params.delete('q');
+          var next = params.toString();
+          history.replaceState(null, '', next ? '/works?' + next : '/works');
+          sync();
+        });
+      }
+      window.addEventListener('popstate', function () {
+        if (!input) return;
+        var text = new URLSearchParams(location.search).get('q') || '';
+        if (input.value !== text) input.value = text;
       });
-      var shown = 0;
-      document.querySelectorAll('.clip-card').forEach(function (card) {
-        if (getComputedStyle(card).display !== 'none') shown += 1;
-      });
-      var count = document.querySelector('[data-clip-count]');
-      if (count) count.textContent = shown + (shown === 1 ? ' edit' : ' edits');
-      var empty = document.querySelector('[data-empty]');
-      if (empty) empty.hidden = shown !== 0;
+      sync();
     })();
   </script>
 </BaseLayout>

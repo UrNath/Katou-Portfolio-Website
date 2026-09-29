@@ -67,7 +67,7 @@ The loops are about 13 MB and are committed under `public/media/previews/` for n
 
 `/admin` is the studio. It is unlisted and `noindex`. Use it to add or remove videos, arrange the home reel, add a client filter, add a section (shorts, long videos, thumbnails, or a custom group), add thumbnails, edit the tag filters, and edit the Terms page (`src/data/terms.json`). Prices and contact stay in Keystatic at `/keystatic`. The README has the GitHub sign-in steps for the studio, and the separate Keystatic GitHub App.
 
-The chips after the client names on Works are the `tags` list in `src/data/works-layout.json`. The Tags tab in the studio renames, reorders, and removes them. A tag with no video still shows, so a new one can be filed onto clips before it is used. An empty list hides those chips, even if an older video file still has tag labels.
+The chips after the client names on Works are the `tags` list in `src/data/works-layout.json`. The Tags tab in the studio renames, reorders, and removes them. A new tag shows on Works after Save. Choosing it leaves the videos that use that tag. A tag with no video still shows, so it can be filed onto clips first. An empty list hides those chips. The search box matches titles, client names, and tags, and it stays on when a chip is selected.
 
 Do not add these clip ids back. They are not Katou’s edits: `miu-ms25` (ROSÉ & Bruno Mars APT. Valorant parody), `miu-mv1` (Miu's London Anime and Gaming Con 2026 Performance), `miu-mv40` (kawaikute gomen HoneyWorks cover), `pidge-p6` (pidge stream core no. 1). They are also filtered out in `src/lib/clips.ts`, and `pidge-p6` is not in `src/data/hub-order.json`.
 
