@@ -8,7 +8,7 @@ import { readStudioFiles } from '../../../lib/studio-store';
 export const prerender = false;
 
 const repo = 'UrNath/Katou-Portfolio-Website';
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 4 * 1024 * 1024;
 const allowedFormats = new Set(['jpeg', 'png', 'webp']);
 
 function json(body: unknown, status = 200): Response {
@@ -60,6 +60,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   if (origin && origin !== new URL(request.url).origin) return json({ error: 'Invalid upload origin.' }, 403);
 
   try {
+    const declaredSize = Number(request.headers.get('content-length') ?? 0);
+    if (declaredSize > MAX_BYTES + 8192) return json({ error: 'Thumbnail upload is too large.' }, 413);
     const data = await request.formData();
     const id = String(data.get('clipId') ?? '');
     const file = data.get('file');
@@ -67,7 +69,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return json({ error: 'Invalid video id.' }, 400);
     }
     if (!(file instanceof File) || file.size === 0 || file.size > MAX_BYTES) {
-      return json({ error: 'Upload a PNG, JPEG or WebP smaller than 5 MB.' }, 400);
+      return json({ error: 'Upload a PNG, JPEG or WebP smaller than 4 MB.' }, 400);
     }
 
     const studio = await readStudioFiles(token);
