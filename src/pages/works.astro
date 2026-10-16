@@ -19,7 +19,6 @@ const blocks = workSections
     return { section, clips: clipsInSection(section, clips), thumbs: [] };
   })
   .filter((block) => block.clips.length > 0 || block.thumbs.length > 0);
-const total = clips.length + thumbnails.length;
 const editLabel = `${clips.length} video edits · ${thumbnails.length} thumbnails`;
 const names = creators.map((creator) => creator.label).join(', ');
 const sectionNames = blocks.map((block) => block.section.label).join(', ');
