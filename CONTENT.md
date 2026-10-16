@@ -82,10 +82,19 @@ python3 scripts/build-clip-media.py chi-c5 'https://www.youtube.com/shorts/CV0M6
 python3 scripts/build-clip-media.py chi-c6 'https://www.youtube.com/shorts/eFPKjgtlaHs'
 ```
 
-Once complete, add the files under `src/assets/posters/` and `public/media/previews/` to GitHub. Full source footage is not committed. The source YouTube thumbnails are a fallback until those assets exist. Two additional Miu works (Monster Hunter and Italy vlog) still need verified original YouTube links to identify the correct original uploads; do not guess their URLs. The Italy vlog belongs under `vlogs`, Monster Hunter under `normal`.
+Once complete, add the files under `src/assets/posters/` and `public/media/previews/` to GitHub. Full source footage is not committed. The source YouTube thumbnails are a fallback until those assets exist. The Monster Hunter and Italy vlog uploads are now linked to their original YouTube videos. The Italy vlog is under `vlogs` and Monster Hunter is under `normal`.
 
 ### Per-video thumbnail editor
 
 The private `/admin` Studio's **Videos** tab now has an **Edit thumbnail** control on each video row. It accepts a local JPG, PNG, or WebP file (up to 4 MB), optimizes it server-side to WebP (540×960 for shorts; 960×540 for long-form), and stores it under `public/media/posters/{id}.webp`. In production the upload requires the existing studio's GitHub OAuth session or repository token; the image commit triggers Vercel deployment. **Click Studio Save after uploading** so `clips.json` points at the new public poster path. The upload and catalog save are separate steps. Alternatively paste an HTTPS image URL and apply it, or revert to the bundled poster or YouTube's public thumbnail. Keystatic also exposes `posterUrl` and its existing poster image upload. The dedicated **Thumbnails** tab is for standalone design projects, not video poster thumbnails.
 
 In `src/lib/clips.ts`, a selected `posterUrl` overrides the bundled poster file, including for `/media/posters/...`; when there is no override, the optimized WebP from `src/assets/posters` is preferred, then the original YouTube thumbnail. The new Miu Monster Hunter and Italy vlog entries use authentic YouTube thumbnails and have no fabricated duration or upload date. The two Chi shorts also have local WebP thumbnails; their hover-preview MP4s remain absent until authentic video files are available.
+
+
+## Works thumbnail gallery
+
+The public `/works` page has a **Thumbnails** section populated from `src/data/thumbnails.json`. The initial set is all 11 existing long-form video posters plus the Chi "i swear im an alpha ahah .." short poster: **12 gallery items**, separate from the 51 video edit cards. Some of these thumbnails may have been designed by others. The gallery notes that credits vary, and its presence **must not be represented as thumbnail design credit**. The owner can remove entries not designed by them from the private Studio. Removing a gallery entry never deletes a video or poster asset.
+
+To avoid duplicate files, seeded entries use `image: "clip:miu-mv42"` (or a corresponding video id). At build time, `loadThumbnails(clips)` resolves that reference to the video's optimized poster. Any gallery entry can later have its `image` overridden with an HTTPS image URL or uploaded `/media/thumbnails/<id>.webp`. A `vertical` or `landscape` orientation preserves the portrait Chi thumbnail alongside landscape posters.
+
+In **`/admin` → Thumbnails**, use Edit to change an entry's title, client, handle, image, linked video, and layout; Up/Down to reorder; Remove to hide work that is not yours. The Add form can prefill from any video. A saved gallery entry can have a custom JPG, PNG or WebP uploaded (max 4 MB): the upload endpoint writes an optimized WebP to GitHub and returns its public URL, then the Studio Save button publishes the `thumbnails.json` change. For new entries, Save the new entry before uploading an image. This is separate from **`/admin` → Videos → Edit thumbnail**, which changes the video card's poster.
