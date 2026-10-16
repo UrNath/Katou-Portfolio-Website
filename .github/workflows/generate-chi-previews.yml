@@ -17,7 +17,10 @@ jobs:
           persist-credentials: true
       - name: Install media tools
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
           python3 -m pip install --user --break-system-packages yt-dlp
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           ffmpeg -version | head -n 1
       - name: Generate authentic Chi assets from source videos
         run: |
