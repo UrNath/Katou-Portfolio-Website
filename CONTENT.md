@@ -82,4 +82,4 @@ python3 scripts/build-clip-media.py chi-c5 'https://www.youtube.com/shorts/CV0M6
 python3 scripts/build-clip-media.py chi-c6 'https://www.youtube.com/shorts/eFPKjgtlaHs'
 ```
 
-Once complete, add the files under `src/assets/posters/` and `public/media/previews/` to GitHub. Full source footage is not committed. The source YouTube thumbnails are a fallback until those assets exist. Two additional Miu works (Monster Hunter and Italy vlog) still need verified original YouTube links and proof they are the edits Katou worked on; do not guess their URLs. The Italy vlog belongs under `vlogs`, Monster Hunter under `normal`.
+Once complete, add the files under `src/assets/posters/` and `public/media/previews/` to GitHub. Full source footage is not committed. The source YouTube thumbnails are a fallback until those assets exist. Two additional Miu works (Monster Hunter and Italy vlog) still need verified original YouTube links to identify the correct original uploads; do not guess their URLs. The Italy vlog belongs under `vlogs`, Monster Hunter under `normal`.
