@@ -1357,6 +1357,15 @@ html.poster-only .clip-pause { display: none; }
   color: var(--muted);
 }
 
+.works-long-form { display: grid; gap: 24px; }
+.works-subgroup[hidden] { display: none; }
+.works-subtitle {
+  margin: 6px 0 12px;
+  font-family: Geist, sans-serif;
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 600;
+  color: var(--ink);
+}
 .works-grid-wide { grid-template-columns: 1fr; }
 
 @media (min-width: 768px) {
