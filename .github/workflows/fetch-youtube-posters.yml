@@ -1,0 +1,33 @@
+name: Fetch authorized YouTube posters
+on:
+  push:
+    branches: [feat/miu-videos-and-clip-thumbnail-editor]
+    paths:
+      - .github/workflows/fetch-youtube-posters.yml
+permissions:
+  contents: write
+jobs:
+  posters:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: true
+      - name: Install Pillow
+        run: python3 -m pip install --user --break-system-packages pillow
+      - name: Retrieve real thumbnails and titles from YouTube
+        run: |
+          python3 scripts/fetch-youtube-posters.py \
+            chi-c5:CV0M6jECxoM:vertical \
+            chi-c6:eFPKjgtlaHs:vertical \
+            miu-mv42:b1TE0mXxwwE:landscape \
+            miu-mv43:jbADJfDbB0g:landscape
+      - name: Commit real thumbnail assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/assets/posters/chi-c5.webp src/assets/posters/chi-c6.webp
+          git add src/assets/posters/miu-mv42.webp src/assets/posters/miu-mv43.webp
+          git commit -m "Add authentic YouTube thumbnail posters for Chi and Miu"
+          git push
