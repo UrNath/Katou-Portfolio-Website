@@ -715,22 +715,24 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
                         <strong>{clip.title}</strong>
                         <span>{clip.creator}</span>
                       </div>
-                      <select aria-label={`Section for ${clip.title}`} value={sectionOf(clip)} onInput={(event) => assignSection(clip, event.currentTarget.value)}>
-                        {clipSections.map((section) => (
-                          <option value={section.id}>{section.label}</option>
-                        ))}
-                      </select>
-                      {clip.orientation === 'landscape' && (
-                        <select
-                          aria-label={`Long Form Video category for ${clip.title}`}
-                          value={clip.longFormCategory ?? 'normal'}
-                          onInput={(event) => setClip(clip.id, { longFormCategory: event.currentTarget.value as 'vlogs' | 'mvs' | 'normal' })}
-                        >
-                          <option value="vlogs">Vlogs</option>
-                          <option value="mvs">MVs</option>
-                          <option value="normal">Normal Videos</option>
+                      <div class="studio-clip-selects">
+                        <select aria-label={`Section for ${clip.title}`} value={sectionOf(clip)} onInput={(event) => assignSection(clip, event.currentTarget.value)}>
+                          {clipSections.map((section) => (
+                            <option value={section.id}>{section.label}</option>
+                          ))}
                         </select>
-                      )}
+                        {clip.orientation === 'landscape' && (
+                          <select
+                            aria-label={`Long Form Video category for ${clip.title}`}
+                            value={clip.longFormCategory ?? 'normal'}
+                            onInput={(event) => setClip(clip.id, { longFormCategory: event.currentTarget.value as 'vlogs' | 'mvs' | 'normal' })}
+                          >
+                            <option value="vlogs">Vlogs</option>
+                            <option value="mvs">MVs</option>
+                            <option value="normal">Normal Videos</option>
+                          </select>
+                        )}
+                      </div>
                       <button class="studio-icon is-quiet" type="button" onClick={() => removeClip(clip.id)}>
                         Remove
                       </button>
