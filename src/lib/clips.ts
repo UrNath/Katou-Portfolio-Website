@@ -104,20 +104,23 @@ async function buildClips(): Promise<ClipRecord[]> {
             format: 'webp',
           })
         : null;
-      const remote =
-        (typeof clip.posterUrl === 'string' && clip.posterUrl) ||
-        youtubePoster(clip.youtubeUrl) ||
-        '/og.png';
+      // An editor-selected image URL or uploaded public poster overrides bundled artwork.
+      const customPoster =
+        typeof clip.posterUrl === 'string' &&
+        (clip.posterUrl.startsWith('https://') || clip.posterUrl.startsWith('/media/posters/'))
+          ? clip.posterUrl
+          : null;
+      const remote = customPoster || youtubePoster(clip.youtubeUrl) || '/og.png';
       return {
         id: clip.id,
         title: clip.title,
         creator: clip.creator,
         channelHandle: clip.channelHandle,
         creatorId: tagSlug(clip.creator),
-        duration: clip.durationSec > 0 ? formatDuration(clip.durationSec) : 'Short',
+        duration: clip.durationSec > 0 ? formatDuration(clip.durationSec) : wide ? 'Video' : 'Short',
         tags: clip.tags.map((tag) => tagSlug(tag)),
-        poster: image?.src ?? remote,
-        posterImage,
+        poster: customPoster ?? image?.src ?? remote,
+        posterImage: customPoster ? null : posterImage,
         previewSrc: clip.preview && previewExists(clip.preview) ? previewUrl(clip.preview) : undefined,
         youtube: clip.youtubeUrl,
         tiktok: clip.tiktokUrl,

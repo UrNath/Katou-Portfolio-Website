@@ -36,7 +36,7 @@ Status is one value per service: `'open'`, `'waitlist'`, or `'closed'`. The visi
 
 ## Clips
 
-`src/data/clips.json` is the list, newest first. The hub and Works counts are calculated from `clips.length` (49 videos as of this update). View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. Tag chips come from `works-layout.json` and stay visible even when no clip uses that tag yet.
+`src/data/clips.json` is the list, newest first. The hub and Works counts are calculated from `clips.length` (51 videos as of this update). View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. Tag chips come from `works-layout.json` and stay visible even when no clip uses that tag yet.
 
 The hub is featured-only. It centers `chi-c3` (`heroFeatured`). The dimmed neighbors, the Works thumbnails, and the hub viewer use only the featured clips, in this order: `chi-c3`, `chi-c4`, `pidge-p7`, `pidge-p8`, `pidge-p3`. Miu stays on `/works`, newest first. Cards read `Edit for @handle` (Pidge `@pidgeira`, Chi `@chiseyi`, Miu `@miuonivt`).
 
@@ -83,3 +83,9 @@ python3 scripts/build-clip-media.py chi-c6 'https://www.youtube.com/shorts/eFPKj
 ```
 
 Once complete, add the files under `src/assets/posters/` and `public/media/previews/` to GitHub. Full source footage is not committed. The source YouTube thumbnails are a fallback until those assets exist. Two additional Miu works (Monster Hunter and Italy vlog) still need verified original YouTube links to identify the correct original uploads; do not guess their URLs. The Italy vlog belongs under `vlogs`, Monster Hunter under `normal`.
+
+### Per-video thumbnail editor
+
+The private `/admin` Studio's **Videos** tab now has an **Edit thumbnail** control on each video row. It accepts a local JPG, PNG, or WebP file (up to 4 MB), optimizes it server-side to WebP (540×960 for shorts; 960×540 for long-form), and stores it under `public/media/posters/{id}.webp`. In production the upload requires the existing studio's GitHub OAuth session or repository token; the image commit triggers Vercel deployment. **Click Studio Save after uploading** so `clips.json` points at the new public poster path. The upload and catalog save are separate steps. Alternatively paste an HTTPS image URL and apply it, or revert to the bundled poster or YouTube's public thumbnail. Keystatic also exposes `posterUrl` and its existing poster image upload. The dedicated **Thumbnails** tab is for standalone design projects, not video poster thumbnails.
+
+In `src/lib/clips.ts`, a selected `posterUrl` overrides the bundled poster file, including for `/media/posters/...`; when there is no override, the optimized WebP from `src/assets/posters` is preferred, then the original YouTube thumbnail. The new Miu Monster Hunter and Italy vlog entries use authentic YouTube thumbnails and have no fabricated duration or upload date. The two Chi shorts also have local WebP thumbnails; their hover-preview MP4s remain absent until authentic video files are available.

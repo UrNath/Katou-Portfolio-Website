@@ -75,7 +75,10 @@ function uniqueId(base: string, taken: Set<string>): string {
 }
 
 function posterOf(clip: StudioClip): string {
-  if (typeof clip.posterUrl === 'string' && clip.posterUrl.startsWith('http')) return clip.posterUrl;
+  if (typeof clip.posterUrl === 'string' &&
+      (clip.posterUrl.startsWith('https://') || clip.posterUrl.startsWith('/media/posters/'))) {
+    return clip.posterUrl;
+  }
   const id = youtubeId(clip.youtubeUrl);
   return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : '/og.png';
 }
@@ -98,6 +101,10 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
   const [tokenDraft, setTokenDraft] = useState('');
   const [needsToken, setNeedsToken] = useState(false);
   const [tagName, setTagName] = useState('');
+  const [editingPoster, setEditingPoster] = useState('');
+  const [posterDraft, setPosterDraft] = useState('');
+  const [posterUploading, setPosterUploading] = useState('');
+  const [posterPreviews, setPosterPreviews] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (oauth) {
@@ -198,6 +205,65 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
 
   const setClip = (id: string, change: Partial<StudioClip>) => {
     patch({ clips: data.clips.map((clip) => (clip.id === id ? { ...clip, ...change } : clip)) });
+  };
+
+  const editPoster = (clip: StudioClip) => {
+    setEditingPoster(editingPoster === clip.id ? '' : clip.id);
+    setPosterDraft(typeof clip.posterUrl === 'string' ? clip.posterUrl : '');
+    setError('');
+  };
+
+  const applyPosterUrl = (clip: StudioClip) => {
+    const value = posterDraft.trim();
+    try {
+      const url = new URL(value);
+      if (url.protocol !== 'https:' || url.username || url.password) throw new Error();
+    } catch {
+      setError('Enter a valid HTTPS image link, or upload a thumbnail file.');
+      return;
+    }
+    setClip(clip.id, { posterUrl: value });
+    setPosterPreviews((current) => ({ ...current, [clip.id]: '' }));
+    setError('');
+    setMessage('Thumbnail link selected. Press Save to publish.');
+  };
+
+  const uploadPoster = async (clip: StudioClip, file: File) => {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 4 * 1024 * 1024) {
+      setError('Choose a PNG, JPG, or WebP image smaller than 4 MB.');
+      return;
+    }
+    setPosterUploading(clip.id);
+    setError('');
+    try {
+      const form = new FormData();
+      form.set('clipId', clip.id);
+      form.set('file', file);
+      const response = await fetch('/api/admin/poster', {
+        method: 'POST',
+        headers: studioHeaders(oauth ? '' : githubToken),
+        body: form,
+      });
+      if (response.status === 401 && oauth) {
+        location.href = '/api/admin/login';
+        return;
+      }
+      const body = (await response.json()) as { error?: string; url?: string };
+      if (!response.ok || !body.url) throw new Error(body.error || 'Upload failed.');
+      // Show the selected file immediately; the real path becomes available after redeployment.
+      const preview = URL.createObjectURL(file);
+      setPosterPreviews((current) => {
+        if (current[clip.id]?.startsWith('blob:')) URL.revokeObjectURL(current[clip.id]);
+        return { ...current, [clip.id]: preview };
+      });
+      setClip(clip.id, { posterUrl: body.url });
+      setPosterDraft(body.url);
+      setMessage('Thumbnail uploaded to the repository. Press Save to attach it to this video.');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Upload failed.');
+    } finally {
+      setPosterUploading('');
+    }
   };
 
   const assignSection = (clip: StudioClip, sectionId: string) => {
@@ -736,6 +802,86 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
                       <button class="studio-icon is-quiet" type="button" onClick={() => removeClip(clip.id)}>
                         Remove
                       </button>
+                      <button
+                        class="studio-icon"
+                        type="button"
+                        aria-expanded={editingPoster === clip.id}
+                        aria-controls={`poster-editor-${clip.id}`}
+                        onClick={() => editPoster(clip)}
+                      >
+                        {editingPoster === clip.id ? 'Close thumbnail' : 'Edit thumbnail'}
+                      </button>
+                      {editingPoster === clip.id && (
+                        <div class="studio-poster-editor" id={`poster-editor-${clip.id}`}>
+                          <img
+                            class={clip.orientation === 'landscape' ? 'is-wide' : ''}
+                            src={posterPreviews[clip.id] || posterOf(clip)}
+                            alt={`Current thumbnail for ${clip.title}`}
+                          />
+                          <div class="studio-poster-fields">
+                            <p class="studio-note">Change this video's poster image. Uploaded files are cropped to {clip.orientation === 'landscape' ? '960 × 540' : '540 × 960'} WebP.</p>
+                            <label class="field">
+                              <span>Upload image</span>
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                disabled={posterUploading === clip.id}
+                                onChange={(event) => {
+                                  const file = event.currentTarget.files?.[0];
+                                  if (file) void uploadPoster(clip, file);
+                                  event.currentTarget.value = '';
+                                }}
+                              />
+                            </label>
+                            <label class="field">
+                              <span>Or use an HTTPS image URL</span>
+                              <input
+                                type="url"
+                                value={posterDraft}
+                                placeholder="Paste an HTTPS image URL…"
+                                onInput={(event) => setPosterDraft(event.currentTarget.value)}
+                              />
+                            </label>
+                            <div class="studio-actions">
+                              <button class="studio-icon" type="button" disabled={posterUploading === clip.id} onClick={() => applyPosterUrl(clip)}>
+                                Apply link
+                              </button>
+                              <button
+                                class="studio-icon is-quiet"
+                                type="button"
+                                disabled={posterUploading === clip.id}
+                                onClick={() => {
+                                  setClip(clip.id, { posterUrl: undefined });
+                                  setPosterDraft('');
+                                  setPosterPreviews((current) => ({ ...current, [clip.id]: '' }));
+                                  setMessage('Bundled poster selected. Press Save to publish.');
+                                }}
+                              >
+                                Use stored poster
+                              </button>
+                              <button
+                                class="studio-icon is-quiet"
+                                type="button"
+                                disabled={posterUploading === clip.id}
+                                onClick={() => {
+                                  const id = youtubeId(clip.youtubeUrl);
+                                  if (!id) return;
+                                  const url = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+                                  setClip(clip.id, { posterUrl: url });
+                                  setPosterDraft(url);
+                                  setPosterPreviews((current) => ({ ...current, [clip.id]: '' }));
+                                  setMessage('YouTube thumbnail selected. Press Save to publish.');
+                                }}
+                              >
+                                Use YouTube thumbnail
+                              </button>
+                            </div>
+                            {posterUploading === clip.id && <p class="studio-note">Uploading and optimizing…</p>}
+                            <p class="studio-note">After changing a thumbnail, press the Studio Save button. Live uploads require GitHub sign-in or a repository token.</p>
+                          </div>
+                        </div>
+                      )}
+
                       {data.tags.length > 0 && (
                         <div class="studio-tag-picks" role="group" aria-label={`Tags for ${clip.title}`}>
                           {data.tags.map((tag) => {
@@ -920,7 +1066,8 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
               addThumb();
             }}
           >
-            <h2>Add a thumbnail</h2>
+            <h2>Add a standalone thumbnail</h2>
+            <p class="studio-note">To edit the poster shown on an existing video card, open Videos and choose Edit thumbnail under that video.</p>
             <p class="studio-note">On Works, a tap opens the full image, the client’s name, and the video’s name and link.</p>
             <div class="studio-split">
               <label class="field">

@@ -145,6 +145,10 @@ export default config({
               ],
               defaultValue: 'short',
             }),
+            posterUrl: fields.text({
+              label: 'Thumbnail override URL',
+              description: 'Optional HTTPS image URL or /media/posters/{clip id}.webp path. Leave empty to use the uploaded WebP poster.',
+            }),
             poster: fields.image({
               label: 'Thumbnail',
               description: 'A still image. Name it {clip id}.webp. Full videos stay on YouTube or TikTok.',
