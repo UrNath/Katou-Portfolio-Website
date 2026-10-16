@@ -12,6 +12,12 @@ export interface WorkSection {
 export const workSections = layout.sections as WorkSection[];
 export const workCreators = layout.creators as { id: string; label: string }[];
 
+export const longFormCategories = [
+  { id: 'vlogs', label: 'Vlogs' },
+  { id: 'mvs', label: 'MVs' },
+  { id: 'normal', label: 'Normal Videos' },
+] as const;
+
 export function loadThumbnails(): StudioThumbnail[] {
   return (Array.isArray(rawThumbnails) ? rawThumbnails : []) as StudioThumbnail[];
 }
