@@ -2335,6 +2335,7 @@ body:has(dialog[open]) { overflow: hidden; }
   grid-template-columns: auto minmax(0, 1fr);
 }
 
+.studio-clip-selects { display: grid; gap: 8px; grid-column: 1 / -1; }
 .studio-clip select,
 .studio-clip .studio-actions,
 .studio-clip > .studio-icon,
@@ -2460,6 +2461,7 @@ body:has(dialog[open]) { overflow: hidden; }
   .studio-reel {
     grid-template-columns: auto auto minmax(0, 1fr) auto;
   }
+  .studio-clip-selects { grid-column: auto; }
   .studio-clip select,
   .studio-clip > .studio-icon,
   .studio-reel .studio-actions { grid-column: auto; }
