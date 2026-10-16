@@ -18,8 +18,17 @@ export const longFormCategories = [
   { id: 'normal', label: 'Normal Videos' },
 ] as const;
 
-export function loadThumbnails(): StudioThumbnail[] {
-  return (Array.isArray(rawThumbnails) ? rawThumbnails : []) as StudioThumbnail[];
+/**
+ * Gallery entries can reference an existing edited video's real optimized poster
+ * via "clip:<id>". Override their image in Studio without copying image assets.
+ */
+export function loadThumbnails(clips: ClipRecord[]): StudioThumbnail[] {
+  const clipMap = new Map(clips.map((clip) => [clip.id, clip]));
+  const items = (Array.isArray(rawThumbnails) ? rawThumbnails : []) as StudioThumbnail[];
+  return items.map((thumb) => {
+    const linked = thumb.image.startsWith('clip:') ? clipMap.get(thumb.image.slice(5)) : null;
+    return { ...thumb, image: linked?.poster ?? (thumb.image.startsWith('clip:') ? '/og.png' : thumb.image) };
+  });
 }
 
 export function creatorIdOf(name: string): string {

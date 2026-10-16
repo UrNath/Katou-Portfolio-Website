@@ -22,6 +22,7 @@ export interface StudioThumbnail {
   title: string;
   image: string;
   videoUrl: string;
+  orientation?: 'vertical' | 'landscape';
 }
 
 export interface StudioClip extends Record<string, unknown> {
@@ -70,6 +71,13 @@ export function slugify(value: string): string {
 
 function isHttp(value: string): boolean {
   return value.startsWith('https://') || value.startsWith('http://');
+}
+
+/** Gallery images can use a public URL, an uploaded WebP, or a linked clip poster. */
+export function isThumbnailImage(value: string): boolean {
+  return isHttp(value) ||
+    /^clip:[a-z0-9-]+$/.test(value) ||
+    /^\/media\/thumbnails\/[a-z0-9-]+\.webp$/.test(value);
 }
 
 function kindOf(value: unknown): SectionKind {
@@ -242,7 +250,7 @@ export function normalizeStudio(input: StudioPayload): {
     const image = String(raw?.image ?? '').trim();
     const videoUrl = String(raw?.videoUrl ?? '').trim();
     const creator = String(raw?.creator ?? '').trim();
-    if (!title || !creator || !isHttp(image) || !isHttp(videoUrl)) continue;
+    if (!title || !creator || !isThumbnailImage(image) || !isHttp(videoUrl)) continue;
     let id = slugify(String(raw?.id ?? '')) || slugify(title);
     if (!id || thumbIds.has(id)) id = `${id || 'thumb'}-${thumbIds.size + 1}`;
     thumbIds.add(id);
@@ -253,6 +261,7 @@ export function normalizeStudio(input: StudioPayload): {
       title,
       image,
       videoUrl,
+      orientation: raw?.orientation === 'vertical' ? 'vertical' : 'landscape',
     });
   }
 

@@ -10,7 +10,7 @@ import { loadClips, toViewerClip } from '../lib/clips';
 import { clipsInSection, creatorIdOf, loadThumbnails, longFormCategories, workSections } from '../lib/works-layout';
 
 const clips = await loadClips();
-const thumbnails = loadThumbnails();
+const thumbnails = loadThumbnails(clips);
 const blocks = workSections
   .map((section) => {
     if (section.kind === 'thumbnail') {
@@ -19,8 +19,7 @@ const blocks = workSections
     return { section, clips: clipsInSection(section, clips), thumbs: [] };
   })
   .filter((block) => block.clips.length > 0 || block.thumbs.length > 0);
-const total = clips.length + thumbnails.length;
-const editLabel = `${total} ${total === 1 ? 'edit' : 'edits'}`;
+const editLabel = `${clips.length} video edits · ${thumbnails.length} thumbnails`;
 const names = creators.map((creator) => creator.label).join(', ');
 const sectionNames = blocks.map((block) => block.section.label).join(', ');
 const cardSizes = '(min-width: 1280px) 220px, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 46vw';
@@ -72,19 +71,22 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
       blocks.map((block) => (
         <div class="works-block" data-block={block.section.id}>
           <h2 class="works-kicker">{block.section.label}</h2>
+          {block.section.kind === 'thumbnail' && (
+            <p class="works-thumbnails-note">A gallery of thumbnails used for these videos. Design credit may vary.</p>
+          )}
           {
             block.section.kind === 'thumbnail' ? (
               <div class="works-grid works-grid-wide thumb-grid">
                 {block.thumbs.map((thumb) => (
                   <article
-                    class="clip-card thumb-card"
+                    class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
                     data-creator={creatorIdOf(thumb.creator)}
                     data-tags=""
                     data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
                   >
                     <button class="thumb-open" type="button" data-open-thumb={thumb.id}>
-                      <span class="clip-frame is-wide">
-                        <img src={thumb.image} alt="" />
+                      <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
+                        <img src={thumb.image} alt="" loading="lazy" decoding="async" />
                         <span class="clip-meta">
                           <span class="clip-title">{thumb.title}</span>
                           <span class="clip-credit">{thumb.creator}</span>
@@ -167,7 +169,7 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
           if (getComputedStyle(card).display !== 'none') shown += 1;
         });
         var count = document.querySelector('[data-clip-count]');
-        if (count) count.textContent = shown + (shown === 1 ? ' edit' : ' edits');
+        if (count) count.textContent = shown + (shown === 1 ? ' work shown' : ' works shown');
         var empty = document.querySelector('[data-empty]');
         if (empty) {
           empty.hidden = shown !== 0;

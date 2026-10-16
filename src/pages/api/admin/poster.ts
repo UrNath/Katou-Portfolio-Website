@@ -63,34 +63,42 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const declaredSize = Number(request.headers.get('content-length') ?? 0);
     if (declaredSize > MAX_BYTES + 8192) return json({ error: 'Thumbnail upload is too large.' }, 413);
     const data = await request.formData();
-    const id = String(data.get('clipId') ?? '');
+    const clipId = String(data.get('clipId') ?? '');
+    const thumbnailId = String(data.get('thumbnailId') ?? '');
+    const gallery = Boolean(thumbnailId);
+    const id = gallery ? thumbnailId : clipId;
     const file = data.get('file');
+    if (gallery && clipId) return json({ error: 'Choose either a video poster or a gallery thumbnail.' }, 400);
     if (!/^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/.test(id)) {
-      return json({ error: 'Invalid video id.' }, 400);
+      return json({ error: 'Invalid thumbnail id.' }, 400);
     }
     if (!(file instanceof File) || file.size === 0 || file.size > MAX_BYTES) {
       return json({ error: 'Upload a PNG, JPEG or WebP smaller than 4 MB.' }, 400);
     }
 
     const studio = await readStudioFiles(token);
-    if (!studio.clips.some((clip) => clip.id === id)) {
-      return json({ error: 'This video is not in the catalog.' }, 404);
+    const item = gallery
+      ? studio.thumbnails.find((thumb) => thumb.id === id)
+      : studio.clips.find((clip) => clip.id === id);
+    if (!item) {
+      return json({ error: 'Save the item in the admin catalog before uploading its image.' }, 404);
     }
-    const clip = studio.clips.find((item) => item.id === id)!;
     const bytes = Buffer.from(await file.arrayBuffer());
     const image = sharp(bytes, { limitInputPixels: 20_000_000, animated: false });
     const meta = await image.metadata();
     if (!meta.format || !allowedFormats.has(meta.format) || !meta.width || !meta.height) {
       return json({ error: 'Unsupported image. Use PNG, JPEG or WebP.' }, 400);
     }
-    const wide = clip.orientation === 'landscape';
+    const wide = item.orientation !== 'vertical';
     const output = await image
       .rotate()
       .resize(wide ? 960 : 540, wide ? 540 : 960, { fit: 'cover', position: 'centre' })
       .webp({ quality: 76, effort: 4 })
       .toBuffer();
 
-    const rel = `public/media/posters/${id}.webp`;
+    const rel = gallery
+      ? `public/media/thumbnails/${id}.webp`
+      : `public/media/posters/${id}.webp`;
     if (process.env.VERCEL) {
       await publishPoster(rel, output, token);
     } else {
@@ -98,7 +106,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       await mkdir(path.dirname(absolute), { recursive: true });
       await writeFile(absolute, output);
     }
-    return json({ ok: true, url: `/media/posters/${id}.webp` });
+    return json({ ok: true, url: gallery ? `/media/thumbnails/${id}.webp` : `/media/posters/${id}.webp` });
   } catch (reason) {
     return json({ error: reason instanceof Error ? reason.message : 'Thumbnail upload failed.' }, 400);
   }

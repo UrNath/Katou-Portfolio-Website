@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { youtubeId } from '../lib/clip-shared';
 import {
   OMITTED_CLIP_IDS,
+  isThumbnailImage,
   slugify,
   type SectionKind,
   type StudioClip,
@@ -90,7 +91,13 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
   const [query, setQuery] = useState('');
   const [client, setClient] = useState('');
   const [draft, setDraft] = useState(emptyVideo);
-  const [thumb, setThumb] = useState({ creator: '', handle: '', title: '', image: '', videoUrl: '' });
+  const [thumb, setThumb] = useState({
+    creator: '', handle: '', title: '', image: '', videoUrl: '',
+    orientation: 'landscape' as 'vertical' | 'landscape',
+  });
+  const [editingThumb, setEditingThumb] = useState('');
+  const [thumbUploading, setThumbUploading] = useState('');
+  const [thumbPreviews, setThumbPreviews] = useState<Record<string, string>>({});
   const [clientName, setClientName] = useState('');
   const [sectionName, setSectionName] = useState('');
   const [sectionKind, setSectionKind] = useState<SectionKind>('custom');
@@ -422,10 +429,76 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
     setError('');
   };
 
+  const imageOfThumbnail = (item: StudioThumbnail): string => {
+    if (item.image.startsWith('clip:')) {
+      const source = data.clips.find((clip) => clip.id === item.image.slice(5));
+      return source ? posterOf(source) : '/og.png';
+    }
+    return item.image;
+  };
+
+  const fromVideo = (clip: StudioClip): Partial<StudioThumbnail> => ({
+    image: `clip:${clip.id}`,
+    title: clip.title,
+    creator: clip.creator,
+    channelHandle: clip.channelHandle,
+    videoUrl: clip.youtubeUrl,
+    orientation: clip.orientation,
+  });
+
+  const setThumbnail = (id: string, change: Partial<StudioThumbnail>) => {
+    patch({ thumbnails: data.thumbnails.map((row) => row.id === id ? { ...row, ...change } : row) });
+  };
+
+  const moveThumbnail = (index: number, delta: number) => {
+    const next = index + delta;
+    if (next < 0 || next >= data.thumbnails.length) return;
+    const items = [...data.thumbnails];
+    const [row] = items.splice(index, 1);
+    items.splice(next, 0, row);
+    patch({ thumbnails: items });
+  };
+
+  const uploadThumbnail = async (item: StudioThumbnail, file: File) => {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || !file.size || file.size > 4 * 1024 * 1024) {
+      setError('Select a JPG, PNG or WebP image smaller than 4 MB.');
+      return;
+    }
+    setThumbUploading(item.id);
+    setError('');
+    try {
+      const form = new FormData();
+      form.set('thumbnailId', item.id);
+      form.set('file', file);
+      const response = await fetch('/api/admin/poster', {
+        method: 'POST',
+        headers: studioHeaders(oauth ? '' : githubToken),
+        body: form,
+      });
+      if (response.status === 401 && oauth) {
+        location.href = '/api/admin/login';
+        return;
+      }
+      const result = (await response.json()) as { error?: string; url?: string };
+      if (!response.ok || !result.url) throw new Error(result.error || 'Thumbnail upload failed.');
+      const url = URL.createObjectURL(file);
+      setThumbPreviews((current) => {
+        if (current[item.id]?.startsWith('blob:')) URL.revokeObjectURL(current[item.id]);
+        return { ...current, [item.id]: url };
+      });
+      setThumbnail(item.id, { image: result.url });
+      setMessage('Thumbnail uploaded. Press Save to attach it to this gallery entry.');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Thumbnail upload failed.');
+    } finally {
+      setThumbUploading('');
+    }
+  };
+
   const addThumb = () => {
     const title = thumb.title.trim();
     const creator = thumb.creator.trim();
-    if (!title || !creator || !thumb.image.startsWith('http') || !thumb.videoUrl.startsWith('http')) {
+    if (!title || !creator || !isThumbnailImage(thumb.image.trim()) || !thumb.videoUrl.startsWith('http')) {
       setError('A thumbnail needs the client, the image link, the video name, and the video link.');
       return;
     }
@@ -437,12 +510,13 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
       title,
       image: thumb.image.trim(),
       videoUrl: thumb.videoUrl.trim(),
+      orientation: thumb.orientation,
     };
     const creators = data.creators.some((row) => row.id === slugify(creator))
       ? data.creators
       : [...data.creators, { id: slugify(creator), label: creator }];
     patch({ thumbnails: [item, ...data.thumbnails], creators });
-    setThumb({ creator, handle: thumb.handle, title: '', image: '', videoUrl: '' });
+    setThumb({ creator, handle: thumb.handle, title: '', image: '', videoUrl: '', orientation: 'landscape' });
     setError('');
     setMessage('Thumbnail added. Save to show it on Works.');
   };
@@ -468,6 +542,18 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
   };
 
   const save = async () => {
+    const invalid = data.thumbnails.find((item) =>
+      !item.title.trim() ||
+      !item.creator.trim() ||
+      !isThumbnailImage(item.image.trim()) ||
+      !item.videoUrl.startsWith('http')
+    );
+    if (invalid) {
+      setTab('thumbnails');
+      setEditingThumb(invalid.id);
+      setError(`Check the thumbnail details for "${invalid.title || invalid.id}" before saving.`);
+      return;
+    }
     setSaving(true);
     setError('');
     setMessage('');
@@ -1066,9 +1152,29 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
               addThumb();
             }}
           >
-            <h2>Add a standalone thumbnail</h2>
-            <p class="studio-note">To edit the poster shown on an existing video card, open Videos and choose Edit thumbnail under that video.</p>
-            <p class="studio-note">On Works, a tap opens the full image, the client’s name, and the video’s name and link.</p>
+            <h2>Add a gallery thumbnail</h2>
+            <p class="studio-note">
+              These are separate entries in Works → Thumbnails. Removing one does not remove its video.
+              The imported examples include some thumbnails you may not have designed; remove those you do not want to show.
+            </p>
+            <label class="field">
+              <span>Use a thumbnail from an existing video (optional)</span>
+              <select
+                value={thumb.image.startsWith('clip:') ? thumb.image.slice(5) : ''}
+                onInput={(event) => {
+                  const source = data.clips.find((clip) => clip.id === event.currentTarget.value);
+                  if (!source) return;
+                  setThumb({
+                    ...thumb, title: source.title, creator: source.creator,
+                    handle: source.channelHandle, image: `clip:${source.id}`,
+                    videoUrl: source.youtubeUrl, orientation: source.orientation,
+                  });
+                }}
+              >
+                <option value="">Choose video…</option>
+                {data.clips.map((clip) => <option value={clip.id}>{clip.title} — {clip.creator}</option>)}
+              </select>
+            </label>
             <div class="studio-split">
               <label class="field">
                 <span>Client</span>
@@ -1084,32 +1190,138 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
               <input value={thumb.title} onInput={(event) => setThumb({ ...thumb, title: event.currentTarget.value })} required />
             </label>
             <label class="field">
-              <span>Full image link</span>
-              <input type="url" value={thumb.image} placeholder="https://" onInput={(event) => setThumb({ ...thumb, image: event.currentTarget.value })} required />
+              <span>Thumbnail image URL or linked video poster</span>
+              <input
+                type="text"
+                value={thumb.image}
+                placeholder="https://… or clip:video-id"
+                onInput={(event) => setThumb({ ...thumb, image: event.currentTarget.value })}
+                required
+              />
             </label>
-            <label class="field">
-              <span>Video link</span>
-              <input type="url" value={thumb.videoUrl} placeholder="https://" onInput={(event) => setThumb({ ...thumb, videoUrl: event.currentTarget.value })} required />
-            </label>
-            <button class="cta" type="submit">Add thumbnail</button>
+            <div class="studio-split">
+              <label class="field">
+                <span>Layout</span>
+                <select value={thumb.orientation} onInput={(event) => setThumb({ ...thumb, orientation: event.currentTarget.value as 'landscape' | 'vertical' })}>
+                  <option value="landscape">Landscape (16:9)</option>
+                  <option value="vertical">Portrait (9:16)</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Video link</span>
+                <input type="url" value={thumb.videoUrl} onInput={(event) => setThumb({ ...thumb, videoUrl: event.currentTarget.value })} required />
+              </label>
+            </div>
+            <button class="cta" type="submit">Add gallery thumbnail</button>
+            <p class="studio-note">To upload an image file, first add and Save the entry, then use Edit → Upload image below.</p>
           </form>
           <div class="studio-catalog">
-            {data.thumbnails.length === 0 && <p class="studio-note">No thumbnails yet. The section stays hidden on Works until you save one.</p>}
+            <p class="studio-note">Reorder entries with Up/Down, edit details or image, or remove those that aren't your thumbnail designs. Press Save to publish the changes.</p>
+            {data.thumbnails.length === 0 && <p class="studio-note">No gallery thumbnails yet. This section stays hidden on Works until you add one.</p>}
             <ul class="studio-list">
-              {data.thumbnails.map((item) => (
-                <li class="studio-row studio-clip" key={item.id}>
-                  <img class="studio-poster is-wide" src={item.image} alt="" />
+              {data.thumbnails.map((item, index) => (
+                <li class="studio-row studio-thumb-row" key={item.id}>
+                  <img
+                    class={item.orientation === 'vertical' ? 'studio-poster' : 'studio-poster is-wide'}
+                    src={thumbPreviews[item.id] || imageOfThumbnail(item)}
+                    alt=""
+                  />
                   <div class="studio-copy">
                     <strong>{item.title}</strong>
                     <span>{item.creator}</span>
                   </div>
-                  <button
-                    class="studio-icon is-quiet"
-                    type="button"
-                    onClick={() => patch({ thumbnails: data.thumbnails.filter((row) => row.id !== item.id) })}
-                  >
-                    Remove
-                  </button>
+                  <div class="studio-actions studio-thumb-actions">
+                    <button
+                      class="studio-icon"
+                      type="button"
+                      onClick={() => { setEditingThumb(editingThumb === item.id ? '' : item.id); setError(''); }}
+                      aria-expanded={editingThumb === item.id}
+                      aria-controls={`thumb-edit-${item.id}`}
+                    >
+                      {editingThumb === item.id ? 'Close' : 'Edit'}
+                    </button>
+                    <button class="studio-icon" type="button" onClick={() => moveThumbnail(index, -1)} disabled={index === 0} aria-label={`Move ${item.title} up`}>Up</button>
+                    <button class="studio-icon" type="button" onClick={() => moveThumbnail(index, 1)} disabled={index === data.thumbnails.length - 1} aria-label={`Move ${item.title} down`}>Down</button>
+                    <button
+                      class="studio-icon is-quiet"
+                      type="button"
+                      onClick={() => {
+                        patch({ thumbnails: data.thumbnails.filter((row) => row.id !== item.id) });
+                        if (editingThumb === item.id) setEditingThumb('');
+                        setMessage('Gallery entry removed. The video and original poster are unchanged. Press Save to publish.');
+                      }}
+                    >Remove</button>
+                  </div>
+                  {editingThumb === item.id && (
+                    <div class="studio-thumb-edit" id={`thumb-edit-${item.id}`}>
+                      <label class="field">
+                        <span>Copy poster from an existing video</span>
+                        <select
+                          value={item.image.startsWith('clip:') ? item.image.slice(5) : ''}
+                          onInput={(event) => {
+                            const clip = data.clips.find((source) => source.id === event.currentTarget.value);
+                            if (!clip) return;
+                            setThumbnail(item.id, fromVideo(clip));
+                            setThumbPreviews((current) => ({ ...current, [item.id]: '' }));
+                          }}
+                        >
+                          <option value="">Choose video…</option>
+                          {data.clips.map((clip) => <option value={clip.id}>{clip.title} — {clip.creator}</option>)}
+                        </select>
+                      </label>
+                      <label class="field">
+                        <span>Title</span>
+                        <input value={item.title} onInput={(event) => setThumbnail(item.id, { title: event.currentTarget.value })} />
+                      </label>
+                      <div class="studio-split">
+                        <label class="field">
+                          <span>Client</span>
+                          <input value={item.creator} onInput={(event) => setThumbnail(item.id, { creator: event.currentTarget.value })} />
+                        </label>
+                        <label class="field">
+                          <span>Channel handle</span>
+                          <input value={item.channelHandle} onInput={(event) => setThumbnail(item.id, { channelHandle: event.currentTarget.value })} />
+                        </label>
+                      </div>
+                      <label class="field">
+                        <span>Image link (HTTPS, an uploaded thumbnail, or clip:video-id)</span>
+                        <input
+                          value={item.image}
+                          onInput={(event) => {
+                            setThumbnail(item.id, { image: event.currentTarget.value });
+                            setThumbPreviews((current) => ({ ...current, [item.id]: '' }));
+                          }}
+                        />
+                      </label>
+                      <label class="field">
+                        <span>Upload a custom JPG, PNG or WebP (max 4 MB)</span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          disabled={thumbUploading === item.id}
+                          onChange={(event) => {
+                            const file = event.currentTarget.files?.[0];
+                            if (file) void uploadThumbnail(item, file);
+                            event.currentTarget.value = '';
+                          }}
+                        />
+                      </label>
+                      <div class="studio-split">
+                        <label class="field">
+                          <span>Layout</span>
+                          <select value={item.orientation === 'vertical' ? 'vertical' : 'landscape'} onInput={(event) => setThumbnail(item.id, { orientation: event.currentTarget.value as 'landscape' | 'vertical' })}>
+                            <option value="landscape">Landscape (16:9)</option>
+                            <option value="vertical">Portrait (9:16)</option>
+                          </select>
+                        </label>
+                        <label class="field">
+                          <span>Video link</span>
+                          <input value={item.videoUrl} onInput={(event) => setThumbnail(item.id, { videoUrl: event.currentTarget.value })} />
+                        </label>
+                      </div>
+                      {thumbUploading === item.id && <p class="studio-note">Uploading and optimizing your thumbnail…</p>}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
