@@ -77,5 +77,6 @@ export default function WorksFilters() {
     };
   }, []);
 
-  // Keep a tiny observable island so Astro client:visible hydrates the controls.\n  return <span style={{ display: 'block', width: '1px', height: '1px', overflow: 'hidden' }} aria-hidden="true" />;
+  // Keep a tiny observable island so Astro client:visible hydrates the controls.
+  return <span style={{ display: 'block', width: '1px', height: '1px', overflow: 'hidden' }} aria-hidden="true" />;
 }
