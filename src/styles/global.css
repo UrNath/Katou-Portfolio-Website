@@ -2408,6 +2408,39 @@ body:has(dialog[open]) { overflow: hidden; }
 
 .studio-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 
+/* Per-video poster editing stays within its card, even on small screens. */
+.studio-poster-editor {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.studio-poster-editor > img {
+  width: 100px;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--surface);
+}
+.studio-poster-editor > img.is-wide { aspect-ratio: 16 / 9; }
+.studio-poster-fields { min-width: 0; display: grid; gap: 10px; }
+.studio-poster-fields .studio-note { margin: 0; }
+.studio-poster-fields input[type="url"],
+.studio-poster-fields input[type="file"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+.studio-poster-fields .studio-actions { grid-column: auto; justify-content: flex-start; flex-wrap: wrap; }
+@media (max-width: 560px) {
+  .studio-poster-editor { grid-template-columns: 1fr; }
+  .studio-poster-editor > img { width: 130px; max-width: 100%; }
+}
+
 .studio-tag-picks { display: flex; flex-wrap: wrap; gap: 6px; }
 .studio-clip .studio-tag-picks { grid-column: 1 / -1; }
 .studio-tag-picks .filter-chip { min-height: 36px; }
