@@ -1,0 +1,33 @@
+name: Generate Chi poster and preview assets
+on:
+  push:
+    branches:
+      - feat/long-form-categories-and-media-tools
+    paths:
+      - .github/workflows/generate-chi-previews.yml
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: true
+      - name: Install media tools
+        run: |
+          python3 -m pip install --user --break-system-packages yt-dlp
+          ffmpeg -version | head -n 1
+      - name: Generate authentic Chi assets from source videos
+        run: |
+          python3 scripts/build-clip-media.py chi-c5 'https://www.youtube.com/shorts/CV0M6jECxoM'
+          python3 scripts/build-clip-media.py chi-c6 'https://www.youtube.com/shorts/eFPKjgtlaHs'
+      - name: Commit generated assets to feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/assets/posters/chi-c5.webp src/assets/posters/chi-c6.webp
+          git add public/media/previews/chi-c5.mp4 public/media/previews/chi-c6.mp4
+          git commit -m "Generate authentic Chi posters and five-second muted previews"
+          git push
