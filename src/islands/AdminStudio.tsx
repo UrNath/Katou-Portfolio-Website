@@ -229,8 +229,8 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
   };
 
   const uploadPoster = async (clip: StudioClip, file: File) => {
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
-      setError('Choose a PNG, JPG, or WebP image smaller than 5 MB.');
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 4 * 1024 * 1024) {
+      setError('Choose a PNG, JPG, or WebP image smaller than 4 MB.');
       return;
     }
     setPosterUploading(clip.id);
@@ -838,7 +838,7 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
                               <input
                                 type="url"
                                 value={posterDraft}
-                                placeholder="https://example.com/thumbnail.webp"
+                                placeholder="Paste an HTTPS image URL…"
                                 onInput={(event) => setPosterDraft(event.currentTarget.value)}
                               />
                             </label>
