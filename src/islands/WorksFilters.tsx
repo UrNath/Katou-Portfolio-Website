@@ -12,7 +12,7 @@ function apply(filters: WorkFilters) {
   ];
 
   for (const dimension of dimensions) {
-    if (filters[dimension]) html.setAttribute(dimension.attribute, filters[dimension]);
+    if (filters[dimension.key]) html.setAttribute(dimension.attribute, filters[dimension.key]);
     else html.removeAttribute(dimension.attribute);
   }
 
