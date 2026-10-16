@@ -1,0 +1,36 @@
+name: Validate combined Works filters
+on:
+  push:
+    branches: [fix/works-thumbnail-clean-layout-and-combined-filters]
+    paths: [.github/workflows/check-combined-works-filters.yml]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Validate source structure and gallery accessibility
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          works=Path('src/pages/works.astro').read_text()
+          card=Path('src/components/ClipCard.astro').read_text()
+          filters=Path('src/islands/WorksFilters.tsx').read_text()
+          tags=Path('src/data/tags.ts').read_text()
+          assert '<span class="clip-title">{thumb.title}</span>' not in works
+          assert 'aria-label={`View thumbnail for' in works
+          for kind in ['short','long','thumbnail']:
+              assert f'data-filter-value="{kind}"' in works
+          assert 'data-content-type="thumbnail"' in works
+          assert "clip.wide ? 'long' : 'short'" in card
+          assert "data-creator-filter" in tags and "data-type-filter" in tags and "data-tag-filter" in tags
+          assert "const next: WorkFilters = { ...prev };" in filters
+          print('Source structure and independent dimension checks passed')
+          PY
+      - name: Install, typecheck and build
+        run: |
+          npm ci --no-audit --no-fund
+          npm run check
+          npm run build
