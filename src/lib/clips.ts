@@ -112,7 +112,7 @@ async function buildClips(): Promise<ClipRecord[]> {
         creator: clip.creator,
         channelHandle: clip.channelHandle,
         creatorId: tagSlug(clip.creator),
-        duration: formatDuration(clip.durationSec),
+        duration: clip.durationSec > 0 ? formatDuration(clip.durationSec) : 'Short',
         tags: clip.tags.map((tag) => tagSlug(tag)),
         poster: image?.src ?? remote,
         posterImage,
