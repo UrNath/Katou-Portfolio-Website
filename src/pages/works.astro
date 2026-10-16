@@ -28,7 +28,7 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
 
 <BaseLayout
   title="Works"
-  description={`${editLabel} for ${names}. ${sectionNames}, with creator and tag filters.`}
+  description={`${editLabel} for ${names}. ${sectionNames}, with content type, creator, and tag filters.`}
 >
   <style slot="head" is:inline set:html={filterCss()} />
   <script slot="head" is:inline set:html={filterBoot()} />
@@ -43,25 +43,42 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
         <input id="works-search" type="search" name="q" placeholder="Search titles or clients" autocomplete="off" enterkeyhint="search" />
       </label>
     </form>
-    <div class="filters" role="toolbar" aria-label="Filter edits by creator or tag">
-      <button class="filter-chip" type="button" data-filter="" aria-pressed="true">All</button>
-      {
-        creators.map((creator) => (
-          <button class="filter-chip" type="button" data-filter={`creator:${creator.id}`} aria-pressed="false">
-            {creator.label}
-          </button>
-        ))
-      }
+    <div class="works-filter-groups" aria-label="Filter works">
+      <div class="works-filter-row">
+        <span class="works-filter-label" id="filter-type-heading">Content</span>
+        <div class="filters" role="group" aria-labelledby="filter-type-heading">
+          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="" aria-pressed="true">All types</button>
+          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="short" aria-pressed="false">Short Form</button>
+          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="long" aria-pressed="false">Long Form</button>
+          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="thumbnail" aria-pressed="false">Thumbnails</button>
+        </div>
+      </div>
+      <div class="works-filter-row">
+        <span class="works-filter-label" id="filter-creator-heading">VTuber</span>
+        <div class="filters" role="group" aria-labelledby="filter-creator-heading">
+          <button class="filter-chip" type="button" data-filter-kind="creator" data-filter-value="" aria-pressed="true">All creators</button>
+          {
+            creators.map((creator) => (
+              <button class="filter-chip" type="button" data-filter-kind="creator" data-filter-value={creator.id} aria-pressed="false">
+                {creator.label}
+              </button>
+            ))
+          }
+        </div>
+      </div>
       {
         clipTags.length > 0 && (
-          <>
-            <span class="filter-gap" aria-hidden="true"></span>
-            {clipTags.map((tag) => (
-              <button class="filter-chip" type="button" data-filter={tag.id} aria-pressed="false">
-                {tag.label}
-              </button>
-            ))}
-          </>
+          <div class="works-filter-row">
+            <span class="works-filter-label" id="filter-tags-heading">Tags</span>
+            <div class="filters" role="group" aria-labelledby="filter-tags-heading">
+              <button class="filter-chip" type="button" data-filter-kind="tag" data-filter-value="" aria-pressed="true">All tags</button>
+              {clipTags.map((tag) => (
+                <button class="filter-chip" type="button" data-filter-kind="tag" data-filter-value={tag.id} aria-pressed="false">
+                  {tag.label}
+                </button>
+              ))}
+            </div>
+          </div>
         )
       }
     </div>
@@ -69,7 +86,7 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
     <ClipPreview client:visible />
     {
       blocks.map((block) => (
-        <div class="works-block" data-block={block.section.id}>
+        <div class="works-block" data-block={block.section.id} data-section-kind={block.section.kind}>
           <h2 class="works-kicker">{block.section.label}</h2>
           {block.section.kind === 'thumbnail' && (
             <p class="works-thumbnails-note">A gallery of thumbnails used for these videos. Design credit may vary.</p>
@@ -81,16 +98,18 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
                   <article
                     class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
                     data-creator={creatorIdOf(thumb.creator)}
+                    data-content-type="thumbnail"
                     data-tags=""
                     data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
                   >
-                    <button class="thumb-open" type="button" data-open-thumb={thumb.id}>
+                    <button
+                      class="thumb-open"
+                      type="button"
+                      data-open-thumb={thumb.id}
+                      aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
+                    >
                       <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
                         <img src={thumb.image} alt="" loading="lazy" decoding="async" />
-                        <span class="clip-meta">
-                          <span class="clip-title">{thumb.title}</span>
-                          <span class="clip-credit">{thumb.creator}</span>
-                        </span>
                       </span>
                     </button>
                   </article>
@@ -173,12 +192,9 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
         var empty = document.querySelector('[data-empty]');
         if (empty) {
           empty.hidden = shown !== 0;
-          var filtered = document.documentElement.hasAttribute('data-filter');
-          empty.textContent = query.length && filtered
-            ? 'No edits match.'
-            : query.length
-              ? 'No edits match that search.'
-              : 'No edits for that filter.';
+          empty.textContent = query.length
+            ? 'No works match that search and filter combination.'
+            : 'No works match these filters.';
         }
       }
 
@@ -196,9 +212,11 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
         });
       }
       window.addEventListener('popstate', function () {
-        if (!input) return;
-        var text = new URLSearchParams(location.search).get('q') || '';
-        if (input.value !== text) input.value = text;
+        if (input) {
+          var text = new URLSearchParams(location.search).get('q') || '';
+          if (input.value !== text) input.value = text;
+        }
+        sync();
       });
       sync();
     })();
