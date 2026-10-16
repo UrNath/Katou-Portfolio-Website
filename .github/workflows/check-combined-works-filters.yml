@@ -34,3 +34,77 @@ jobs:
           npm ci --no-audit --no-fund
           npm run check
           npm run build
+      - name: Exercise mobile gallery and combined filter behavior
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+          test -f .vercel/output/static/works/index.html
+          python3 -m http.server 4173 --directory .vercel/output/static >/tmp/portfolio-server.log 2>&1 &
+          sleep 2
+          node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+          const base = 'http://127.0.0.1:4173/works/';
+          const chip = (kind, value) => page.locator(`[data-filter-kind="${kind}"][data-filter-value="${value}"]`);
+          const shown = async (selector) => await page.locator(selector).evaluateAll((elements) =>
+            elements.filter((e) => getComputedStyle(e).display !== 'none' &&
+              getComputedStyle(e.closest('.works-block')).display !== 'none').length);
+          const settle = async () => {
+            await page.waitForTimeout(350);
+            await page.waitForFunction(() => typeof window.__nkWorksSync === 'function');
+          };
+          const clickChip = async (kind, value) => {
+            await chip(kind, value).click();
+            await page.waitForTimeout(300);
+          };
+          const check = (condition, label) => {
+            if (!condition) throw new Error(`FAIL: ${label}`);
+            console.log('PASS:', label);
+          };
+          try {
+            await page.goto(base, { waitUntil: 'domcontentloaded' });
+            await settle();
+            check(await page.locator('.thumb-card').count() === 12, 'all 12 thumbnail entries exist');
+            check(await page.locator('.thumb-card .clip-meta, .thumb-card .clip-title').count() === 0, 'no overlay text on mobile thumbnails');
+
+            await clickChip('type', 'thumbnail');
+            check(await shown('.thumb-card') === 12, 'thumbnails type displays all thumbnails');
+            check(await shown('.clip-card:not(.thumb-card)') === 0, 'thumbnails type hides videos');
+
+            await clickChip('creator', 'chi');
+            check(await shown('.thumb-card') === 1, 'Chi and Thumbnails combine');
+            check(page.url().includes('creator=chi') && page.url().includes('type=thumbnail'), 'combined filters saved to URL');
+
+            await clickChip('creator', 'miu');
+            check(await shown('.thumb-card') === 11, 'switching to Miu preserves Thumbnails');
+
+            await clickChip('type', 'long');
+            check(await shown('.clip-card:not(.thumb-card)') === 11, 'Miu and Long Form combine');
+            check(await shown('.thumb-card') === 0, 'Long Form hides thumbnails');
+
+            await clickChip('creator', 'chi');
+            check(await shown('.clip-card') === 0, 'empty combinations hide all cards');
+            check(await page.locator('[data-empty]').isVisible(), 'empty results message appears');
+
+            await clickChip('type', 'short');
+            check(await shown('.clip-card') > 0, 'Chi Short Form returns videos');
+            check(await chip('creator', 'chi').getAttribute('aria-pressed') === 'true', 'changing type preserves VTuber button');
+
+            await page.goto(base + '?creator=chi&type=thumbnail', { waitUntil: 'domcontentloaded' });
+            await settle();
+            check(await shown('.thumb-card') === 1, 'combined deep link restores filtered gallery');
+            check(await chip('type', 'thumbnail').getAttribute('aria-pressed') === 'true', 'deep-link content chip selected');
+            check(await chip('creator', 'chi').getAttribute('aria-pressed') === 'true', 'deep-link creator chip selected');
+
+            await clickChip('creator', 'miu');
+            await page.goBack({ waitUntil: 'domcontentloaded' });
+            await settle();
+            check(await shown('.thumb-card') === 1, 'browser Back restores combined filter');
+
+            console.log('All filter smoke tests passed');
+          } finally {
+            await browser.close();
+          }
+          JS
