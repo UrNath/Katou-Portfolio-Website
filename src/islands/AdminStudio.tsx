@@ -40,6 +40,7 @@ const emptyVideo = {
   youtubeUrl: '',
   tiktokUrl: '',
   sectionId: 'shorts',
+  longFormCategory: 'normal' as 'vlogs' | 'mvs' | 'normal',
   tags: [] as string[],
 };
 
@@ -251,6 +252,7 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
       orientation,
       aspectRatio: orientation === 'landscape' ? '16:9' : '9:16',
       type: orientation === 'landscape' ? 'video' : 'short',
+      longFormCategory: orientation === 'landscape' ? draft.longFormCategory : undefined,
       poster: `posters/${id}.webp`,
       preview: '',
       tags: draft.tags,
@@ -641,6 +643,16 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
                 ))}
               </select>
             </label>
+            {data.sections.find((section) => section.id === draft.sectionId)?.kind === 'landscape' && (
+              <label class="field">
+                <span>Long Form Video category</span>
+                <select value={draft.longFormCategory} onInput={(event) => setDraft({ ...draft, longFormCategory: event.currentTarget.value as 'vlogs' | 'mvs' | 'normal' })}>
+                  <option value="vlogs">Vlogs</option>
+                  <option value="mvs">MVs</option>
+                  <option value="normal">Normal Videos</option>
+                </select>
+              </label>
+            )}
             {data.tags.length > 0 && (
               <div class="studio-tag-picks" role="group" aria-label="Tags for the new video">
                 {data.tags.map((tag) => {
@@ -703,11 +715,24 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
                         <strong>{clip.title}</strong>
                         <span>{clip.creator}</span>
                       </div>
-                      <select aria-label={`Section for ${clip.title}`} value={sectionOf(clip)} onInput={(event) => assignSection(clip, event.currentTarget.value)}>
-                        {clipSections.map((section) => (
-                          <option value={section.id}>{section.label}</option>
-                        ))}
-                      </select>
+                      <div class="studio-clip-selects">
+                        <select aria-label={`Section for ${clip.title}`} value={sectionOf(clip)} onInput={(event) => assignSection(clip, event.currentTarget.value)}>
+                          {clipSections.map((section) => (
+                            <option value={section.id}>{section.label}</option>
+                          ))}
+                        </select>
+                        {clip.orientation === 'landscape' && (
+                          <select
+                            aria-label={`Long Form Video category for ${clip.title}`}
+                            value={clip.longFormCategory ?? 'normal'}
+                            onInput={(event) => setClip(clip.id, { longFormCategory: event.currentTarget.value as 'vlogs' | 'mvs' | 'normal' })}
+                          >
+                            <option value="vlogs">Vlogs</option>
+                            <option value="mvs">MVs</option>
+                            <option value="normal">Normal Videos</option>
+                          </select>
+                        )}
+                      </div>
                       <button class="studio-icon is-quiet" type="button" onClick={() => removeClip(clip.id)}>
                         Remove
                       </button>
@@ -836,7 +861,7 @@ export default function AdminStudio({ oauth = false, login = '' }: { oauth?: boo
       {tab === 'sections' && (
         <div class="studio-panel">
           <p class="studio-note">
-            Shorts and long videos are already here. Add another group, or a thumbnail section, then file videos into it from Videos.
+            Shorts and Long Form Videos are already here. Categorize long videos as Vlogs, MVs, or Normal Videos from the Videos tab.
           </p>
           <form
             class="studio-inline"

@@ -7,7 +7,7 @@ import ThumbnailViewer from '../islands/ThumbnailViewer';
 import WorksFilters from '../islands/WorksFilters';
 import { clipTags, creators, filterBoot, filterCss } from '../data/tags';
 import { loadClips, toViewerClip } from '../lib/clips';
-import { clipsInSection, creatorIdOf, loadThumbnails, workSections } from '../lib/works-layout';
+import { clipsInSection, creatorIdOf, loadThumbnails, longFormCategories, workSections } from '../lib/works-layout';
 
 const clips = await loadClips();
 const thumbnails = loadThumbnails();
@@ -94,12 +94,27 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
                   </article>
                 ))}
               </div>
+            ) : block.section.kind === 'landscape' ? (
+              <div class="works-long-form">
+                {longFormCategories.map((category) => {
+                  const group = block.clips.filter((clip) => clip.longFormCategory === category.id);
+                  if (group.length === 0) return null;
+                  return (
+                    <section class="works-subgroup" data-long-form-category={category.id}>
+                      <h3 class="works-subtitle">{category.label}</h3>
+                      <div class="works-grid works-grid-wide">
+                        {group.map((clip) => <ClipCard clip={clip} sizes={wideSizes} />)}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
             ) : (
-              <div class:list={['works-grid', block.section.kind === 'landscape' && 'works-grid-wide']}>
+              <div class="works-grid">
                 {block.clips.map((clip, index) => (
                   <ClipCard
                     clip={clip}
-                    sizes={block.section.kind === 'landscape' ? wideSizes : cardSizes}
+                    sizes={cardSizes}
                     eager={index < 2 && block.section.kind === 'vertical'}
                     priority={index === 0 && block.section.kind === 'vertical'}
                   />
@@ -133,6 +148,12 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
         var query = words(input ? input.value : '');
         document.querySelectorAll('.clip-card').forEach(function (card) {
           card.style.display = hit(card, query) ? '' : 'none';
+        });
+        document.querySelectorAll('.works-subgroup').forEach(function (group) {
+          var hasVisible = Array.from(group.querySelectorAll('.clip-card')).some(function (card) {
+            return getComputedStyle(card).display !== 'none';
+          });
+          group.hidden = !hasVisible;
         });
         document.querySelectorAll('.works-block').forEach(function (block) {
           var any = false;

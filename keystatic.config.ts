@@ -159,8 +159,17 @@ export default config({
             }),
             section: fields.text({
               label: 'Works section',
-              description: 'Leave blank to use Shorts or Longer edits. Set a custom section id to file the clip there.',
+              description: 'Leave blank to use Shorts or Long Form Videos. Set a custom section id to file the clip there.',
               defaultValue: '',
+            }),
+            longFormCategory: fields.select({
+              label: 'Long Form Video category',
+              options: [
+                { label: 'Vlogs', value: 'vlogs' },
+                { label: 'MVs', value: 'mvs' },
+                { label: 'Normal Videos', value: 'normal' },
+              ],
+              defaultValue: 'normal',
             }),
             tags: lines('Tags'),
             tagsSuggested: fields.checkbox({ label: 'Tags are suggestions', defaultValue: true }),

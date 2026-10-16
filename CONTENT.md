@@ -36,15 +36,15 @@ Status is one value per service: `'open'`, `'waitlist'`, or `'closed'`. The visi
 
 ## Clips
 
-`src/data/clips.json` is the list, newest first. The hub and Works counts (`47 edits`) are `clips.length`. View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. Tag chips come from `works-layout.json` and stay visible even when no clip uses that tag yet.
+`src/data/clips.json` is the list, newest first. The hub and Works counts are calculated from `clips.length` (49 videos as of this update). View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. Tag chips come from `works-layout.json` and stay visible even when no clip uses that tag yet.
 
 The hub is featured-only. It centers `chi-c3` (`heroFeatured`). The dimmed neighbors, the Works thumbnails, and the hub viewer use only the featured clips, in this order: `chi-c3`, `chi-c4`, `pidge-p7`, `pidge-p8`, `pidge-p3`. Miu stays on `/works`, newest first. Cards read `Edit for @handle` (Pidge `@pidgeira`, Chi `@chiseyi`, Miu `@miuonivt`).
 
-Landscape items (`orientation: "landscape"`, 16:9) render in the Longer edits row on `/works`. `miu-ms17` is square in the source and already padded to 9:16, and its `orientation` is `vertical`, so it stays in the short grid. The viewer sizes the frame to 9:16 or 16:9 from that same flag.
+Landscape items (`orientation: "landscape"`, 16:9) render inside **Long Form Videos** on `/works`, grouped under **Vlogs**, **MVs**, or **Normal Videos** (in that order). Set `longFormCategory` to `vlogs`, `mvs`, or `normal` in `src/data/clips.json`; the normal category is the fallback when omitted. The category is also editable through Keystatic and the studio. `miu-ms17` is square in the source and already padded to 9:16, and its `orientation` is `vertical`, so it stays in the short grid. The viewer sizes the frame to 9:16 or 16:9 from that same flag.
 
 Creator chips come from `src/data/works-layout.json`, in that order, and stay visible even when a new client has no videos yet. The current chips are `/works?creator=pidge`, `/works?creator=chi`, and `/works?creator=miu`. Tag chips use `/works?tag=` plus the slug (`highlights`, `gaming`, `funny`, `karaoke-music`, `mv`, `collab`). One filter is active at a time.
 
-Works sections also come from `works-layout.json`. Shorts hold vertical clips, Longer edits hold landscape clips, and a clip with `section` set is filed into that section. Thumbnails live in `src/data/thumbnails.json` and only appear once that list has an item. Empty sections stay off the page.
+Works sections also come from `works-layout.json`. Shorts hold vertical clips, Long Form Videos hold landscape clips, and a clip with `section` set is filed into that section. Thumbnails live in `src/data/thumbnails.json` and only appear once that list has an item. Empty sections stay off the page.
 
 ### Add a clip
 
@@ -72,3 +72,14 @@ The chips after the client names on Works are the `tags` list in `src/data/works
 Do not add these clip ids back. They are not Katou’s edits: `miu-ms25` (ROSÉ & Bruno Mars APT. Valorant parody), `miu-mv1` (Miu's London Anime and Gaming Con 2026 Performance), `miu-mv40` (kawaikute gomen HoneyWorks cover), `pidge-p6` (pidge stream core no. 1). They are also filtered out in `src/lib/clips.ts`, and `pidge-p6` is not in `src/data/hub-order.json`.
 
 Saving Editing or Web design rewrites that markdown file. Comments in the frontmatter are not kept. Editing’s “I take” and “I don’t take” fields are marked as drafts in the editor.
+
+## Generating authentic posters and previews
+
+Run `scripts/build-clip-media.py` with a local copy of a video you edited, or its original YouTube URL, to make a WebP poster and a silent 5-second H.264 preview. It requires ffmpeg/ffprobe; YouTube sources also need `yt-dlp` installed. If YouTube restricts downloads, use the original edited video file instead. Never substitute generated/fictional images for actual frames.
+
+```sh
+python3 scripts/build-clip-media.py chi-c5 'https://www.youtube.com/shorts/CV0M6jECxoM'
+python3 scripts/build-clip-media.py chi-c6 'https://www.youtube.com/shorts/eFPKjgtlaHs'
+```
+
+Once complete, add the files under `src/assets/posters/` and `public/media/previews/` to GitHub. Full source footage is not committed. The source YouTube thumbnails are a fallback until those assets exist. Two additional Miu works (Monster Hunter and Italy vlog) still need verified original YouTube links to identify the correct original uploads; do not guess their URLs. The Italy vlog belongs under `vlogs`, Monster Hunter under `normal`.
