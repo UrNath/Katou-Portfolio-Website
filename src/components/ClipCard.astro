@@ -23,6 +23,7 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
   data-clip-id={clip.id}
   data-tags={clip.tags.join(' ')}
   data-creator={clip.creatorId}
+  data-content-type={clip.wide ? 'long' : 'short'}
   data-find={`${clip.title} ${clip.creator} ${clip.channelHandle} ${clip.tags.join(' ')}`}
 >
   <div class="clip-anim">

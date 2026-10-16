@@ -1300,6 +1300,37 @@ html.poster-only .clip-pause { display: none; }
 .filters::-webkit-scrollbar,
 .tier-scroller::-webkit-scrollbar { display: none; }
 
+/* Independent Works filters, arranged in compact scrollable rows on mobile. */
+.works-filter-groups {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+.works-filter-row {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.works-filter-label {
+  color: var(--muted);
+  font: 500 11px "Geist Mono", ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.works-filter-row .filters {
+  min-width: 0;
+  margin: 0;
+  padding-bottom: 3px;
+}
+@media (min-width: 768px) {
+  .works-filter-row {
+    grid-template-columns: 85px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+
 .filter-chip {
   flex: none;
   scroll-snap-align: start;
@@ -2162,6 +2193,10 @@ body:has(dialog[open]) { overflow: hidden; }
 }
 @media (min-width: 1200px) {
   .thumb-grid { columns: 4; }
+}
+.thumb-card .clip-frame {
+  /* No title, gradient or credits obscuring the gallery artwork. */
+  background: transparent;
 }
 .thumb-open {
   display: block;

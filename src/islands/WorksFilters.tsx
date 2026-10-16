@@ -1,63 +1,74 @@
 import { useEffect } from 'preact/hooks';
-import { filterFromSearch, filterHref } from '../data/tags';
+import { filterFromSearch, filterHref, type WorkFilters } from '../data/tags';
 
-function shownCards(): HTMLElement[] {
-  return Array.from(document.querySelectorAll<HTMLElement>('.clip-card')).filter(
-    (card) => getComputedStyle(card).display !== 'none',
-  );
-}
+type FilterDimension = keyof WorkFilters;
 
-function apply(filter: string) {
-  if (filter) document.documentElement.setAttribute('data-filter', filter);
-  else document.documentElement.removeAttribute('data-filter');
-  document.documentElement.removeAttribute('data-tag');
+function apply(filters: WorkFilters) {
+  const html = document.documentElement;
+  const dimensions: { key: FilterDimension; attribute: string }[] = [
+    { key: 'creator', attribute: 'data-creator-filter' },
+    { key: 'type', attribute: 'data-type-filter' },
+    { key: 'tag', attribute: 'data-tag-filter' },
+  ];
 
-  document.querySelectorAll<HTMLElement>('[data-filter]').forEach((chip) => {
-    const value = chip.getAttribute('data-filter') ?? '';
-    chip.setAttribute('aria-pressed', value === filter ? 'true' : 'false');
+  for (const dimension of dimensions) {
+    if (filters[dimension.key]) html.setAttribute(dimension.attribute, filters[dimension.key]);
+    else html.removeAttribute(dimension.attribute);
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-filter-kind][data-filter-value]').forEach((chip) => {
+    const kind = chip.getAttribute('data-filter-kind') as FilterDimension;
+    const value = chip.getAttribute('data-filter-value') ?? '';
+    if (kind !== 'creator' && kind !== 'type' && kind !== 'tag') return;
+    chip.setAttribute('aria-pressed', filters[kind] === value ? 'true' : 'false');
   });
 
-  const sync = (window as Window & { __nkWorksSync?: () => void }).__nkWorksSync;
-  if (sync) {
-    sync();
-    return;
-  }
-
-  const visible = shownCards();
-  const count = document.querySelector('[data-clip-count]');
-  if (count) {
-    const noun = visible.length === 1 ? 'edit' : 'edits';
-    count.textContent = `${visible.length} ${noun}`;
-  }
-
-  const empty = document.querySelector<HTMLElement>('[data-empty]');
-  if (empty) empty.hidden = visible.length !== 0;
+  // This sync also applies search terms, hides empty sections and updates the count.
+  (window as Window & { __nkWorksSync?: () => void }).__nkWorksSync?.();
 }
 
 export default function WorksFilters() {
   useEffect(() => {
-    apply(filterFromSearch(new URLSearchParams(location.search)));
+    const current = () => filterFromSearch(new URLSearchParams(location.search));
+    apply(current());
 
     const onClick = (event: MouseEvent) => {
-      const chip = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-filter]');
+      const chip = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+        '[data-filter-kind][data-filter-value]',
+      );
       if (!chip) return;
+      const kind = chip.getAttribute('data-filter-kind');
+      if (kind !== 'creator' && kind !== 'type' && kind !== 'tag') return;
+      const value = chip.getAttribute('data-filter-value') ?? '';
       event.preventDefault();
-      const filter = chip.getAttribute('data-filter') ?? '';
+
+      const prev = current();
+      const next: WorkFilters = { ...prev };
+      // Clicking an active chip toggles it off, while 'All' clears only its row.
+      if (kind === 'type') {
+        next.type = prev.type === value ? '' : value as WorkFilters['type'];
+      } else if (kind === 'creator') {
+        next.creator = prev.creator === value ? '' : value;
+      } else {
+        next.tag = prev.tag === value ? '' : value;
+      }
+
       const query = new URLSearchParams(location.search).get('q') ?? '';
-      const href = filterHref(filter, query);
-      const next = () => {
-        history.pushState(null, '', href);
-        apply(filter);
+      const href = filterHref(next, query);
+      const change = () => {
+        if (location.pathname + location.search !== href) history.pushState(null, '', href);
+        apply(next);
       };
+
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!reduce && 'startViewTransition' in document) {
-        document.startViewTransition(() => next());
+        document.startViewTransition(() => change());
       } else {
-        next();
+        change();
       }
     };
 
-    const onPop = () => apply(filterFromSearch(new URLSearchParams(location.search)));
+    const onPop = () => apply(current());
     document.addEventListener('click', onClick);
     window.addEventListener('popstate', onPop);
     return () => {
@@ -66,5 +77,6 @@ export default function WorksFilters() {
     };
   }, []);
 
+  // Keep a tiny observable island so Astro client:visible hydrates the controls.
   return <span style={{ display: 'block', width: '1px', height: '1px', overflow: 'hidden' }} aria-hidden="true" />;
 }
