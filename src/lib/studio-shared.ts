@@ -38,6 +38,7 @@ export interface StudioClip extends Record<string, unknown> {
   featured: boolean;
   heroFeatured: boolean;
   section?: string;
+  longFormCategory?: 'vlogs' | 'mvs' | 'normal';
 }
 
 export interface StudioTerm {
@@ -191,7 +192,7 @@ export function normalizeStudio(input: StudioPayload): {
   }
   if (!sections.some((section) => section.kind === 'landscape')) {
     const at = sections.findIndex((section) => section.kind !== 'vertical');
-    const row: StudioSection = { id: 'longer', label: 'Longer edits', kind: 'landscape' };
+    const row: StudioSection = { id: 'longer', label: 'Long Form Videos', kind: 'landscape' };
     if (at === -1) sections.push(row);
     else sections.splice(at, 0, row);
   }
