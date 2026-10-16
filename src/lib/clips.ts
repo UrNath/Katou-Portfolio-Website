@@ -28,6 +28,7 @@ const clipSchema = z.object({
   tags: z.array(z.string()),
   featured: z.boolean(),
   heroFeatured: z.boolean(),
+  longFormCategory: z.enum(['vlogs', 'mvs', 'normal']).optional(),
   section: z.string().optional(),
   posterUrl: z.string().optional(),
 });
@@ -36,6 +37,7 @@ export interface ClipRecord extends ViewerClip {
   featured: boolean;
   posterImage: ImageMetadata | null;
   section?: string;
+  longFormCategory: 'vlogs' | 'mvs' | 'normal';
 }
 
 function posterFor(file: string): ImageMetadata | null {
@@ -123,6 +125,7 @@ async function buildClips(): Promise<ClipRecord[]> {
         featured: clip.featured,
         heroFeatured: clip.heroFeatured,
         section: clip.section || undefined,
+        longFormCategory: clip.longFormCategory ?? 'normal',
       } satisfies ClipRecord;
     }),
   );
