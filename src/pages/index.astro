@@ -2,6 +2,7 @@
 import BaseLayout from '../components/BaseLayout.astro';
 import CharacterArt from '../components/CharacterArt.astro';
 import FeaturedCarousel from '../components/FeaturedCarousel.astro';
+import ShortsWordmark from '../components/ShortsWordmark.astro';
 import ContactSection from '../components/ContactSection.astro';
 import ServiceSection from '../components/ServiceSection.astro';
 import TermsSection from '../components/TermsSection.astro';
@@ -23,34 +24,15 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
 ---
 <BaseLayout>
   <div class="scroll-portfolio">
-    <section class="intro-panel scroll-panel cinematic-hero" id="home" aria-labelledby="intro-title">
-      <span class="hero-watermark" aria-hidden="true">NassuKatou</span>
+    <section class="intro-panel scroll-panel" id="home" aria-labelledby="intro-title">
       <div class:list={['intro-visual', artOn && 'has-character']}>
         {artOn ? <CharacterArt /> : (
-          <div class="hero-sculpture" aria-hidden="true">
-            <svg class="sculpture-echo" viewBox="0 0 600 700" fill="none"><use href="#hero-bloom" /></svg>
-            <svg class="sculpture-main" viewBox="0 0 600 700" fill="none" data-parallax="0.07">
-              <defs>
-                <linearGradient id="wing-front" x1="100" y1="100" x2="450" y2="640" gradientUnits="userSpaceOnUse"><stop stop-color="#f3ffff"/><stop offset=".4" stop-color="#9ae8e3"/><stop offset="1" stop-color="#247f9a"/></linearGradient>
-                <linearGradient id="wing-back" x1="480" y1="100" x2="180" y2="600" gradientUnits="userSpaceOnUse"><stop stop-color="#a6ebef" stop-opacity=".95"/><stop offset="1" stop-color="#4a6cbd" stop-opacity=".1"/></linearGradient>
-                <radialGradient id="bloom-core"><stop stop-color="#fff"/><stop offset=".45" stop-color="#cffbfa"/><stop offset="1" stop-color="#76d9e0" stop-opacity="0"/></radialGradient>
-                <g id="hero-bloom">
-                  <ellipse cx="290" cy="360" rx="212" ry="270" stroke="#c5f4f0" stroke-opacity=".28" transform="rotate(-24 290 360)"/>
-                  <ellipse cx="290" cy="360" rx="245" ry="184" stroke="#c5f4f0" stroke-opacity=".2" transform="rotate(-24 290 360)"/>
-                  <path d="M294 406C118 338 65 171 116 68C222 105 317 223 294 406Z" fill="url(#wing-front)"/>
-                  <path d="M292 406C312 229 431 105 535 123C554 258 449 382 292 406Z" fill="url(#wing-back)"/>
-                  <path d="M295 403C151 366 74 438 90 568C197 587 281 524 295 403Z" fill="url(#wing-back)"/>
-                  <path d="M293 405C420 387 513 454 494 615C382 587 303 517 293 405Z" fill="url(#wing-front)"/>
-                  <path d="M116 68C187 210 262 319 294 406M535 123C427 217 355 316 294 406M90 568L294 406L494 615" stroke="#efffff" stroke-opacity=".55"/>
-                  <ellipse cx="294" cy="406" rx="80" ry="100" fill="url(#bloom-core)"/>
-                  <path d="M295 329C310 364 311 412 295 464C279 412 280 364 295 329Z" fill="#e5ffff"/>
-                  <path d="M282 344Q253 299 246 275M305 345Q327 300 350 288" stroke="#e5ffff" stroke-width="2"/>
-                  <circle cx="174" cy="168" r="4" fill="#e5ffff"/><circle cx="459" cy="359" r="3" fill="#e5ffff"/><circle cx="135" cy="425" r="2" fill="#e5ffff"/>
-                </g>
-              </defs>
-              <use href="#hero-bloom" />
-            </svg>
-            <span class="sculpture-note">TIMING. MOTION. PERSONALITY.</span>
+          <div class="type-art" aria-hidden="true">
+            <span class="art-label">NASSUKATOU / CREATIVE STUDIO</span>
+            <span class="art-orbit" data-parallax="-0.07"></span>
+            <span class="art-word" data-parallax="0.09">Cut.<br /><em>Create.</em></span>
+            <span class="art-star" data-parallax="-0.13">✳</span>
+            <span class="art-caption">A little timing.<br />A lot of personality.</span>
           </div>
         )}
       </div>
@@ -72,7 +54,7 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
 
     <section class="featured-panel scroll-panel" id="featured" aria-labelledby="featured-title">
       <div class="featured-visual">
-        <svg class="outline-word" viewBox="0 0 900 190" aria-hidden="true" focusable="false"><text x="5" y="160" textLength="885" lengthAdjust="spacingAndGlyphs">SHORTS</text></svg>
+        <ShortsWordmark />
         <FeaturedCarousel clips={featured} initialId={hero.id} />
       </div>
       <div class="featured-copy">

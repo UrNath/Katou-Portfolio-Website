@@ -16,6 +16,13 @@ html:has(.clean-portfolio) { background: #fcfcfa; scroll-padding-top: 100px; }
 .scroll-panel, .detail-panel { width: min(1400px, calc(100% - 96px)); margin-inline: auto; }
 .scroll-panel { min-height: min(820px, calc(100svh - 82px)); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 5vw, 100px); align-items: center; padding-block: 70px 90px; position: relative; }
 .intro-visual { aspect-ratio: 1; position: relative; border-radius: 24px; overflow: hidden; background: #edf5f3; border: 1px solid #dae7e4; }
+.type-art { position: relative; width: 100%; height: 100%; isolation: isolate; }
+.art-label { position: absolute; top: 28px; left: 28px; font: 10px "Geist Mono", monospace; letter-spacing: .07em; }
+.art-orbit { position: absolute; width: 80%; aspect-ratio: 1; border: 1px solid #a4c5c4; border-radius: 50%; top: 10%; left: 10%; z-index: -1; }
+.art-word { position: absolute; left: 8%; top: 23%; font-size: clamp(64px, 8.5vw, 132px); font-weight: 750; letter-spacing: -.085em; line-height: .93; }
+.art-word em { font-style: normal; color: var(--teal-ink); }
+.art-star { position: absolute; right: 7%; top: 9%; color: var(--teal-ink); font-size: clamp(56px, 7vw, 112px); line-height: 1; }
+.art-caption { position: absolute; bottom: 28px; right: 28px; font-size: 13px; text-align: right; color: var(--muted); }
 .section-label { color: var(--teal-ink); font-size: 11px; font-weight: 700; letter-spacing: .16em; margin: 0 0 24px; }
 .intro-copy h1 { font-size: clamp(36px, 3.8vw, 64px); font-weight: 750; line-height: 1.08; letter-spacing: -.055em; margin: 0; }
 .intro-copy h1 > span { display: inline-block; font-size: clamp(76px, 9vw, 144px); color: var(--teal-ink); line-height: 1.04; }
@@ -33,6 +40,16 @@ html:has(.clean-portfolio) { background: #fcfcfa; scroll-padding-top: 100px; }
 .featured-panel { border-top: 1px solid var(--hairline); }
 .featured-visual { position: relative; padding-block: 70px 20px; }
 .outline-word { position: absolute; left: 0; top: 0; font-size: clamp(72px, 9vw, 150px); font-weight: 750; letter-spacing: -.06em; color: transparent; -webkit-text-stroke: 1px #b1b9b5; line-height: 1; pointer-events: none; }
+.featured-stack { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; }
+.stack-side { width: 34%; flex: none; z-index: 1; }
+.stack-side:first-child { margin-right: -5%; }
+.stack-side:last-child { margin-left: -5%; }
+.stack-center { width: 42%; flex: none; z-index: 2; }
+.featured-stack .clip-card { width: 100%; opacity: 1; }
+.featured-stack .clip-frame { border-radius: 16px; box-shadow: 0 12px 24px rgb(23 26 25 / .15); }
+.featured-stack .stack-side .clip-frame { scale: .91; }
+.featured-stack .clip-meta { display: none; }
+.featured-caption { text-align: center; color: var(--muted); font-size: 11px; margin-top: 34px; }
 .featured-copy h2, .clients-panel h2 { font-size: clamp(34px, 3.5vw, 56px); line-height: 1.12; font-weight: 700; letter-spacing: -.045em; margin: 0; }
 .featured-copy > p:not(.section-label) { max-width: 34ch; color: var(--muted); line-height: 1.7; margin-block: 25px 32px; }
 .detail-panel { border-top: 1px solid var(--hairline); padding-block: 72px 88px; }
@@ -85,6 +102,9 @@ html:has(.clean-portfolio) { background: #fcfcfa; scroll-padding-top: 100px; }
   .intro-actions { gap: 10px; margin-top: 24px; }
   .solid-button, .outline-button { font-size: 12px; padding: 13px 17px; gap: 10px; }
   .intro-status { margin-top: 22px; }
+  .art-word { font-size: clamp(70px, 20vw, 112px); }
+  .art-star { font-size: 76px; }
+  .art-label { left: 20px; top: 20px; font-size: 8px; }
   .scroll-cue { bottom: 15px; }
   .featured-panel { padding-top: 48px; }
   .featured-copy { grid-row: 1; }
@@ -104,45 +124,7 @@ html:has(.clean-portfolio) { background: #fcfcfa; scroll-padding-top: 100px; }
   .scroll-portfolio [data-parallax] { will-change: auto; transform: none !important; }
 }
 
-/* Layered glass hero: original vector placeholder, ready for commissioned character art. */
-.cinematic-hero {
-  overflow: hidden;
-  isolation: isolate;
-  min-height: min(740px, calc(100svh - 126px));
-  padding: 64px clamp(32px, 5vw, 80px) 82px;
-  margin-block: 24px 56px;
-  border: 1px solid #a0c8ca;
-  border-radius: 26px;
-  background: radial-gradient(ellipse at 93% 35%, #72cfd05c, transparent 38%), radial-gradient(ellipse at 75% 110%, #5076ac, transparent 67%), linear-gradient(135deg, #152a34, #254859 58%, #326879);
-  color: #effcfa;
-  box-shadow: 0 16px 60px #21485420, inset 0 0 0 5px #ffffff04;
-  gap: 24px;
-}
-.cinematic-hero::before { content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: -1; background: linear-gradient(100deg, #10242b00 30%, #172f4059 65%, #4db4bc00); }
-.cinematic-hero .intro-visual { position: relative; aspect-ratio: auto; height: 100%; min-height: 500px; background: none; border: 0; border-radius: 0; overflow: visible; }
-.hero-sculpture { position: absolute; inset: -80px -40px -84px -50px; pointer-events: none; }
-.sculpture-main { position: relative; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 20px 36px #00162555); }
-.sculpture-echo { position: absolute; height: 140%; width: 160%; left: -55%; top: -28%; opacity: .13; transform: rotate(-14deg); }
-.sculpture-note { position: absolute; bottom: 12%; left: 12%; color: #c2e4e5; font-size: 9px; letter-spacing: .22em; }
-.cinematic-hero .intro-copy { position: relative; z-index: 1; padding-bottom: 30px; }
-.cinematic-hero .section-label { color: #acdedc; font-size: 10px; }
-.cinematic-hero .intro-copy h1 { font-size: clamp(35px, 3.9vw, 62px); }
-.cinematic-hero .intro-copy h1 > span { color: #a4eeeb; font-size: clamp(80px, 8.5vw, 136px); text-shadow: 0 0 44px #83dfdf25; }
-.cinematic-hero .intro-role { color: #d0e4e9; line-height: 1.65; max-width: 32ch; }
-.cinematic-hero .outline-button { color: #e2f5f4; border-color: #c4e5e660; background: #b1e6e50a; backdrop-filter: blur(8px); }
-.cinematic-hero .outline-button:hover { background: #b1e6e52a; }
-.cinematic-hero .solid-button { color: #163f48; background: #effdfb; border-color: #effdfb; }
-.cinematic-hero .solid-button:hover { background: #b9ede9; border-color: #b9ede9; }
-.cinematic-hero .intro-status > span { color: #d0e4e9; }
-.cinematic-hero .status-chip { color: #ecffff; background: #17353d; border-color: #b7e3dd55; }
-.cinematic-hero .scroll-cue { color: #d0e4e9; left: auto; right: 32px; bottom: 24px; z-index: 1; }
-.hero-watermark { position: absolute; bottom: -0.15em; left: 3%; font-size: clamp(84px, 12.8vw, 205px); font-weight: 550; line-height: 1; letter-spacing: -.07em; color: transparent; -webkit-text-stroke: 1px #c9f7f038; white-space: nowrap; z-index: -1; pointer-events: none; }
-.cinematic-hero .character-art { position: absolute; inset: auto 0 0; width: 100%; height: 100%; object-fit: contain; object-position: bottom; }
-
-/* Use SVG text for consistent outline joins, including the H crossbar. */
-.featured-visual { padding-top: 76px; min-width: 0; }
-svg.outline-word { display: block; width: 100%; height: auto; top: 0; left: 0; overflow: visible; -webkit-text-stroke: 0; }
-svg.outline-word text { font-family: 'Geist Variable', sans-serif; font-size: 168px; font-weight: 700; font-style: normal; letter-spacing: 1px; fill: none; stroke: #aeb9b5; stroke-width: 1.2; stroke-linejoin: round; }
+/* Circular sample carousel. */
 .sample-carousel { position: relative; outline-offset: 6px; }
 .carousel-stage { position: relative; width: 100%; aspect-ratio: 1.18; perspective: 1100px; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
 .sample-carousel[data-moving="true"] .carousel-stage { cursor: grabbing; }
@@ -167,29 +149,7 @@ svg.outline-word text { font-family: 'Geist Variable', sans-serif; font-size: 16
 .carousel-dot[aria-pressed="true"] span { background: #171a19; }
 .carousel-current { margin: 10px 0 0; min-height: 2.8em; font-size: 11px; color: var(--muted); text-align: center; max-width: 42ch; margin-inline: auto; }
 .carousel-help { text-align: center; font-size: 10px; color: var(--muted); margin: 8px 0 0; }
-@media (max-width: 1100px) {
-  .cinematic-hero { padding-inline: 28px; gap: 15px; }
-  .cinematic-hero .intro-visual { min-height: 440px; }
-  .cinematic-hero .intro-copy h1 { font-size: 36px; }
-  .cinematic-hero .intro-copy h1 > span { font-size: 86px; }
-  .cinematic-hero .intro-actions { gap: 10px; }
-  .cinematic-hero .solid-button, .cinematic-hero .outline-button { padding: 13px 15px; font-size: 11px; }
-}
 @media (max-width: 767px) {
-  .cinematic-hero { width: calc(100% - 24px); padding: 32px 24px 58px; margin-block: 12px 24px; min-height: auto; gap: 0; border-radius: 22px; }
-  .cinematic-hero .intro-copy { grid-row: 1; padding-bottom: 0; }
-  .cinematic-hero .intro-copy h1 { font-size: clamp(32px, 8vw, 44px); }
-  .cinematic-hero .intro-copy h1 > span { font-size: 82px; }
-  .cinematic-hero .intro-visual { grid-row: 2; min-height: 0; aspect-ratio: 1.45; width: 100%; margin-top: 24px; }
-  .hero-sculpture { inset: -20px 0 -95px; }
-  .sculpture-main { width: 100%; height: 130%; margin-top: -30px; }
-  .sculpture-echo { top: -80%; opacity: .1; }
-  .sculpture-note { display: none; }
-  .hero-watermark { font-size: 17vw; bottom: 12px; left: 5%; }
-  .cinematic-hero .scroll-cue { right: 24px; bottom: 20px; font-size: 8px; }
-  .cinematic-hero .intro-status { gap: 12px; }
-  .cinematic-hero .intro-status > span { font-size: 10px; gap: 7px; }
-  .featured-visual { padding-top: 50px; }
   .carousel-card .clip-frame { border-radius: 12px; }
   .carousel-controls { gap: 7px; }
   .carousel-dot { width: 33px; }
@@ -202,3 +162,9 @@ svg.outline-word text { font-family: 'Geist Variable', sans-serif; font-size: 16
 
 .carousel-card[data-active="true"] .clip-card:not(.no-preview) .clip-pause { display: grid; color: white; }
 html.poster-only .carousel-card .clip-pause { display: none; }
+
+/* Keep the complete H and every other letter above the cards, never behind them. */
+.featured-visual { padding-top: 0; min-width: 0; }
+.shorts-wordmark { display: block; position: relative; width: 100%; height: auto; margin: 0 0 14px; overflow: visible; }
+.shorts-wordmark path { fill: none; stroke: #9da9a3; stroke-width: 1.3; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.carousel-current { min-height: 1.45em; }

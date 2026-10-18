@@ -62,7 +62,7 @@ export function mountCarousel(root: HTMLElement) {
     });
     dots.forEach((dot, index) => dot.setAttribute('aria-pressed', String(index === active)));
     const label = root.querySelector('[data-carousel-current]');
-    if (label) label.textContent = `${active + 1} / ${count} · ${cards[active].getAttribute('aria-label')?.replace(/^\d+ of \d+: /, '') ?? ''}`;
+    if (label) label.textContent = cards[active].dataset.caption ?? '';
     draw();
     notify();
   }

@@ -13,7 +13,7 @@ function offset(index: number) {
 <div class="sample-carousel" data-carousel data-initial={initial} role="region" aria-roledescription="carousel" aria-label="Featured video samples" tabindex="0">
   <div class="carousel-stage" data-carousel-stage>
     {samples.map((clip, index) => (
-      <div class="carousel-card" data-carousel-card data-index={index} data-position={offset(index)} data-active={index === initial ? 'true' : 'false'} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${samples.length}: ${clip.title}`} aria-hidden={Math.abs(offset(index)) > 1 ? 'true' : 'false'} inert={Math.abs(offset(index)) > 1}>
+      <div class="carousel-card" data-carousel-card data-index={index} data-caption={`${clip.creator}’s Short Video`} data-position={offset(index)} data-active={index === initial ? 'true' : 'false'} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${samples.length}: ${clip.title}`} aria-hidden={Math.abs(offset(index)) > 1 ? 'true' : 'false'} inert={Math.abs(offset(index)) > 1}>
         <ClipCard clip={clip} variant="hero" previewHero={index === initial} sizes="(min-width: 960px) 260px, 40vw" />
       </div>
     ))}
@@ -25,7 +25,7 @@ function offset(index: number) {
     </div>
     <button class="carousel-arrow" type="button" data-carousel-next aria-label="Next sample">→</button>
   </div>
-  <p class="carousel-current" data-carousel-current aria-live="polite" aria-atomic="true">{initial + 1} / {samples.length} · {samples[initial]?.creator}</p>
+  <p class="carousel-current" data-carousel-current aria-live="polite" aria-atomic="true">{samples[initial]?.creator}’s Short Video</p>
   <p class="carousel-help">Swipe or use the arrows to explore. Tap the centre video to play.</p>
 </div>
 <script>
