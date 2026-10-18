@@ -1,0 +1,24 @@
+---
+interface Props { section: string; title: string }
+const { section, title } = Astro.props;
+const target = `/#${section}`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · NassuKatou</title>
+    <link rel="canonical" href={`https://nassukatou-site.vercel.app/${target.slice(1)}`} />
+    <noscript><meta http-equiv="refresh" content={`0;url=${target}`} /></noscript>
+    <script is:inline define:vars={{ section }}>
+      const destination = new URL('/', location.origin);
+      destination.search = location.search;
+      destination.hash = section === 'terms' && location.hash && location.hash !== '#terms'
+        ? '#term-' + location.hash.slice(1).replace(/^term-/, '')
+        : '#' + section;
+      location.replace(destination.href);
+    </script>
+  </head>
+  <body><p>This section has moved to the main page. <a href={target}>Continue to {title}</a>.</p></body>
+</html>

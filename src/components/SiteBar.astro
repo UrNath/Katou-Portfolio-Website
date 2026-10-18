@@ -24,7 +24,7 @@ const routes = getRoutes(prices);
     {
       navLinks.map((link) => (
         <a
-          class="bar-link"
+          class:list={['bar-link', link.href === '/#commission' && 'commission-link']}
           href={link.href}
           aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
         >
@@ -120,6 +120,7 @@ const routes = getRoutes(prices);
     });
 
     dialog.querySelector('[data-sheet-close]')?.addEventListener('click', closeSheet);
+    dialog.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeSheet));
 
     const grab = dialog.querySelector('[data-sheet-grab]');
     let startY = 0;
