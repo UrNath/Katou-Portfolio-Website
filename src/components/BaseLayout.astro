@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import '../styles/scroll-portfolio.css';
 import SiteBar from './SiteBar.astro';
 import SiteFooter from './SiteFooter.astro';
 import { site } from '../data/site';
@@ -47,7 +48,7 @@ const pathname = Astro.url.pathname;
       })();
     </script>
   </head>
-  <body class={pathname === '/' ? 'is-hub' : undefined}>
+  <body class:list={['clean-portfolio', pathname === '/' && 'is-scroll']}>
     <a class="skip" href="#main">Skip to content</a>
     <SiteBar pathname={pathname} prices={{ editing, web }} />
     <main id="main">

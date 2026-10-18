@@ -9,10 +9,11 @@ interface Props {
   variant?: 'grid' | 'hero' | 'neighbor';
   eager?: boolean;
   priority?: boolean;
+  previewHero?: boolean;
   sizes: string;
 }
 
-const { clip, variant = 'grid', eager = false, priority = false, sizes } = Astro.props;
+const { clip, variant = 'grid', eager = false, priority = false, sizes, previewHero = variant === 'hero' } = Astro.props;
 const widths = clip.wide ? [480, 960] : [270, 540];
 const credit = editCredit(clip.channelHandle);
 const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
@@ -56,7 +57,7 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
             class="clip-video"
             data-preview
             data-src={clip.previewSrc}
-            data-hero={variant === 'hero' ? 'true' : undefined}
+            data-hero={previewHero ? 'true' : undefined}
             muted
             playsinline
             loop
