@@ -9,7 +9,7 @@ import tailwindcss from '@tailwindcss/vite';
 // Public pages stay prerendered. The Vercel adapter exists for Keystatic's
 // sign-in routes. The contact form still opens an email draft.
 export default defineConfig({
-  site: 'https://nassukatou-site.vercel.app',
+  site: 'https://nassukatou.site',
   output: 'static',
   adapter: vercel(),
   integrations: [

@@ -8,6 +8,7 @@ const sessionSeconds = 60 * 60 * 24 * 14;
 const stateSeconds = 60 * 10;
 
 const allowedOrigins = new Set([
+  'https://nassukatou.site',
   'https://nassukatou-site.vercel.app',
   'http://127.0.0.1:4321',
   'http://localhost:4321',

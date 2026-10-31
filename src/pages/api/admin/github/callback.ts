@@ -56,7 +56,7 @@ export const GET: APIRoute = async ({ request, url, cookies, redirect }) => {
     return adminHtml(
       'GitHub did not sign you in',
       mismatch
-        ? '<p>The callback URL on the GitHub OAuth app does not match this site. Add <code>https://nassukatou-site.vercel.app/api/admin/github/callback</code>, then <a href="/api/admin/login">try again</a>.</p>'
+        ? `<p>The callback URL on the GitHub OAuth app does not match this site. Add <code>${origin}/api/admin/github/callback</code>, then <a href="/api/admin/login">try again</a>.</p>`
         : '<p>GitHub did not return a sign-in. <a href="/api/admin/login">Try again</a>.</p>',
       400,
     );
