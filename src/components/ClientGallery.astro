@@ -7,8 +7,8 @@ const colors = ['#d8ece9', '#e8e4f2', '#f2e4d7'];
 <p id="client-gallery-help" class="gallery-help">Scroll, swipe, or use the arrow keys to browse.</p>
 <div class="client-reel" tabindex="0" role="region" aria-label="Client artwork" aria-describedby="client-gallery-help">
   {creators.map((creator, index) => (
-    <article class="client-entry" aria-label={creator.label}>
-      <div class="client-art" style={`--art-background: ${colors[index % colors.length]}`}>
+    <article class="client-entry" aria-label={creator.label} style={`--art-background: ${colors[index % colors.length]}`}>
+      <div class="art-window"><div class="client-art">
         <svg viewBox="0 0 240 250" aria-hidden="true" fill="none">
           <circle cx="120" cy="112" r="84" stroke="currentColor" opacity=".35" />
           <path d="M41 220c9-38 38-59 79-59s70 21 79 59H41Z" fill="currentColor" opacity=".22" />
@@ -16,95 +16,172 @@ const colors = ['#d8ece9', '#e8e4f2', '#f2e4d7'];
           <path d="M64 111c0-47 23-71 56-71s56 24 56 71c-18-3-37-18-47-34-18 22-42 32-65 34Z" fill="currentColor" opacity=".65" />
         </svg>
         <span>OC artwork placeholder</span>
-      </div>
-      <div class="client-copy">
+      </div></div>
+      <div class="copy-window"><div class="client-copy">
         <p class="section-label">{String(index + 1).padStart(2, '0')} / {String(creators.length).padStart(2, '0')}</p>
         <h3>{creator.label}</h3>
         <p>A short client introduction will go here alongside their character artwork.</p>
         <a class="outline-button" href={`/works?creator=${encodeURIComponent(creator.id)}`}>View edits <span aria-hidden="true">↗</span></a>
       </div>
+      </div>
     </article>
   ))}
 </div>
+<div class="reel-controls" hidden>
+  <button class="outline-button" type="button" data-step="-1" aria-label="Previous client">↑</button>
+  <span aria-live="polite"></span>
+  <button class="outline-button" type="button" data-step="1" aria-label="Next client">↓</button>
+</div>
 
 <script>
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  document.querySelectorAll<HTMLElement>('.client-reel').forEach((reel) => {
-    const entries = Array.from(reel.querySelectorAll<HTMLElement>('.client-entry'));
-    reel.addEventListener('keydown', (event) => {
-      const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1 }[event.key];
-      if (step === undefined && event.key !== 'Home' && event.key !== 'End') return;
-      if (!entries.length || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-      const top = reel.getBoundingClientRect().top;
-      const current = entries.reduce((nearest, entry, i) =>
-        Math.abs(entry.getBoundingClientRect().top - top) <
-        Math.abs(entries[nearest].getBoundingClientRect().top - top) ? i : nearest, 0);
-      const next = event.key === 'Home' ? 0 : event.key === 'End' ? entries.length - 1 :
-        Math.max(0, Math.min(entries.length - 1, current + (step ?? 0)));
-      if (next === current) return;
-      event.preventDefault();
-      reel.scrollTo({
-        top: reel.scrollTop + entries[next].getBoundingClientRect().top - top,
-        behavior: reducedMotion.matches ? 'instant' : 'smooth',
+  const reel = document.querySelector<HTMLElement>('.client-reel');
+  const controls = document.querySelector<HTMLElement>('.reel-controls');
+  const status = controls?.querySelector('span');
+  const entries = Array.from(reel?.querySelectorAll<HTMLElement>('.client-entry') ?? []);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (reel && controls && status && entries.length > 1) {
+    const stage = reel;
+    const announcement = status;
+    let current = 0;
+    let moving = false;
+    let wheelTotal = 0;
+    let lastWheel = -Infinity;
+    let touchStart: Touch | undefined;
+    stage.dataset.ready = '';
+    controls.hidden = false;
+
+    function show(index: number) {
+      entries.forEach((entry, i) => {
+        entry.hidden = i !== index;
+        entry.inert = i !== index;
       });
+      announcement.textContent = `${index + 1} / ${entries.length} · ${entries[index].getAttribute('aria-label')}`;
+    }
+    show(current);
+
+    async function move(step: number) {
+      if (moving) return;
+      const next = (current + step + entries.length) % entries.length;
+      const outgoing = entries[current];
+      const incoming = entries[next];
+      if (outgoing.contains(document.activeElement)) stage.focus({ preventScroll: true });
+      outgoing.inert = true;
+      if (!reduced.matches) {
+        moving = true;
+        incoming.hidden = false;
+        incoming.dataset.entering = '';
+        const animations: Animation[] = [];
+        for (const selector of ['.client-art', '.client-copy']) {
+          const direction = step * (selector === '.client-art' ? 1 : -1);
+          for (const [entry, from, to] of [[outgoing, 0, -direction], [incoming, direction, 0]] as const) {
+            const panel = entry.querySelector(selector);
+            if (panel) animations.push(panel.animate(
+              [{ transform: `translateY(${from * 100}%)` }, { transform: `translateY(${to * 100}%)` }],
+              { duration: 550, easing: 'cubic-bezier(.65, 0, .25, 1)', fill: 'both' },
+            ));
+          }
+        }
+        await Promise.allSettled(animations.map((animation) => animation.finished));
+        outgoing.hidden = true;
+        animations.forEach((animation) => animation.cancel());
+        delete incoming.dataset.entering;
+        moving = false;
+      }
+      current = next;
+      show(current);
+    }
+
+    stage.addEventListener('wheel', (event) => {
+      if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      event.preventDefault();
+      const now = performance.now();
+      const fresh = now - lastWheel > 160;
+      lastWheel = now;
+      if (fresh) wheelTotal = 0;
+      if (moving || !Number.isFinite(wheelTotal)) return;
+      wheelTotal += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
+      if (Math.abs(wheelTotal) < 34) return;
+      const step = Math.sign(wheelTotal);
+      wheelTotal = Infinity;
+      void move(step);
+    }, { passive: false });
+
+    stage.addEventListener('touchstart', (event) => {
+      touchStart = event.touches.length === 1 ? event.touches[0] : undefined;
+    }, { passive: true });
+    stage.addEventListener('touchcancel', () => { touchStart = undefined; });
+    stage.addEventListener('touchend', (event) => {
+      const end = event.changedTouches[0];
+      if (!touchStart || !end) return;
+      const dy = touchStart.clientY - end.clientY;
+      const dx = touchStart.clientX - end.clientX;
+      touchStart = undefined;
+      if (Math.abs(dy) > 42 && Math.abs(dy) > Math.abs(dx)) void move(Math.sign(dy));
     });
-  });
+
+    stage.addEventListener('keydown', (event) => {
+      const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1 }[event.key];
+      if (!step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      event.preventDefault();
+      void move(step);
+    });
+    controls.querySelectorAll<HTMLButtonElement>('button').forEach((button) => {
+      button.addEventListener('click', () => { void move(Number(button.dataset.step)); });
+    });
+  }
 </script>
 
 <style>
-  .gallery-help { margin-block: .5rem 1.25rem; }
-  .client-reel {
-    height: clamp(24rem, 66svh, 42rem);
-    overflow-y: auto;
-    scroll-snap-type: y mandatory;
-    border: 1px solid #20262326;
+  .gallery-help { margin-block: .5rem 1rem; }
+  .client-reel[data-ready] {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    touch-action: pan-x pinch-zoom;
     border-radius: 1.25rem;
-    background: #fff;
-    scrollbar-color: #0b6f73 #eef4f2;
+    height: clamp(26rem, 68svh, 50rem);
   }
   .client-entry {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    align-items: center;
-    gap: clamp(1rem, 4vw, 4rem);
-    padding: clamp(1rem, 4vw, 4rem);
-    min-height: 100%;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    grid-template-areas: "copy art";
+    min-height: 26rem;
   }
+  .client-entry[hidden] { display: none; }
+  [data-ready] .client-entry { position: absolute; inset: 0; min-height: 0; }
+  .client-entry[data-entering] { z-index: 1; }
+  .art-window, .copy-window { overflow: hidden; min-height: 0; }
+  .art-window { grid-area: art; }
+  .copy-window { grid-area: copy; }
+  .client-art, .client-copy { min-height: 100%; }
   .client-art {
     display: grid;
-    justify-items: center;
     align-content: center;
-    gap: .5rem;
-    min-height: 15rem;
+    justify-items: center;
     padding: 1rem;
-    border-radius: 1rem;
-    background: var(--art-background);
+    background: radial-gradient(ellipse at 50% 40%, #fff8, transparent 70%), var(--art-background);
     color: #264b49;
   }
-  .client-art svg { width: min(100%, 14rem); max-height: 30svh; }
-  .client-copy h3 { font-size: clamp(1.8rem, 4vw, 4rem); margin: .3rem 0; }
+  .client-art svg { width: min(75%, 24rem); max-height: 48svh; }
+  .client-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    padding: clamp(1.25rem, 5vw, 5rem);
+    background: color-mix(in srgb, var(--art-background) 67%, #fff);
+    color: #1a2927;
+  }
+  .client-copy h3 { font-size: clamp(1.75rem, 5vw, 5rem); line-height: 1; margin: .4rem 0 .75rem; }
   .client-copy .outline-button { margin-top: 1rem; }
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .client-entry { view-timeline: --client-entry block; }
-      .client-art svg {
-        animation: art-travel linear both;
-        animation-timeline: --client-entry;
-      }
-      @keyframes art-travel {
-        0% { transform: translateY(24%) scale(.92); opacity: .3; }
-        48%, 52% { transform: translateY(0) scale(1); opacity: 1; }
-        100% { transform: translateY(-24%) scale(.92); opacity: .3; }
-      }
-    }
-  }
+  .reel-controls { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .75rem; }
+  .reel-controls[hidden] { display: none; }
   @media (max-width: 640px) {
-    .client-reel { height: clamp(26rem, 72svh, 38rem); }
-    .client-entry { grid-template-columns: 1fr; align-content: center; }
-    .client-art { min-height: 10rem; }
-    .client-art svg { max-height: 20svh; }
+    .client-entry { grid-template: minmax(0, 3fr) minmax(0, 2fr) / 1fr; grid-template-areas: "art" "copy"; }
+    .client-reel[data-ready] { height: clamp(29rem, 70svh, 42rem); }
+    .client-art svg { max-height: 28svh; }
+    .client-copy { padding: 1rem; }
+    .client-copy .outline-button { margin-top: .5rem; }
   }
-  @media (prefers-reduced-motion: reduce) { .client-reel { scroll-snap-type: none; } }
 </style>
