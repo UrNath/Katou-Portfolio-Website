@@ -287,6 +287,18 @@ const profiles: Record<string, string> = {
   .client-art, .client-copy { height: 100%; }
   .client-art { background: var(--backdrop); }
   .client-art svg { display: block; width: 100%; height: 100%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .character-depth { animation: client-float 7s ease-in-out infinite; }
+    .art-depth { animation: backdrop-drift 11s ease-in-out infinite; }
+  }
+  @keyframes client-float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(3px, -9px); }
+  }
+  @keyframes backdrop-drift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-3px, 2px); }
+  }
   .client-copy {
     display: flex;
     flex-direction: column;
