@@ -33,7 +33,7 @@ export function getRoutes(prices: { editing: string; web: string }): RouteItem[]
       icon: 'code-xml',
       statusKey: 'webDesign',
     },
-    { href: '/#clients', label: 'Meet the Clients!', meta: 'Creators I edit for', icon: 'film' },
+    { href: '/clients', label: 'Meet the Clients!', meta: 'Creators I edit for', icon: 'film' },
     {
       href: '/#terms',
       label: 'Terms',
