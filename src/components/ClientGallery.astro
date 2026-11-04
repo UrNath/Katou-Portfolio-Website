@@ -89,6 +89,7 @@ const profiles: Record<string, string> = {
     let moving = false;
     let wheelTotal = 0;
     let lastWheel = -Infinity;
+    let wheelTimer: ReturnType<typeof setTimeout> | undefined;
     let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean } | undefined;
     let direction = 0;
     let progress = 0;
@@ -106,10 +107,30 @@ const profiles: Record<string, string> = {
     }
     show(current);
 
+    // One clock for every scene, including hidden neighbours. Revealing a layer
+    // or completing a gesture never restarts its idle phase.
+    const motionOrigin = performance.now();
+    let idleFrame = 0;
+    function floatLayers(now: number) {
+      const seconds = (now - motionOrigin) / 1000;
+      stage.style.setProperty('--character-float', `${Math.sin(seconds * Math.PI * 2 / 6) * 9}px`);
+      stage.style.setProperty('--background-float', `${Math.sin(seconds * Math.PI * 2 / 8) * -4}px`);
+      idleFrame = requestAnimationFrame(floatLayers);
+    }
+    function updateMotionPreference() {
+      cancelAnimationFrame(idleFrame);
+      stage.style.removeProperty('--character-float');
+      stage.style.removeProperty('--background-float');
+      if (!reduced.matches) idleFrame = requestAnimationFrame(floatLayers);
+    }
+    reduced.addEventListener('change', updateMotionPreference);
+    updateMotionPreference();
+
     function reset(entry: HTMLElement) {
       delete entry.dataset.curtain;
       delete entry.dataset.entering;
       entry.style.removeProperty('--curtain-cut');
+      entry.style.removeProperty('--character-shift');
     }
 
     function render(step: number, amount: number) {
@@ -129,10 +150,16 @@ const profiles: Record<string, string> = {
       // One progress value drives opposing masks inside fixed panel windows.
       // Incoming art and copy remain opaque beneath their outgoing counterparts.
       outgoing.style.setProperty('--curtain-cut', `${amount * 100}%`);
+      // SVG units keep the small depth movement proportional to the artwork.
+      // The incoming character reaches zero exactly when its curtain completes.
+      outgoing.style.setProperty('--character-shift', `${-step * amount * 40}px`);
+      entries[incomingIndex].style.setProperty('--character-shift', `${step * (1 - amount) * 40}px`);
     }
 
     function settle(step: number, commit: boolean) {
       if (moving) return;
+      clearTimeout(wheelTimer);
+      wheelTimer = undefined;
       moving = true;
       const outgoing = entries[current];
       if (commit && outgoing.contains(document.activeElement)) stage.focus({ preventScroll: true });
@@ -165,19 +192,24 @@ const profiles: Record<string, string> = {
       if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
       event.preventDefault();
       const now = performance.now();
-      const fresh = now - lastWheel > 160;
+      const fresh = now - lastWheel > 180;
       lastWheel = now;
+      if (moving || drag) return;
       if (fresh) wheelTotal = 0;
-      if (moving || drag || !Number.isFinite(wheelTotal)) return;
       wheelTotal += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
-      if (Math.abs(wheelTotal) < 34) return;
-      const step = Math.sign(wheelTotal);
-      wheelTotal = Infinity;
-      settle(step, true);
+      const step = Math.sign(wheelTotal) || direction || 1;
+      if (!reduced.matches) render(step, Math.min(1, Math.abs(wheelTotal) / stage.clientHeight));
+      clearTimeout(wheelTimer);
+      // Accumulate trackpad reversals before releasing, rather than latching
+      // the first direction. A wheel notch still completes one scene.
+      wheelTimer = setTimeout(() => {
+        settle(step, Math.abs(wheelTotal) >= 34);
+        wheelTotal = 0;
+      }, 180);
     }, { passive: false });
 
     stage.addEventListener('pointerdown', (event) => {
-      if (event.pointerType !== 'touch' || !event.isPrimary || moving) return;
+      if (event.pointerType !== 'touch' || !event.isPrimary || moving || wheelTimer !== undefined) return;
       drag = { id: event.pointerId, x: event.clientX, y: event.clientY,
         lastY: event.clientY, time: event.timeStamp, velocity: 0, locked: false };
     });
@@ -221,8 +253,9 @@ const profiles: Record<string, string> = {
 
     stage.addEventListener('keydown', (event) => {
       const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1 }[event.key];
-      if (drag || !step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (moving || drag || !step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       event.preventDefault();
+      if (direction && direction !== step) render(step, 0);
       settle(step, true);
     });
   }
@@ -288,16 +321,8 @@ const profiles: Record<string, string> = {
   .client-art { background: var(--backdrop); }
   .client-art svg { display: block; width: 100%; height: 100%; }
   @media (prefers-reduced-motion: no-preference) {
-    .character-depth { animation: client-float 7s ease-in-out infinite; }
-    .art-depth { animation: backdrop-drift 11s ease-in-out infinite; }
-  }
-  @keyframes client-float {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(3px, -9px); }
-  }
-  @keyframes backdrop-drift {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-3px, 2px); }
+    .character-depth { transform: translateY(calc(var(--character-float, 0px) + var(--character-shift, 0px))); }
+    .art-depth { transform: translateY(var(--background-float, 0px)); }
   }
   .client-copy {
     display: flex;
