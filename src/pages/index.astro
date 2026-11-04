@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../components/BaseLayout.astro';
+import SiteIntro from '../components/SiteIntro.astro';
+import ClientGallery from '../components/ClientGallery.astro';
 import CharacterArt from '../components/CharacterArt.astro';
 import FeaturedCarousel from '../components/FeaturedCarousel.astro';
 import ShortsWordmark from '../components/ShortsWordmark.astro';
@@ -23,6 +25,7 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
 // The featured pool, exclusions, order and gallery data remain unchanged.
 ---
 <BaseLayout>
+  <SiteIntro />
   <div class="scroll-portfolio">
     <section class="intro-panel scroll-panel" id="home" aria-labelledby="intro-title">
       <div class:list={['intro-visual', artOn && 'has-character']}>
@@ -77,14 +80,7 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
       <p class="section-label">THE CREATORS BEHIND THE CLIPS</p>
       <h2 id="clients-title">Meet the Clients!</h2>
       <p class="clients-intro">Explore the edits for each creator.</p>
-      <div class="client-links">
-        {creators.filter((creator) => clips.some((clip) => clip.creatorId === creator.id)).map((creator, index) => (
-          <a href={`/works?creator=${encodeURIComponent(creator.id)}`}>
-            <span class="client-index">{String(index + 1).padStart(2, '0')}</span>
-            <span>{creator.label}</span><span class="client-arrow" aria-hidden="true">↗</span>
-          </a>
-        ))}
-      </div>
+      <ClientGallery creators={creators.filter((creator) => clips.some((clip) => clip.creatorId === creator.id))} />
     </section>
     <section class="detail-panel terms-panel" id="terms" aria-label="Commission terms">
       <p class="section-label">THE DETAILS, UP FRONT</p>
