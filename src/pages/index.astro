@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../components/BaseLayout.astro';
 import SiteIntro from '../components/SiteIntro.astro';
-import ClientGallery from '../components/ClientGallery.astro';
 import CharacterArt from '../components/CharacterArt.astro';
 import FeaturedCarousel from '../components/FeaturedCarousel.astro';
 import ShortsWordmark from '../components/ShortsWordmark.astro';
@@ -13,7 +12,6 @@ import ClipPreview from '../islands/ClipPreview';
 import ClipViewer from '../islands/ClipViewer';
 import { site } from '../data/site';
 import { status } from '../data/status';
-import { creators } from '../data/tags';
 import { heroReel, hubClips, loadClips, toViewerClip } from '../lib/clips';
 import { loadService } from '../lib/services';
 const clips = await loadClips();
@@ -75,12 +73,6 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
     <section class="detail-panel web-panel" id="web-design" aria-label="Web design commissions">
       <div class="section-marker"><span>02 / WEB DESIGN</span><span aria-hidden="true" data-parallax="-0.05">↗</span></div>
       <ServiceSection service={web} />
-    </section>
-    <section class="clients-panel detail-panel" id="clients" aria-labelledby="clients-title">
-      <p class="section-label">THE CREATORS BEHIND THE CLIPS</p>
-      <h2 id="clients-title">Meet the Clients!</h2>
-      <p class="clients-intro">Explore the edits for each creator.</p>
-      <ClientGallery creators={creators.filter((creator) => clips.some((clip) => clip.creatorId === creator.id))} />
     </section>
     <section class="detail-panel terms-panel" id="terms" aria-label="Commission terms">
       <p class="section-label">THE DETAILS, UP FRONT</p>
