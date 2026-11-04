@@ -100,13 +100,13 @@ const profiles: Record<string, string> = {
     show(current);
 
     function reset(entry: HTMLElement) {
+      delete entry.dataset.curtain;
       delete entry.dataset.entering;
-      entry.style.removeProperty('--art-travel');
-      entry.style.removeProperty('--copy-travel');
-      entry.style.removeProperty('--depth-travel');
+      entry.style.removeProperty('--curtain-cut');
     }
 
     function render(step: number, amount: number) {
+      const outgoing = entries[current];
       if (step !== direction) {
         if (direction) {
           entries[incomingIndex].hidden = true;
@@ -116,15 +116,12 @@ const profiles: Record<string, string> = {
         incomingIndex = (current + step + entries.length) % entries.length;
         entries[incomingIndex].dataset.entering = '';
         entries[incomingIndex].hidden = false;
+        outgoing.dataset.curtain = step > 0 ? 'up' : 'down';
       }
       progress = amount;
-      const positions = [amount * -step, (1 - amount) * step];
-      [entries[current], entries[incomingIndex]].forEach((entry, i) => {
-        const offset = positions[i];
-        entry.style.setProperty('--art-travel', `${offset * 100}%`);
-        entry.style.setProperty('--copy-travel', `${offset * -100}%`);
-        entry.style.setProperty('--depth-travel', String(offset));
-      });
+      // Only the front scene is clipped. The opaque scene below covers the
+      // entire stage, including the antialiased edge of the moving mask.
+      outgoing.style.setProperty('--curtain-cut', `${amount * 100}%`);
     }
 
     function settle(step: number, commit: boolean) {
@@ -267,15 +264,12 @@ const profiles: Record<string, string> = {
     color: white;
   }
   [data-ready] .client-entry { position: absolute; inset: 0; min-height: 0; }
-  .art-window { z-index: 0; }
-  .copy-window { z-index: 2; }
-  [data-entering] .art-window { z-index: 1; }
-  [data-entering] .copy-window { z-index: 3; }
-  .client-art { transform: translateY(var(--art-travel, 0%)); }
-  .client-copy { transform: translateY(var(--copy-travel, 0%)); }
-  [data-entering] .client-art, [data-entering] .client-copy { scale: 1 1.004; }
-  .art-depth { transform: translateY(calc(var(--depth-travel, 0) * -115px)); }
-  .character-depth { transform: translateY(calc(var(--depth-travel, 0) * -32px)); }
+  [data-ready] .client-entry { background: var(--panel); }
+  [data-ready] .client-entry[data-entering] { z-index: 0; }
+  [data-ready] .client-entry[data-curtain] { z-index: 1; }
+  .client-entry[data-curtain="up"] { clip-path: inset(0 0 var(--curtain-cut, 0%) 0); }
+  .client-entry[data-curtain="down"] { clip-path: inset(var(--curtain-cut, 0%) 0 0 0); }
+  .copy-window { z-index: 1; }
   .art-window, .copy-window { position: absolute; overflow: clip; }
   .art-window { inset: 0 0 0 var(--art-start); }
   .copy-window { inset: 0 auto 0 0; width: var(--copy-end); clip-path: polygon(0 0, 100% 0, 80.5% 100%, 0 100%); }
