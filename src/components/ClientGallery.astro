@@ -151,7 +151,7 @@ const colors = ['#d8ece9', '#e8e4f2', '#f2e4d7'];
   .client-entry[hidden] { display: none; }
   [data-ready] .client-entry { position: absolute; inset: 0; min-height: 0; }
   .client-entry[data-entering] { z-index: 1; }
-  .art-window, .copy-window { overflow: hidden; min-height: 0; }
+  .art-window, .copy-window { overflow: clip; min-height: 0; }
   .art-window { grid-area: art; }
   .copy-window { grid-area: copy; }
   .client-art, .client-copy { min-height: 100%; }
