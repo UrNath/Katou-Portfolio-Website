@@ -88,6 +88,7 @@ const profiles: Record<string, string> = {
     let current = 0;
     let moving = false;
     let wheelTotal = 0;
+    let wheelBlocked = false;
     let lastWheel = -Infinity;
     let wheelTimer: ReturnType<typeof setTimeout> | undefined;
     let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean } | undefined;
@@ -194,8 +195,11 @@ const profiles: Record<string, string> = {
       const now = performance.now();
       const fresh = now - lastWheel > 180;
       lastWheel = now;
-      if (moving || drag) return;
-      if (fresh) wheelTotal = 0;
+      if (fresh) {
+        wheelTotal = 0;
+        wheelBlocked = false;
+      }
+      if (moving || drag || wheelBlocked) return;
       wheelTotal += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
       const step = Math.sign(wheelTotal) || direction || 1;
       if (!reduced.matches) render(step, Math.min(1, Math.abs(wheelTotal) / stage.clientHeight));
@@ -203,6 +207,7 @@ const profiles: Record<string, string> = {
       // Accumulate trackpad reversals before releasing, rather than latching
       // the first direction. A wheel notch still completes one scene.
       wheelTimer = setTimeout(() => {
+        wheelBlocked = true;
         settle(step, Math.abs(wheelTotal) >= 34);
         wheelTotal = 0;
       }, 180);
