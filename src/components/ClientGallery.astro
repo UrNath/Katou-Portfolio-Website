@@ -25,11 +25,13 @@ const profiles: Record<string, string> = {
           <div class="art-window">
             <div class="client-art">
               <svg viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <g class="art-depth">
                 <rect width="800" height="900" fill="var(--backdrop)" />
                 <circle cx="430" cy="330" r="273" fill="var(--glow)" opacity=".55" />
                 <path d="M-50 790 670 -40M100 950 850 80M-80 420 390 -90" stroke="var(--glow)" stroke-width="18" opacity=".28" />
                 <circle cx="430" cy="330" r="300" fill="none" stroke="var(--glow)" stroke-width="2" />
-                <g transform={index % 2 ? 'translate(850 0) scale(-1 1)' : undefined}>
+                </g>
+                <g class="character-depth"><g transform={index % 2 ? 'translate(850 0) scale(-1 1)' : undefined}>
                   <path d="M156 714c-37-132 1-226 15-323 19-153 91-253 242-253 154 0 230 111 230 252 0 119 69 200 23 324z" fill="var(--portrait-ink)" />
                   <path d="M65 930c19-159 123-251 300-285l125 4c170 23 266 129 294 281z" fill="var(--portrait-ink)" />
                   <path d="m358 590-14 69 85 106 91-109-21-77z" fill="#d9968d" />
@@ -43,6 +45,7 @@ const profiles: Record<string, string> = {
                   <path d="m194 359 32-83 25 79 80 23-83 21-25 79-23-82-77-25z" fill="var(--glow)" />
                 </g>
                 <path d="m651 199 15-43 13 43 43 14-43 13-13 44-15-44-42-13zM111 563l11-30 9 30 31 9-31 10-9 30-11-30-29-10z" fill="var(--glow)" />
+                </g>
               </svg>
             </div>
           </div>
@@ -79,7 +82,10 @@ const profiles: Record<string, string> = {
     let moving = false;
     let wheelTotal = 0;
     let lastWheel = -Infinity;
-    let touchStart: Touch | undefined;
+    let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean } | undefined;
+    let direction = 0;
+    let progress = 0;
+    let incomingIndex = current;
     stage.dataset.ready = '';
     controls.hidden = false;
 
@@ -93,36 +99,62 @@ const profiles: Record<string, string> = {
     }
     show(current);
 
-    async function move(step: number) {
-      if (moving) return;
-      const next = (current + step + entries.length) % entries.length;
-      const outgoing = entries[current];
-      const incoming = entries[next];
-      if (outgoing.contains(document.activeElement)) stage.focus({ preventScroll: true });
-      outgoing.inert = true;
-      if (!reduced.matches) {
-        moving = true;
-        incoming.hidden = false;
-        incoming.dataset.entering = '';
-        const animations: Animation[] = [];
-        for (const selector of ['.client-art', '.client-copy']) {
-          const direction = step * (selector === '.client-art' ? 1 : -1);
-          for (const [entry, from, to] of [[outgoing, 0, -direction], [incoming, direction, 0]] as const) {
-            const panel = entry.querySelector(selector);
-            if (panel) animations.push(panel.animate(
-              [{ transform: `translateY(${from * 100}%)` }, { transform: `translateY(${to * 100}%)` }],
-              { duration: 550, easing: 'cubic-bezier(.65, 0, .25, 1)', fill: 'both' },
-            ));
-          }
+    function reset(entry: HTMLElement) {
+      delete entry.dataset.entering;
+      entry.style.removeProperty('--art-travel');
+      entry.style.removeProperty('--copy-travel');
+      entry.style.removeProperty('--depth-travel');
+    }
+
+    function render(step: number, amount: number) {
+      if (step !== direction) {
+        if (direction) {
+          entries[incomingIndex].hidden = true;
+          reset(entries[incomingIndex]);
         }
-        await Promise.allSettled(animations.map((animation) => animation.finished));
-        outgoing.hidden = true;
-        animations.forEach((animation) => animation.cancel());
-        delete incoming.dataset.entering;
-        moving = false;
+        direction = step;
+        incomingIndex = (current + step + entries.length) % entries.length;
+        entries[incomingIndex].dataset.entering = '';
+        entries[incomingIndex].hidden = false;
       }
-      current = next;
-      show(current);
+      progress = amount;
+      const positions = [amount * -step, (1 - amount) * step];
+      [entries[current], entries[incomingIndex]].forEach((entry, i) => {
+        const offset = positions[i];
+        entry.style.setProperty('--art-travel', `${offset * 100}%`);
+        entry.style.setProperty('--copy-travel', `${offset * -100}%`);
+        entry.style.setProperty('--depth-travel', String(offset));
+      });
+    }
+
+    function settle(step: number, commit: boolean) {
+      if (moving) return;
+      moving = true;
+      const outgoing = entries[current];
+      if (commit && outgoing.contains(document.activeElement)) stage.focus({ preventScroll: true });
+      const from = progress;
+      const target = commit ? 1 : 0;
+      const finish = () => {
+        if (commit) current = (current + step + entries.length) % entries.length;
+        show(current);
+        entries.forEach(reset);
+        direction = 0;
+        progress = 0;
+        moving = false;
+      };
+      if (reduced.matches || from === target) {
+        finish();
+        return;
+      }
+      const duration = 150 + 370 * Math.abs(target - from);
+      const started = performance.now();
+      const frame = (now: number) => {
+        const time = Math.min(1, (now - started) / duration);
+        render(step, from + (target - from) * (1 - (1 - time) ** 3));
+        if (time < 1) requestAnimationFrame(frame);
+        else finish();
+      };
+      requestAnimationFrame(frame);
     }
 
     stage.addEventListener('wheel', (event) => {
@@ -132,32 +164,62 @@ const profiles: Record<string, string> = {
       const fresh = now - lastWheel > 160;
       lastWheel = now;
       if (fresh) wheelTotal = 0;
-      if (moving || !Number.isFinite(wheelTotal)) return;
+      if (moving || drag || !Number.isFinite(wheelTotal)) return;
       wheelTotal += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
       if (Math.abs(wheelTotal) < 34) return;
       const step = Math.sign(wheelTotal);
       wheelTotal = Infinity;
-      void move(step);
+      settle(step, true);
     }, { passive: false });
 
-    stage.addEventListener('touchstart', (event) => {
-      touchStart = event.touches.length === 1 ? event.touches[0] : undefined;
-    }, { passive: true });
-    stage.addEventListener('touchcancel', () => { touchStart = undefined; });
-    stage.addEventListener('touchend', (event) => {
-      const end = event.changedTouches[0];
-      if (!touchStart || !end) return;
-      const dy = touchStart.clientY - end.clientY;
-      const dx = touchStart.clientX - end.clientX;
-      touchStart = undefined;
-      if (Math.abs(dy) > 42 && Math.abs(dy) > Math.abs(dx)) void move(Math.sign(dy));
+    stage.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'touch' || !event.isPrimary || moving) return;
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY,
+        lastY: event.clientY, time: event.timeStamp, velocity: 0, locked: false };
+    });
+    stage.addEventListener('pointermove', (event) => {
+      if (!drag || drag.id !== event.pointerId) return;
+      const distance = drag.y - event.clientY;
+      const horizontal = Math.abs(drag.x - event.clientX);
+      if (!drag.locked) {
+        if (horizontal > 9 && horizontal > Math.abs(distance)) {
+          drag = undefined;
+          return;
+        }
+        if (Math.abs(distance) < 9) return;
+        drag.locked = true;
+        stage.setPointerCapture(event.pointerId);
+      }
+      const elapsed = Math.max(1, event.timeStamp - drag.time);
+      drag.velocity = (drag.lastY - event.clientY) / elapsed;
+      drag.lastY = event.clientY;
+      drag.time = event.timeStamp;
+      if (!reduced.matches) render(Math.sign(distance) || direction || 1, Math.min(1, Math.abs(distance) / stage.clientHeight));
+    });
+
+    function release(event: PointerEvent) {
+      if (!drag || drag.id !== event.pointerId) return;
+      const gesture = drag;
+      drag = undefined;
+      if (!gesture.locked) return;
+      const distance = gesture.y - gesture.lastY;
+      const step = Math.sign(distance) || direction || 1;
+      const speed = event.timeStamp - gesture.time < 100 ? gesture.velocity * step : 0;
+      const commit = event.type === 'pointerup' &&
+        (Math.abs(distance) >= stage.clientHeight * .25 || (Math.abs(distance) >= 24 && speed > .45));
+      settle(step, commit);
+    }
+    stage.addEventListener('pointerup', release);
+    stage.addEventListener('pointercancel', release);
+    stage.addEventListener('lostpointercapture', (event) => {
+      if (event.target === stage) release(event);
     });
 
     stage.addEventListener('keydown', (event) => {
       const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1 }[event.key];
-      if (!step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (drag || !step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       event.preventDefault();
-      void move(step);
+      settle(step, true);
     });
   }
 </script>
@@ -205,7 +267,15 @@ const profiles: Record<string, string> = {
     color: white;
   }
   [data-ready] .client-entry { position: absolute; inset: 0; min-height: 0; }
-  .client-entry[data-entering] { z-index: 1; }
+  .art-window { z-index: 0; }
+  .copy-window { z-index: 2; }
+  [data-entering] .art-window { z-index: 1; }
+  [data-entering] .copy-window { z-index: 3; }
+  .client-art { transform: translateY(var(--art-travel, 0%)); }
+  .client-copy { transform: translateY(var(--copy-travel, 0%)); }
+  [data-entering] .client-art, [data-entering] .client-copy { scale: 1 1.004; }
+  .art-depth { transform: translateY(calc(var(--depth-travel, 0) * -115px)); }
+  .character-depth { transform: translateY(calc(var(--depth-travel, 0) * -32px)); }
   .art-window, .copy-window { position: absolute; overflow: clip; }
   .art-window { inset: 0 0 0 var(--art-start); }
   .copy-window { inset: 0 auto 0 0; width: var(--copy-end); clip-path: polygon(0 0, 100% 0, 80.5% 100%, 0 100%); }
