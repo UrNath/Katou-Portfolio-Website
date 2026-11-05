@@ -94,6 +94,7 @@ const profiles: Record<string, string> = {
 </div>
 
 <script>
+  import { GalleryWheel } from '../lib/gallery-wheel.mjs';
   const reel = document.querySelector<HTMLElement>('.client-reel');
   const controls = document.querySelector<HTMLElement>('.reel-controls');
   const status = controls?.querySelector('output');
@@ -106,20 +107,16 @@ const profiles: Record<string, string> = {
     const announcement = status;
     let current = 0;
     let moving = false;
-    let wheelTotal = 0;
-    let wheelBlocked = false;
-    let wheelDirection = 0;
-    let reverseTotal = 0;
+    const wheel = new GalleryWheel();
     let queuedStep = 0;
     let unlocked = false;
-    let lastSettled = -Infinity;
-    let lastWheel = -Infinity;
 
     let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean } | undefined;
     let direction = 0;
     let progress = 0;
     let incomingIndex = current;
     stage.dataset.ready = '';
+    stage.inert = true;
     controls.hidden = false;
     const media = new Map<HTMLVideoElement, () => void>();
     stage.querySelectorAll<HTMLVideoElement>('video').forEach((video) => {
@@ -157,23 +154,25 @@ const profiles: Record<string, string> = {
     function palette(entry: HTMLElement) {
       return [entry.style.getPropertyValue('--panel'), entry.style.getPropertyValue('--backdrop')];
     }
-    function paintHeader(amount = 0) {
-      const [panel, art] = palette(entries[current]);
-      const [nextPanel, nextArt] = palette(entries[incomingIndex]);
-      const root = document.body.style;
-      root.setProperty('--scene-panel', panel);
-      root.setProperty('--scene-art', art);
-      root.setProperty('--next-panel', nextPanel);
-      root.setProperty('--next-art', nextArt);
-      root.setProperty('--nav-progress', `${amount * 100}%`);
-      document.body.dataset.sceneDirection = direction < 0 ? 'down' : 'up';
+    function paintProgress(amount = 0) {
+      const [panel] = palette(entries[current]);
+      document.body.style.setProperty('--scene-panel', panel);
       markers.forEach((marker, i) => {
         const weight = i === current ? 1 - amount : i === incomingIndex ? amount : 0;
         (marker as HTMLElement).style.width = `${5 + weight * 11}px`;
         (marker as HTMLElement).style.opacity = `${.45 + weight * .55}`;
       });
     }
-    paintHeader();
+    paintProgress();
+    let artworkReady = false;
+    const unlock = () => {
+      if (!artworkReady) return;
+      unlocked = true;
+      stage.inert = false;
+      const bar = document.querySelector<HTMLElement>('.site-bar');
+      if (bar) bar.inert = false;
+    };
+    document.addEventListener('nk-intro-complete', unlock, { once: true });
     // Decode the first scene before lifting the logo curtain. Other scenes load
     // eagerly and retain their media elements throughout the gallery lifetime.
     Promise.all([
@@ -183,14 +182,10 @@ const profiles: Record<string, string> = {
       new Promise(resolve => setTimeout(resolve, 900)),
     ])
       .then(() => {
-        document.dispatchEvent(new Event('nk-gallery-ready'));
-        stage.dataset.opening = '';
-        setTimeout(() => {
-          delete stage.dataset.opening;
-          unlocked = true;
-          const bar = document.querySelector<HTMLElement>('.site-bar');
-          if (bar) bar.inert = false;
-        }, reduced.matches ? 0 : 760);
+        artworkReady = true;
+        const opening = document.getElementById('site-opening');
+        if (!opening || opening.hidden) unlock();
+        else document.dispatchEvent(new Event('nk-gallery-ready'));
       });
 
     // One clock for every scene, including hidden neighbours. Revealing a layer
@@ -251,7 +246,7 @@ const profiles: Record<string, string> = {
         outgoing.dataset.curtain = step > 0 ? 'up' : 'down';
       }
       progress = amount;
-      paintHeader(amount);
+      paintProgress(amount);
       // One progress value drives opposing masks inside fixed panel windows.
       // Incoming art and copy remain opaque beneath their outgoing counterparts.
       outgoing.style.setProperty('--curtain-cut', `${amount * 100}%`);
@@ -275,9 +270,8 @@ const profiles: Record<string, string> = {
         direction = 0;
         progress = 0;
         moving = false;
-        lastSettled = performance.now();
         incomingIndex = current;
-        paintHeader();
+        paintProgress();
         if (queuedStep) {
           const next = queuedStep;
           queuedStep = 0;
@@ -303,35 +297,14 @@ const profiles: Record<string, string> = {
     stage.addEventListener('wheel', (event) => {
       if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
       event.preventDefault();
-      const now = performance.now();
-      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
-      const step = Math.sign(delta);
-      const fresh = now - lastWheel > 220;
-      lastWheel = now;
       if (!unlocked || drag) return;
-      if (fresh && !moving && now - lastSettled > 300) { wheelTotal = 0; wheelBlocked = false; reverseTotal = 0; }
-      // A gesture triggers one automatic transition. Momentum never extends its
-      // lifetime or scrubs its masks. A deliberate opposite gesture is retained
-      // once, then runs after the current transition reaches a coherent endpoint.
-      if (wheelBlocked || moving) {
-        if (step !== wheelDirection) {
-          reverseTotal += delta;
-          if (Math.abs(reverseTotal) >= 48) {
-            wheelDirection = step;
-            reverseTotal = 0;
-            if (moving) queuedStep = step === direction ? 0 : step;
-            else { queuedStep = 0; settle(step, true); }
-          }
-        } else reverseTotal = 0;
-        return;
-      }
-      if (Math.sign(wheelTotal) !== step) wheelTotal = 0;
-      wheelTotal += delta;
-      if (Math.abs(wheelTotal) < 28) return;
-      wheelDirection = step;
-      wheelBlocked = true;
-      wheelTotal = 0;
-      settle(step, true);
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
+      const step = wheel.feed(delta, performance.now(), event.deltaMode);
+      if (!step) return;
+      // At most one intentional next gesture is retained while curtains settle.
+      // Completion consumes it immediately; there is no post-animation cooldown.
+      if (moving) queuedStep = step;
+      else settle(step, true);
     }, { passive: false });
 
     stage.addEventListener('pointerdown', (event) => {
@@ -393,23 +366,15 @@ const profiles: Record<string, string> = {
     position: fixed;
     inset: 0 0 auto;
     height: calc(56px + env(safe-area-inset-top));
-    background: linear-gradient(100deg, var(--next-panel, #283b62) 39%, color-mix(in srgb, var(--next-art, #556da2) 60%, #101821) 39%);
-    isolation: isolate;
+    background: rgb(8 16 24 / .60);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    backdrop-filter: blur(14px) saturate(115%);
     color: white;
     border: 0;
+    border-bottom: 1px solid rgb(255 255 255 / .12);
+    text-shadow: 0 1px 3px rgb(0 0 0 / .4);
   }
-  :global(.immersive-clients .site-bar::before),
-  :global(.immersive-clients .site-bar::after) {
-    content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-    background: var(--scene-panel, #283b62);
-    clip-path: polygon(0 var(--nav-progress, 0%), 40% var(--nav-progress, 0%), 40% 100%, 0 100%);
-  }
-  :global(.immersive-clients .site-bar::after) {
-    background: color-mix(in srgb, var(--scene-art, #556da2) 60%, #101821);
-    clip-path: polygon(40% 0, 100% 0, 100% calc(100% - var(--nav-progress, 0%)), 40% calc(100% - var(--nav-progress, 0%)));
-  }
-  :global(.immersive-clients[data-scene-direction="down"] .site-bar::before) { clip-path: polygon(0 0, 40% 0, 40% calc(100% - var(--nav-progress, 0%)), 0 calc(100% - var(--nav-progress, 0%))); }
-  :global(.immersive-clients[data-scene-direction="down"] .site-bar::after) { clip-path: polygon(40% var(--nav-progress, 0%), 100% var(--nav-progress, 0%), 100% 100%, 40% 100%); }
+  :global(.immersive-clients .commission-link) { border-color: rgb(255 255 255 / .35); }
   :global(.immersive-clients .bar-link),
   :global(.immersive-clients .brand),
   :global(.immersive-clients .menu-btn),
@@ -428,17 +393,12 @@ const profiles: Record<string, string> = {
   .client-gallery { position: relative; }
   .client-reel[data-ready] {
     position: relative;
-    margin-top: calc(56px + env(safe-area-inset-top));
-    height: calc(100svh - 56px - env(safe-area-inset-top));
-    height: calc(100dvh - 56px - env(safe-area-inset-top));
+    height: 100svh;
+    height: 100dvh;
     overflow: clip;
     isolation: isolate;
     touch-action: pan-x pinch-zoom;
   }
-  [data-opening] .art-window { animation: art-arrive 740ms cubic-bezier(.76,0,.24,1) both; }
-  [data-opening] .copy-window { animation: copy-arrive 740ms cubic-bezier(.76,0,.24,1) both; }
-  @keyframes art-arrive { from { transform: translateY(100%); } }
-  @keyframes copy-arrive { from { transform: translateY(-100%); } }
   .client-reel:focus-visible { outline: 2px solid white; outline-offset: -4px; }
   .client-entry {
     --art-start: 33%;

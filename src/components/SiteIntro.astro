@@ -11,7 +11,8 @@ const { gallery = false } = Astro.props;
 <script is:inline>
   (() => {
     const opening = document.getElementById('site-opening');
-    if (!opening || location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const motion = matchMedia('(prefers-reduced-motion: reduce)');
+    if (!opening || location.hash || motion.matches) return;
     const gallery = opening.hasAttribute('data-gallery');
     try {
       if (!gallery && sessionStorage.getItem('nk-opening')) return;
@@ -21,15 +22,22 @@ const { gallery = false } = Astro.props;
     const started = performance.now();
     opening.hidden = false;
     if (gallery) document.querySelector('.site-bar').inert = true;
-    const finish = () => { opening.hidden = true; };
-    opening.addEventListener('animationend', finish, { once: true });
+    const finish = () => {
+      if (opening.hidden) return;
+      opening.hidden = true;
+      document.dispatchEvent(new Event('nk-intro-complete'));
+    };
+    opening.addEventListener('animationend', event => {
+      if (event.target === opening) finish();
+    });
+    motion.addEventListener('change', event => { if (event.matches) finish(); });
     if (!gallery) document.addEventListener('keydown', finish, { once: true });
     if (gallery) {
       const ready = () => {
         opening.setAttribute('data-revealing', '');
       };
       document.addEventListener('nk-gallery-ready', ready, { once: true });
-    } else setTimeout(finish, 1700);
+    } else setTimeout(finish, 2000);
     function tick(now) {
       if (opening.hidden) return;
       const progress = Math.min(100, Math.round((now - started) / 9));
@@ -54,14 +62,14 @@ const { gallery = false } = Astro.props;
     background: #fff;
     color: #181b18;
     pointer-events: none;
-    animation: opening-away 550ms 950ms cubic-bezier(.76, 0, .24, 1) both;
+    animation: opening-away 850ms 950ms cubic-bezier(.76, 0, .24, 1) both;
   }
   .opening[data-gallery] { animation: none; }
-  .opening[data-gallery][data-revealing] { animation: opening-away 740ms cubic-bezier(.76,0,.24,1) both; }
+  .opening[data-gallery][data-revealing] { animation: opening-away 850ms cubic-bezier(.76,0,.24,1) both; }
   .opening[hidden] { display: none; }
   .opening :global(.wordmark) { font-size: clamp(2.7rem, 8vw, 8rem); }
   .opening-count { font-variant-numeric: tabular-nums; color: #0b6f73; }
-  @keyframes opening-away { to { clip-path: inset(0 0 100% 0); } }
+  @keyframes opening-away { to { transform: translate3d(0, -102%, 0); } }
   @media (max-width: 640px) {
     .opening { grid-template-columns: 1fr auto; }
     .opening :global(.wordmark) { grid-column: 1 / -1; }
