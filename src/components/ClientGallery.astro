@@ -369,7 +369,7 @@ const profiles: Record<string, string> = {
   .client-entry:has(.pidge-scene) .client-art { background: #556da2; }
   .client-entry:has(.client-video) .client-art { background: #1e2030; }
   .pidge-cutout { filter: drop-shadow(12px 18px 14px rgb(10 15 35 / .38)); }
-  .pidge-background { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; }
+  .pidge-background { position: absolute; inset: -4%; width: 108%; max-width: none; height: 108%; object-fit: cover; }
   /* Keep the source's cropped arm and lower torso beyond the moving stage. */
   .client-art .pidge-scene { position: absolute; top: 0; right: 0; height: calc(100% + 64px); }
   .video-depth { width: 88%; margin-left: 12%; height: 100%; }
