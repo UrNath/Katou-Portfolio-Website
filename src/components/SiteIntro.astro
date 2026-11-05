@@ -1,8 +1,9 @@
 ---
 import Wordmark from './Wordmark.astro';
+const { gallery = false } = Astro.props;
 ---
 
-<div class="opening" id="site-opening" hidden aria-hidden="true">
+<div class="opening" id="site-opening" data-gallery={gallery || undefined} hidden aria-hidden="true">
   <Wordmark />
   <span>Editing &amp; Web Design</span>
   <span class="opening-count" data-count>00</span>
@@ -11,17 +12,24 @@ import Wordmark from './Wordmark.astro';
   (() => {
     const opening = document.getElementById('site-opening');
     if (!opening || location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const gallery = opening.hasAttribute('data-gallery');
     try {
-      if (sessionStorage.getItem('nk-opening')) return;
+      if (!gallery && sessionStorage.getItem('nk-opening')) return;
       sessionStorage.setItem('nk-opening', '1');
     } catch { /* The intro still works when storage is unavailable. */ }
     const count = opening.querySelector('[data-count]');
     const started = performance.now();
     opening.hidden = false;
+    if (gallery) document.querySelector('.site-bar').inert = true;
     const finish = () => { opening.hidden = true; };
     opening.addEventListener('animationend', finish, { once: true });
-    document.addEventListener('keydown', finish, { once: true });
-    setTimeout(finish, 1700);
+    if (!gallery) document.addEventListener('keydown', finish, { once: true });
+    if (gallery) {
+      const ready = () => {
+        opening.setAttribute('data-revealing', '');
+      };
+      document.addEventListener('nk-gallery-ready', ready, { once: true });
+    } else setTimeout(finish, 1700);
     function tick(now) {
       if (opening.hidden) return;
       const progress = Math.min(100, Math.round((now - started) / 9));
@@ -48,6 +56,8 @@ import Wordmark from './Wordmark.astro';
     pointer-events: none;
     animation: opening-away 550ms 950ms cubic-bezier(.76, 0, .24, 1) both;
   }
+  .opening[data-gallery] { animation: none; }
+  .opening[data-gallery][data-revealing] { animation: opening-away 740ms cubic-bezier(.76,0,.24,1) both; }
   .opening[hidden] { display: none; }
   .opening :global(.wordmark) { font-size: clamp(2.7rem, 8vw, 8rem); }
   .opening-count { font-variant-numeric: tabular-nums; color: #0b6f73; }

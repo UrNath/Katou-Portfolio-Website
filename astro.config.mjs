@@ -18,6 +18,7 @@ export default defineConfig({
     keystatic(),
   ],
   vite: {
+    server: { allowedHosts: ['terminal.local'] },
     plugins: [tailwindcss()],
   },
 });

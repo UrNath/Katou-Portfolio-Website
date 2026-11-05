@@ -2,8 +2,8 @@
 interface Props { creators: { id: string; label: string }[] }
 const { creators } = Astro.props;
 const colors = [
-  { panel: '#164c50', backdrop: '#357c80', glow: '#a3f0db', ink: '#192d46' },
-  { panel: '#403052', backdrop: '#805588', glow: '#f5b4d2', ink: '#33264b' },
+  { panel: '#283b62', backdrop: '#556da2', glow: '#a3f0db', ink: '#192d46' },
+  { panel: '#654653', backdrop: '#b88698', glow: '#f5b4d2', ink: '#33264b' },
   { panel: '#693e35', backdrop: '#a96653', glow: '#ffdb9e', ink: '#432d46' },
 ];
 // Profile paths come from the credited TikTok video URLs in clips.json.
@@ -27,7 +27,7 @@ const profiles: Record<string, string> = {
               {creator.id === 'pidge' ? (
                 <>
                 <img class="pidge-background art-depth" src="/clients/pidge-background.webp" width="1128" height="1536" alt="" aria-hidden="true" />
-                <svg class="pidge-scene" viewBox="0 0 1128 1536" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+                <svg class="pidge-scene" viewBox="0 0 1128 1536" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                   <g class="character-depth pidge-cutout">
                     <image href="/clients/pidge-foreground.webp" width="1128" height="1536" />
                   </g>
@@ -108,8 +108,13 @@ const profiles: Record<string, string> = {
     let moving = false;
     let wheelTotal = 0;
     let wheelBlocked = false;
+    let wheelDirection = 0;
+    let reverseTotal = 0;
+    let queuedStep = 0;
+    let unlocked = false;
+    let lastSettled = -Infinity;
     let lastWheel = -Infinity;
-    let wheelTimer: ReturnType<typeof setTimeout> | undefined;
+
     let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean } | undefined;
     let direction = 0;
     let progress = 0;
@@ -142,19 +147,75 @@ const profiles: Record<string, string> = {
       entries.forEach((entry, i) => {
         entry.hidden = i !== index;
         entry.inert = i !== index;
+        if (i !== index) entry.querySelectorAll('video').forEach(video => video.pause());
       });
       announcement.textContent = entries[index].getAttribute('aria-label') ?? '';
       markers.forEach((marker, i) => marker.toggleAttribute('data-active', i === index));
       resumeMedia(entries[index]);
     }
     show(current);
+    function palette(entry: HTMLElement) {
+      return [entry.style.getPropertyValue('--panel'), entry.style.getPropertyValue('--backdrop')];
+    }
+    function paintHeader(amount = 0) {
+      const [panel, art] = palette(entries[current]);
+      const [nextPanel, nextArt] = palette(entries[incomingIndex]);
+      const root = document.body.style;
+      root.setProperty('--scene-panel', panel);
+      root.setProperty('--scene-art', art);
+      root.setProperty('--next-panel', nextPanel);
+      root.setProperty('--next-art', nextArt);
+      root.setProperty('--nav-progress', `${amount * 100}%`);
+      document.body.dataset.sceneDirection = direction < 0 ? 'down' : 'up';
+      markers.forEach((marker, i) => {
+        const weight = i === current ? 1 - amount : i === incomingIndex ? amount : 0;
+        (marker as HTMLElement).style.width = `${5 + weight * 11}px`;
+        (marker as HTMLElement).style.opacity = `${.45 + weight * .55}`;
+      });
+    }
+    paintHeader();
+    // Decode the first scene before lifting the logo curtain. Other scenes load
+    // eagerly and retain their media elements throughout the gallery lifetime.
+    Promise.all([
+      ...['/clients/pidge-background.webp', '/clients/pidge-foreground.webp', '/clients/chiseyi-poster.webp'].map(src => {
+        const image = new Image(); image.src = src; return image.decode().catch(() => {});
+      }),
+      new Promise(resolve => setTimeout(resolve, 900)),
+    ])
+      .then(() => {
+        document.dispatchEvent(new Event('nk-gallery-ready'));
+        stage.dataset.opening = '';
+        setTimeout(() => {
+          delete stage.dataset.opening;
+          unlocked = true;
+          const bar = document.querySelector<HTMLElement>('.site-bar');
+          if (bar) bar.inert = false;
+        }, reduced.matches ? 0 : 760);
+      });
 
     // One clock for every scene, including hidden neighbours. Revealing a layer
     // or completing a gesture never restarts its idle phase.
     const motionOrigin = performance.now();
     let idleFrame = 0;
+    let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0;
+    stage.addEventListener('pointermove', event => {
+      if (event.pointerType !== 'mouse') return;
+      const bounds = stage.getBoundingClientRect();
+      pointerX = ((event.clientX - bounds.left) / bounds.width - .5) * 2;
+      pointerY = ((event.clientY - bounds.top) / bounds.height - .5) * 2;
+    });
+    const neutral = () => { pointerX = pointerY = 0; };
+    stage.addEventListener('pointerleave', neutral);
+    window.addEventListener('blur', neutral);
+    let previousFrame = performance.now();
     function floatLayers(now: number) {
       const seconds = (now - motionOrigin) / 1000;
+      const blend = 1 - Math.exp(-(now - previousFrame) / 130);
+      previousFrame = now;
+      smoothX += (pointerX - smoothX) * blend;
+      smoothY += (pointerY - smoothY) * blend;
+      stage.style.setProperty('--pointer-x', `${smoothX * 16}px`);
+      stage.style.setProperty('--pointer-y', `${smoothY * 12}px`);
       stage.style.setProperty('--character-float', `${Math.sin(seconds * Math.PI * 2 / 6) * 9}px`);
       stage.style.setProperty('--background-float', `${Math.sin(seconds * Math.PI * 2 / 8) * -4}px`);
       idleFrame = requestAnimationFrame(floatLayers);
@@ -190,6 +251,7 @@ const profiles: Record<string, string> = {
         outgoing.dataset.curtain = step > 0 ? 'up' : 'down';
       }
       progress = amount;
+      paintHeader(amount);
       // One progress value drives opposing masks inside fixed panel windows.
       // Incoming art and copy remain opaque beneath their outgoing counterparts.
       outgoing.style.setProperty('--curtain-cut', `${amount * 100}%`);
@@ -201,8 +263,6 @@ const profiles: Record<string, string> = {
 
     function settle(step: number, commit: boolean) {
       if (moving) return;
-      clearTimeout(wheelTimer);
-      wheelTimer = undefined;
       moving = true;
       const outgoing = entries[current];
       if (commit && outgoing.contains(document.activeElement)) stage.focus({ preventScroll: true });
@@ -215,12 +275,21 @@ const profiles: Record<string, string> = {
         direction = 0;
         progress = 0;
         moving = false;
+        lastSettled = performance.now();
+        incomingIndex = current;
+        paintHeader();
+        if (queuedStep) {
+          const next = queuedStep;
+          queuedStep = 0;
+          settle(next, true);
+        }
       };
       if (reduced.matches || from === target) {
         finish();
         return;
       }
-      const duration = 150 + 370 * Math.abs(target - from);
+      render(step, from);
+      const duration = 180 + 460 * Math.abs(target - from);
       const started = performance.now();
       const frame = (now: number) => {
         const time = Math.min(1, (now - started) / duration);
@@ -235,28 +304,38 @@ const profiles: Record<string, string> = {
       if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
       event.preventDefault();
       const now = performance.now();
-      const fresh = now - lastWheel > 180;
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
+      const step = Math.sign(delta);
+      const fresh = now - lastWheel > 220;
       lastWheel = now;
-      if (fresh) {
-        wheelTotal = 0;
-        wheelBlocked = false;
+      if (!unlocked || drag) return;
+      if (fresh && !moving && now - lastSettled > 300) { wheelTotal = 0; wheelBlocked = false; reverseTotal = 0; }
+      // A gesture triggers one automatic transition. Momentum never extends its
+      // lifetime or scrubs its masks. A deliberate opposite gesture is retained
+      // once, then runs after the current transition reaches a coherent endpoint.
+      if (wheelBlocked || moving) {
+        if (step !== wheelDirection) {
+          reverseTotal += delta;
+          if (Math.abs(reverseTotal) >= 48) {
+            wheelDirection = step;
+            reverseTotal = 0;
+            if (moving) queuedStep = step === direction ? 0 : step;
+            else { queuedStep = 0; settle(step, true); }
+          }
+        } else reverseTotal = 0;
+        return;
       }
-      if (moving || drag || wheelBlocked) return;
-      wheelTotal += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
-      const step = Math.sign(wheelTotal) || direction || 1;
-      if (!reduced.matches) render(step, Math.min(1, Math.abs(wheelTotal) / stage.clientHeight));
-      clearTimeout(wheelTimer);
-      // Accumulate trackpad reversals before releasing, rather than latching
-      // the first direction. A wheel notch still completes one scene.
-      wheelTimer = setTimeout(() => {
-        wheelBlocked = true;
-        settle(step, Math.abs(wheelTotal) >= 34);
-        wheelTotal = 0;
-      }, 180);
+      if (Math.sign(wheelTotal) !== step) wheelTotal = 0;
+      wheelTotal += delta;
+      if (Math.abs(wheelTotal) < 28) return;
+      wheelDirection = step;
+      wheelBlocked = true;
+      wheelTotal = 0;
+      settle(step, true);
     }, { passive: false });
 
     stage.addEventListener('pointerdown', (event) => {
-      if (event.pointerType !== 'touch' || !event.isPrimary || moving || wheelTimer !== undefined) return;
+      if (event.pointerType !== 'touch' || !event.isPrimary || moving || !unlocked) return;
       drag = { id: event.pointerId, x: event.clientX, y: event.clientY,
         lastY: event.clientY, time: event.timeStamp, velocity: 0, locked: false };
     });
@@ -300,7 +379,7 @@ const profiles: Record<string, string> = {
 
     stage.addEventListener('keydown', (event) => {
       const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1 }[event.key];
-      if (moving || drag || !step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (!unlocked || moving || drag || !step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       event.preventDefault();
       if (direction && direction !== step) render(step, 0);
       settle(step, true);
@@ -309,20 +388,33 @@ const profiles: Record<string, string> = {
 </script>
 
 <style>
-  :global(.immersive-clients) { background: #164c50; }
+  :global(.immersive-clients) { background: var(--scene-panel, #283b62); }
   :global(.immersive-clients .site-bar) {
     position: fixed;
     inset: 0 0 auto;
     height: calc(56px + env(safe-area-inset-top));
-    background: rgb(17 26 29 / .72);
+    background: linear-gradient(100deg, var(--next-panel, #283b62) 39%, color-mix(in srgb, var(--next-art, #556da2) 60%, #101821) 39%);
+    isolation: isolate;
     color: white;
     border: 0;
   }
+  :global(.immersive-clients .site-bar::before),
+  :global(.immersive-clients .site-bar::after) {
+    content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: var(--scene-panel, #283b62);
+    clip-path: polygon(0 var(--nav-progress, 0%), 40% var(--nav-progress, 0%), 40% 100%, 0 100%);
+  }
+  :global(.immersive-clients .site-bar::after) {
+    background: color-mix(in srgb, var(--scene-art, #556da2) 60%, #101821);
+    clip-path: polygon(40% 0, 100% 0, 100% calc(100% - var(--nav-progress, 0%)), 40% calc(100% - var(--nav-progress, 0%)));
+  }
+  :global(.immersive-clients[data-scene-direction="down"] .site-bar::before) { clip-path: polygon(0 0, 40% 0, 40% calc(100% - var(--nav-progress, 0%)), 0 calc(100% - var(--nav-progress, 0%))); }
+  :global(.immersive-clients[data-scene-direction="down"] .site-bar::after) { clip-path: polygon(40% var(--nav-progress, 0%), 100% var(--nav-progress, 0%), 100% 100%, 40% 100%); }
   :global(.immersive-clients .bar-link),
   :global(.immersive-clients .brand),
   :global(.immersive-clients .menu-btn),
-  :global(.immersive-clients .wordmark .nassu) { color: white; }
-  :global(.immersive-clients .wordmark .katou) { color: #a3f0db; }
+  :global(.immersive-clients .site-bar .wordmark .nassu) { color: white; }
+  :global(.immersive-clients .site-bar .wordmark .katou) { color: #a3f0db; }
   :global(.immersive-clients .bar-link[aria-current]),
   :global(.immersive-clients .bar-link:hover) { color: #132c30; background: #eaf7f4; }
   .gallery-sr {
@@ -336,12 +428,17 @@ const profiles: Record<string, string> = {
   .client-gallery { position: relative; }
   .client-reel[data-ready] {
     position: relative;
-    height: 100svh;
-    height: 100dvh;
+    margin-top: calc(56px + env(safe-area-inset-top));
+    height: calc(100svh - 56px - env(safe-area-inset-top));
+    height: calc(100dvh - 56px - env(safe-area-inset-top));
     overflow: clip;
     isolation: isolate;
     touch-action: pan-x pinch-zoom;
   }
+  [data-opening] .art-window { animation: art-arrive 740ms cubic-bezier(.76,0,.24,1) both; }
+  [data-opening] .copy-window { animation: copy-arrive 740ms cubic-bezier(.76,0,.24,1) both; }
+  @keyframes art-arrive { from { transform: translateY(100%); } }
+  @keyframes copy-arrive { from { transform: translateY(-100%); } }
   .client-reel:focus-visible { outline: 2px solid white; outline-offset: -4px; }
   .client-entry {
     --art-start: 33%;
@@ -369,17 +466,17 @@ const profiles: Record<string, string> = {
   .client-entry:has(.pidge-scene) .client-art { background: #556da2; }
   .client-entry:has(.client-video) .client-art { background: #1e2030; }
   .pidge-cutout { filter: drop-shadow(12px 18px 14px rgb(10 15 35 / .38)); }
-  .pidge-background { position: absolute; inset: -4%; width: 108%; max-width: none; height: 108%; object-fit: cover; }
+  .pidge-background { position: absolute; inset: -6%; width: 112%; max-width: none; height: 112%; object-fit: cover; }
   /* Keep the source's cropped arm and lower torso beyond the moving stage. */
-  .client-art .pidge-scene { position: absolute; top: 0; right: 0; height: calc(100% + 64px); }
-  .video-depth { width: 88%; margin-left: 12%; height: 100%; }
-  .client-video { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .client-art .pidge-scene { position: absolute; inset: -8% -5% -10% -5%; width: 110%; height: 118%; max-width: none; }
+  .video-depth { position: absolute; inset: -8%; width: 116%; height: 116%; }
+  .client-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 71% 46%; }
   .video-play { position: absolute; inset: auto auto 18% 50%; transform: translateX(-50%); padding: .7rem 1rem; border: 1px solid white; border-radius: 2rem; background: #152328e6; color: white; }
   .client-art svg { display: block; width: 100%; height: 100%; }
   @media (prefers-reduced-motion: no-preference) {
-    .character-depth { transform: translateY(calc(var(--character-float, 0px) + var(--character-shift, 0px))); }
-    .video-depth { transform: translateY(calc((var(--character-float, 0px) + var(--character-shift, 0px)) * .45)); }
-    .art-depth { transform: translateY(var(--background-float, 0px)); }
+    .character-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + var(--character-float, 0px) + var(--character-shift, 0px))); }
+    .video-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + (var(--character-float, 0px) + var(--character-shift, 0px)) * .45)); }
+    .art-depth { transform: translate(calc(var(--pointer-x, 0px) * -.35), calc(var(--background-float, 0px) + var(--pointer-y, 0px) * -.35)); }
   }
   .client-copy {
     display: flex;
@@ -394,11 +491,11 @@ const profiles: Record<string, string> = {
   .client-copy a { color: white; font-size: clamp(1rem, 1.7vw, 1.65rem); text-decoration: underline; text-underline-offset: .3em; }
   .reel-controls { position: absolute; inset: auto max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) auto; z-index: 2; pointer-events: none; }
   .position-marks { display: flex; align-items: center; gap: 5px; padding: 7px; border-radius: 100px; background: #152328a6; }
-  .position-marks span { width: 5px; height: 5px; border-radius: 100px; background: #ffffff80; transition: width .25s, background-color .25s; }
+  .position-marks span { width: 5px; height: 5px; border-radius: 100px; background: #ffffff80;  }
   .position-marks [data-active] { width: 16px; background: white; }
   @media (max-width: 680px) {
-    .client-art .pidge-scene { height: calc(100% + 12px); }
-    .video-depth { width: 100%; margin-left: 0; }
+    .client-art .pidge-scene { inset: -7% -12% -14%; width: 124%; height: 121%; }
+    .client-video { object-position: 73% 43%; }
     .art-window { inset: 0 0 31%; }
     .copy-window { inset: 58% 0 0; width: auto; clip-path: polygon(0 0, 100% 21%, 100% 100%, 0 100%); }
     .client-copy { justify-content: start; padding: clamp(2.5rem, 9vh, 5rem) 1.25rem 1.25rem; }

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../components/BaseLayout.astro';
+import SiteIntro from '../components/SiteIntro.astro';
 import ClientGallery from '../components/ClientGallery.astro';
 import { creators } from '../data/tags';
 import { loadClips } from '../lib/clips';
@@ -8,5 +9,6 @@ const clips = await loadClips();
 const clients = creators.filter((creator) => clips.some((clip) => clip.creatorId === creator.id));
 ---
 <BaseLayout title="Meet the Clients" immersive>
+  <SiteIntro gallery />
   <ClientGallery creators={clients} />
 </BaseLayout>
