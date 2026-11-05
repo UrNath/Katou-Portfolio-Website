@@ -24,6 +24,24 @@ const profiles: Record<string, string> = {
           style={`--panel:${palette.panel};--backdrop:${palette.backdrop};--glow:${palette.glow};--portrait-ink:${palette.ink}`}>
           <div class="art-window">
             <div class="client-art">
+              {creator.id === 'pidge' ? (
+                <>
+                <img class="pidge-background art-depth" src="/clients/pidge-background.webp" width="1128" height="1536" alt="" aria-hidden="true" />
+                <svg class="pidge-scene" viewBox="0 0 1128 1536" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+                  <g class="character-depth pidge-cutout">
+                    <image href="/clients/pidge-foreground.webp" width="1128" height="1536" />
+                  </g>
+                </svg>
+                </>
+              ) : creator.id === 'chi' ? (
+                <>
+                  <div class="video-depth">
+                    <video class="client-video" src="/clients/chiseyi-loop.mp4" poster="/clients/chiseyi-poster.webp"
+                      width="1280" height="720" autoplay muted loop playsinline preload="auto" aria-label="Chiseyi animated artwork"></video>
+                  </div>
+                  <button class="video-play" type="button" hidden>Play animation</button>
+                </>
+              ) : (
               <svg viewBox="0 0 800 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                 <g class="art-depth">
                 <rect width="800" height="900" fill="var(--backdrop)" />
@@ -54,6 +72,7 @@ const profiles: Record<string, string> = {
                 <path d="m651 199 15-43 13 43 43 14-43 13-13 44-15-44-42-13zM111 563l11-30 9 30 31 9-31 10-9 30-11-30-29-10z" fill="var(--glow)" />
                 </g>
               </svg>
+              )}
             </div>
           </div>
           <div class="copy-window">
@@ -97,6 +116,27 @@ const profiles: Record<string, string> = {
     let incomingIndex = current;
     stage.dataset.ready = '';
     controls.hidden = false;
+    const media = new Map<HTMLVideoElement, () => void>();
+    stage.querySelectorAll<HTMLVideoElement>('video').forEach((video) => {
+      const playButton = video.closest('.client-art')?.querySelector<HTMLButtonElement>('.video-play');
+      const play = () => {
+        video.muted = true;
+        video.play().then(() => { if (playButton) playButton.hidden = true; })
+          .catch(() => { if (playButton) playButton.hidden = false; });
+      };
+      playButton?.addEventListener('click', play);
+      video.addEventListener('playing', () => { if (playButton) playButton.hidden = true; });
+      video.addEventListener('error', () => { if (playButton) playButton.hidden = false; });
+      media.set(video, play);
+    });
+
+    function resumeMedia(entry: HTMLElement) {
+      // Retry suspended offscreen media without seeking or replacing its element.
+      entry.querySelectorAll('video').forEach((video) => media.get(video)?.());
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) entries.filter((entry) => !entry.hidden).forEach(resumeMedia);
+    });
 
     function show(index: number) {
       entries.forEach((entry, i) => {
@@ -105,6 +145,7 @@ const profiles: Record<string, string> = {
       });
       announcement.textContent = entries[index].getAttribute('aria-label') ?? '';
       markers.forEach((marker, i) => marker.toggleAttribute('data-active', i === index));
+      resumeMedia(entries[index]);
     }
     show(current);
 
@@ -145,6 +186,7 @@ const profiles: Record<string, string> = {
         incomingIndex = (current + step + entries.length) % entries.length;
         entries[incomingIndex].dataset.entering = '';
         entries[incomingIndex].hidden = false;
+        resumeMedia(entries[incomingIndex]);
         outgoing.dataset.curtain = step > 0 ? 'up' : 'down';
       }
       progress = amount;
@@ -323,10 +365,20 @@ const profiles: Record<string, string> = {
   .art-window { inset: 0 0 0 var(--art-start); }
   .copy-window { inset: 0 auto 0 0; width: var(--copy-end); clip-path: polygon(0 0, 100% 0, 80.5% 100%, 0 100%); }
   .client-art, .client-copy { height: 100%; }
-  .client-art { background: var(--backdrop); }
+  .client-art { position: relative; background: var(--backdrop); }
+  .client-entry:has(.pidge-scene) .client-art { background: #556da2; }
+  .client-entry:has(.client-video) .client-art { background: #1e2030; }
+  .pidge-cutout { filter: drop-shadow(12px 18px 14px rgb(10 15 35 / .38)); }
+  .pidge-background { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; }
+  /* Keep the source's cropped arm and lower torso beyond the moving stage. */
+  .client-art .pidge-scene { position: absolute; top: 0; right: 0; height: calc(100% + 64px); }
+  .video-depth { width: 88%; margin-left: 12%; height: 100%; }
+  .client-video { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .video-play { position: absolute; inset: auto auto 18% 50%; transform: translateX(-50%); padding: .7rem 1rem; border: 1px solid white; border-radius: 2rem; background: #152328e6; color: white; }
   .client-art svg { display: block; width: 100%; height: 100%; }
   @media (prefers-reduced-motion: no-preference) {
     .character-depth { transform: translateY(calc(var(--character-float, 0px) + var(--character-shift, 0px))); }
+    .video-depth { transform: translateY(calc((var(--character-float, 0px) + var(--character-shift, 0px)) * .45)); }
     .art-depth { transform: translateY(var(--background-float, 0px)); }
   }
   .client-copy {
@@ -345,6 +397,7 @@ const profiles: Record<string, string> = {
   .position-marks span { width: 5px; height: 5px; border-radius: 100px; background: #ffffff80; transition: width .25s, background-color .25s; }
   .position-marks [data-active] { width: 16px; background: white; }
   @media (max-width: 680px) {
+    .video-depth { width: 100%; margin-left: 0; }
     .art-window { inset: 0 0 31%; }
     .copy-window { inset: 58% 0 0; width: auto; clip-path: polygon(0 0, 100% 21%, 100% 100%, 0 100%); }
     .client-copy { justify-content: start; padding: clamp(2.5rem, 9vh, 5rem) 1.25rem 1.25rem; }
