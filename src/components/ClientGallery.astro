@@ -1,0 +1,469 @@
+---
+interface Props { creators: { id: string; label: string }[] }
+const { creators } = Astro.props;
+const colors = [
+  { panel: '#283b62', backdrop: '#556da2', glow: '#a3f0db', ink: '#192d46' },
+  { panel: '#654653', backdrop: '#b88698', glow: '#f5b4d2', ink: '#33264b' },
+  { panel: '#693e35', backdrop: '#a96653', glow: '#ffdb9e', ink: '#432d46' },
+];
+// Profile paths come from the credited TikTok video URLs in clips.json.
+const profiles: Record<string, string> = {
+  pidge: 'https://www.tiktok.com/@pidgeira',
+  chi: 'https://www.tiktok.com/@chiseyivt',
+  miu: 'https://www.tiktok.com/@miuonivt',
+};
+---
+
+<div class="client-gallery">
+  <div class="client-reel" tabindex="0" role="region" aria-label="Meet the Clients" aria-describedby="gallery-input">
+    <span id="gallery-input" class="gallery-sr">Browse clients with the up and down arrow keys.</span>
+    {creators.map((creator, index) => {
+      const palette = colors[index % colors.length];
+      return (
+        <article class="client-entry" aria-label={creator.label}
+          style={`--panel:${palette.panel};--backdrop:${palette.backdrop};--glow:${palette.glow};--portrait-ink:${palette.ink}`}>
+          <div class="art-window">
+            <div class="client-art">
+              {creator.id === 'pidge' ? (
+                <>
+                <img class="pidge-background art-depth" src="/clients/pidge-background.webp" width="1128" height="1536" alt="" aria-hidden="true" />
+                <svg class="pidge-scene" viewBox="0 0 1128 1536" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                  <g class="character-depth pidge-cutout">
+                    <image href="/clients/pidge-foreground.webp" width="1128" height="1536" />
+                  </g>
+                </svg>
+                </>
+              ) : creator.id === 'chi' ? (
+                <>
+                  <div class="video-depth">
+                    <video class="client-video" src="/clients/chiseyi-loop.mp4" poster="/clients/chiseyi-poster.webp"
+                      width="1280" height="720" autoplay muted loop playsinline preload="auto" aria-label="Chiseyi animated artwork"></video>
+                  </div>
+                  <button class="video-play" type="button" hidden>Play animation</button>
+                </>
+              ) : (
+              <svg viewBox="0 0 800 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <g class="art-depth">
+                <rect width="800" height="900" fill="var(--backdrop)" />
+                <circle cx="430" cy="330" r="273" fill="var(--glow)" opacity=".55" />
+                <path d="M-50 790 670 -40M100 950 850 80M-80 420 390 -90" stroke="var(--glow)" stroke-width="18" opacity=".28" />
+                <circle cx="430" cy="330" r="300" fill="none" stroke="var(--glow)" stroke-width="2" />
+                </g>
+                <g class="character-depth"><g transform={[
+                  'translate(35 55) scale(.9)',
+                  'translate(745 135) scale(-.73 .73) rotate(-12 400 500)',
+                  'translate(90 210) scale(.77) rotate(10 400 500)',
+                ][index % 3]}>
+                  {index === 1 && <path d="M180 775 70 575 88 440 135 415 161 468 149 561 292 711" fill="#f7cfc1" stroke="var(--portrait-ink)" stroke-width="18" />}
+                  {index === 2 && <path d="M130 570Q-50 340 155 200L275 230 220 580M560 240Q780 210 760 610L610 630" fill="var(--portrait-ink)" />}
+                  <path d={index === 1 ? 'M190 560c-70-210 2-422 223-422 210 0 290 220 220 422z' : 'M156 714c-37-132 1-226 15-323 19-153 91-253 242-253 154 0 230 111 230 252 0 119 69 200 23 324z'} fill="var(--portrait-ink)" />
+                  <path d="M65 930c19-159 123-251 300-285l125 4c170 23 266 129 294 281z" fill="var(--portrait-ink)" />
+                  <path d="m358 590-14 69 85 106 91-109-21-77z" fill="#d9968d" />
+                  <path d="M245 376c20-113 96-158 181-158 108 0 172 68 173 169l-9 116c-10 83-80 149-158 149-84 0-157-62-170-143z" fill="#f7cfc1" />
+                  <path d="M218 439c-20-175 53-293 205-293 123 0 225 81 217 237l-37 99-40-119-109-76 23 75-126-55-99 155z" fill="var(--portrait-ink)" />
+                  <path d="m284 484 59-16 53 14m75-2 53-17 48 10" fill="none" stroke="var(--portrait-ink)" stroke-width="12" stroke-linecap="round" />
+                  <ellipse cx="348" cy="489" rx="13" ry="17" fill="var(--backdrop)" />
+                  <ellipse cx="521" cy="486" rx="13" ry="17" fill="var(--backdrop)" />
+                  {index === 2 && <g fill="none" stroke="var(--glow)" stroke-width="9"><circle cx="348" cy="489" r="43" /><circle cx="521" cy="486" r="43" /><path d="M391 486h87" /></g>}
+                  <path d="M408 563q27 24 57-3" fill="none" stroke="#a15068" stroke-width="7" stroke-linecap="round" />
+                  <path d="m319 665 109 100 114-100 58 46-169 172-164-171z" fill="var(--glow)" />
+                  <path d="m194 359 32-83 25 79 80 23-83 21-25 79-23-82-77-25z" fill="var(--glow)" />
+                </g>
+                <path d="m651 199 15-43 13 43 43 14-43 13-13 44-15-44-42-13zM111 563l11-30 9 30 31 9-31 10-9 30-11-30-29-10z" fill="var(--glow)" />
+                </g>
+              </svg>
+              )}
+            </div>
+          </div>
+          <div class="copy-window">
+            <div class="client-copy">
+              <h1>{creator.label}</h1>
+              {profiles[creator.id] && <a href={profiles[creator.id]} aria-label={`${creator.label} on TikTok`}>TikTok</a>}
+            </div>
+          </div>
+        </article>
+      );
+    })}
+  </div>
+  <div class="reel-controls" hidden>
+    <output class="gallery-sr" aria-live="polite"></output>
+    <div class="position-marks" aria-hidden="true">
+      {creators.map(() => <span data-position></span>)}
+    </div>
+  </div>
+</div>
+
+<script>
+  import { GalleryWheel } from '../lib/gallery-wheel.mjs';
+  import { GalleryReveal } from '../lib/gallery-reveal.mjs';
+  const reel = document.querySelector<HTMLElement>('.client-reel');
+  const controls = document.querySelector<HTMLElement>('.reel-controls');
+  const status = controls?.querySelector('output');
+  const markers = Array.from(controls?.querySelectorAll('[data-position]') ?? []);
+  const entries = Array.from(reel?.querySelectorAll<HTMLElement>('.client-entry') ?? []);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (reel && controls && status && entries.length > 1) {
+    const stage = reel;
+    const announcement = status;
+    let current = 0;
+    let moving = false;
+    const wheel = new GalleryWheel();
+    let queuedStep = 0;
+    let accelerateWheel: (() => void) | undefined;
+    let unlocked = false;
+
+    let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean } | undefined;
+    let direction = 0;
+    let progress = 0;
+    let incomingIndex = current;
+    stage.dataset.ready = '';
+    stage.inert = true;
+    controls.hidden = false;
+    const media = new Map<HTMLVideoElement, () => void>();
+    stage.querySelectorAll<HTMLVideoElement>('video').forEach((video) => {
+      const playButton = video.closest('.client-art')?.querySelector<HTMLButtonElement>('.video-play');
+      const play = () => {
+        video.muted = true;
+        video.play().then(() => { if (playButton) playButton.hidden = true; })
+          .catch(() => { if (playButton) playButton.hidden = false; });
+      };
+      playButton?.addEventListener('click', play);
+      video.addEventListener('playing', () => { if (playButton) playButton.hidden = true; });
+      video.addEventListener('error', () => { if (playButton) playButton.hidden = false; });
+      media.set(video, play);
+    });
+
+    function resumeMedia(entry: HTMLElement) {
+      // Retry suspended offscreen media without seeking or replacing its element.
+      entry.querySelectorAll('video').forEach((video) => media.get(video)?.());
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) entries.filter((entry) => !entry.hidden).forEach(resumeMedia);
+    });
+
+    function show(index: number) {
+      entries.forEach((entry, i) => {
+        entry.hidden = i !== index;
+        entry.inert = i !== index;
+        if (i !== index) entry.querySelectorAll('video').forEach(video => video.pause());
+      });
+      announcement.textContent = entries[index].getAttribute('aria-label') ?? '';
+      markers.forEach((marker, i) => marker.toggleAttribute('data-active', i === index));
+      resumeMedia(entries[index]);
+    }
+    show(current);
+    function palette(entry: HTMLElement) {
+      return [entry.style.getPropertyValue('--panel'), entry.style.getPropertyValue('--backdrop')];
+    }
+    function paintProgress(amount = 0) {
+      const [panel] = palette(entries[current]);
+      document.body.style.setProperty('--scene-panel', panel);
+      markers.forEach((marker, i) => {
+        const weight = i === current ? 1 - amount : i === incomingIndex ? amount : 0;
+        (marker as HTMLElement).style.width = `${5 + weight * 11}px`;
+        (marker as HTMLElement).style.opacity = `${.45 + weight * .55}`;
+      });
+    }
+    paintProgress();
+    let artworkReady = false;
+    const unlock = () => {
+      if (!artworkReady) return;
+      unlocked = true;
+      stage.inert = false;
+      const bar = document.querySelector<HTMLElement>('.site-bar');
+      if (bar) bar.inert = false;
+    };
+    document.addEventListener('nk-intro-complete', unlock, { once: true });
+    // Decode the first scene before lifting the logo curtain. Other scenes load
+    // eagerly and retain their media elements throughout the gallery lifetime.
+    Promise.all([
+      ...['/clients/pidge-background.webp', '/clients/pidge-foreground.webp', '/clients/chiseyi-poster.webp'].map(src => {
+        const image = new Image(); image.src = src; return image.decode().catch(() => {});
+      }),
+      new Promise(resolve => setTimeout(resolve, 900)),
+    ])
+      .then(() => {
+        artworkReady = true;
+        const opening = document.getElementById('site-opening');
+        if (!opening || opening.hidden) unlock();
+        else document.dispatchEvent(new Event('nk-gallery-ready'));
+      });
+
+    // One clock for every scene, including hidden neighbours. Revealing a layer
+    // or completing a gesture never restarts its idle phase.
+    const motionOrigin = performance.now();
+    let idleFrame = 0;
+    let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0;
+    stage.addEventListener('pointermove', event => {
+      if (event.pointerType !== 'mouse') return;
+      const bounds = stage.getBoundingClientRect();
+      pointerX = ((event.clientX - bounds.left) / bounds.width - .5) * 2;
+      pointerY = ((event.clientY - bounds.top) / bounds.height - .5) * 2;
+    });
+    const neutral = () => { pointerX = pointerY = 0; };
+    stage.addEventListener('pointerleave', neutral);
+    window.addEventListener('blur', neutral);
+    let previousFrame = performance.now();
+    function floatLayers(now: number) {
+      const seconds = (now - motionOrigin) / 1000;
+      const blend = 1 - Math.exp(-(now - previousFrame) / 130);
+      previousFrame = now;
+      smoothX += (pointerX - smoothX) * blend;
+      smoothY += (pointerY - smoothY) * blend;
+      stage.style.setProperty('--pointer-x', `${smoothX * 16}px`);
+      stage.style.setProperty('--pointer-y', `${smoothY * 12}px`);
+      stage.style.setProperty('--character-float', `${Math.sin(seconds * Math.PI * 2 / 6) * 9}px`);
+      stage.style.setProperty('--background-float', `${Math.sin(seconds * Math.PI * 2 / 8) * -4}px`);
+      idleFrame = requestAnimationFrame(floatLayers);
+    }
+    function updateMotionPreference() {
+      cancelAnimationFrame(idleFrame);
+      stage.style.removeProperty('--character-float');
+      stage.style.removeProperty('--background-float');
+      if (!reduced.matches) idleFrame = requestAnimationFrame(floatLayers);
+    }
+    reduced.addEventListener('change', updateMotionPreference);
+    updateMotionPreference();
+
+    function reset(entry: HTMLElement) {
+      delete entry.dataset.curtain;
+      delete entry.dataset.entering;
+      entry.style.removeProperty('--curtain-cut');
+      entry.style.removeProperty('--character-shift');
+    }
+
+    function render(step: number, amount: number) {
+      const outgoing = entries[current];
+      if (step !== direction) {
+        if (direction) {
+          entries[incomingIndex].hidden = true;
+          reset(entries[incomingIndex]);
+        }
+        direction = step;
+        incomingIndex = (current + step + entries.length) % entries.length;
+        entries[incomingIndex].dataset.entering = '';
+        entries[incomingIndex].hidden = false;
+        resumeMedia(entries[incomingIndex]);
+        outgoing.dataset.curtain = step > 0 ? 'up' : 'down';
+      }
+      progress = amount;
+      paintProgress(amount);
+      // One progress value drives opposing masks inside fixed panel windows.
+      // Incoming art and copy remain opaque beneath their outgoing counterparts.
+      outgoing.style.setProperty('--curtain-cut', `${amount * 100}%`);
+      // SVG units keep the small depth movement proportional to the artwork.
+      // The incoming character reaches zero exactly when its curtain completes.
+      outgoing.style.setProperty('--character-shift', `${-step * amount * 40}px`);
+      entries[incomingIndex].style.setProperty('--character-shift', `${step * (1 - amount) * 40}px`);
+    }
+
+    function settle(step: number, commit: boolean, input: 'wheel' | 'gesture' = 'gesture') {
+      if (moving) return;
+      moving = true;
+      const outgoing = entries[current];
+      if (commit && outgoing.contains(document.activeElement)) stage.focus({ preventScroll: true });
+      const from = progress;
+      const target = commit ? 1 : 0;
+      const finish = () => {
+        if (commit) current = (current + step + entries.length) % entries.length;
+        show(current);
+        entries.forEach(reset);
+        direction = 0;
+        progress = 0;
+        moving = false;
+        accelerateWheel = undefined;
+        incomingIndex = current;
+        paintProgress();
+        if (queuedStep) {
+          const next = queuedStep;
+          queuedStep = 0;
+          settle(next, true, 'wheel');
+        }
+      };
+      if (reduced.matches || from === target) {
+        finish();
+        return;
+      }
+      render(step, from);
+      const clock = new GalleryReveal(from, target, performance.now(), input);
+      if (input === 'wheel') accelerateWheel = () => clock.hurry(performance.now());
+      const frame = (now: number) => {
+        render(step, clock.value(now));
+        if (!clock.done(now)) requestAnimationFrame(frame);
+        else finish();
+      };
+      requestAnimationFrame(frame);
+    }
+
+    stage.addEventListener('wheel', (event) => {
+      if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      event.preventDefault();
+      if (!unlocked || drag) return;
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
+      const step = wheel.feed(delta, performance.now(), event.deltaMode);
+      if (!step) return;
+      // At most one intentional next gesture is retained while curtains settle.
+      // Completion consumes it immediately; there is no post-animation cooldown.
+      if (moving) {
+        queuedStep = step;
+        accelerateWheel?.();
+      } else settle(step, true, 'wheel');
+    }, { passive: false });
+
+    stage.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'touch' || !event.isPrimary || moving || !unlocked) return;
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY,
+        lastY: event.clientY, time: event.timeStamp, velocity: 0, locked: false };
+    });
+    stage.addEventListener('pointermove', (event) => {
+      if (!drag || drag.id !== event.pointerId) return;
+      const distance = drag.y - event.clientY;
+      const horizontal = Math.abs(drag.x - event.clientX);
+      if (!drag.locked) {
+        if (horizontal > 9 && horizontal > Math.abs(distance)) {
+          drag = undefined;
+          return;
+        }
+        if (Math.abs(distance) < 9) return;
+        drag.locked = true;
+        stage.setPointerCapture(event.pointerId);
+      }
+      const elapsed = Math.max(1, event.timeStamp - drag.time);
+      drag.velocity = (drag.lastY - event.clientY) / elapsed;
+      drag.lastY = event.clientY;
+      drag.time = event.timeStamp;
+      if (!reduced.matches) render(Math.sign(distance) || direction || 1, Math.min(1, Math.abs(distance) / stage.clientHeight));
+    });
+
+    function release(event: PointerEvent) {
+      if (!drag || drag.id !== event.pointerId) return;
+      const gesture = drag;
+      drag = undefined;
+      if (!gesture.locked) return;
+      const distance = gesture.y - gesture.lastY;
+      const step = Math.sign(distance) || direction || 1;
+      const speed = event.timeStamp - gesture.time < 100 ? gesture.velocity * step : 0;
+      const commit = event.type === 'pointerup' &&
+        (Math.abs(distance) >= stage.clientHeight * .25 || (Math.abs(distance) >= 24 && speed > .45));
+      settle(step, commit);
+    }
+    stage.addEventListener('pointerup', release);
+    stage.addEventListener('pointercancel', release);
+    stage.addEventListener('lostpointercapture', (event) => {
+      if (event.target === stage) release(event);
+    });
+
+    stage.addEventListener('keydown', (event) => {
+      const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1 }[event.key];
+      if (!unlocked || moving || drag || !step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      event.preventDefault();
+      if (direction && direction !== step) render(step, 0);
+      settle(step, true);
+    });
+  }
+</script>
+
+<style>
+  :global(.immersive-clients) { background: var(--scene-panel, #283b62); }
+  :global(.immersive-clients .site-bar) {
+    position: fixed;
+    inset: 0 0 auto;
+    height: calc(56px + env(safe-area-inset-top));
+    background: rgb(8 16 24 / .60);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    backdrop-filter: blur(14px) saturate(115%);
+    color: white;
+    border: 0;
+    border-bottom: 1px solid rgb(255 255 255 / .12);
+    text-shadow: 0 1px 3px rgb(0 0 0 / .4);
+  }
+  :global(.immersive-clients .commission-link) { border-color: rgb(255 255 255 / .35); }
+  :global(.immersive-clients .bar-link),
+  :global(.immersive-clients .brand),
+  :global(.immersive-clients .menu-btn),
+  :global(.immersive-clients .site-bar .wordmark .nassu) { color: white; }
+  :global(.immersive-clients .site-bar .wordmark .katou) { color: #a3f0db; }
+  :global(.immersive-clients .bar-link[aria-current]),
+  :global(.immersive-clients .bar-link:hover) { color: #132c30; background: #eaf7f4; }
+  .gallery-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .client-gallery { position: relative; }
+  .client-reel[data-ready] {
+    position: relative;
+    height: 100svh;
+    height: 100dvh;
+    overflow: clip;
+    isolation: isolate;
+    touch-action: pan-x pinch-zoom;
+  }
+  .client-reel:focus-visible { outline: 2px solid white; outline-offset: -4px; }
+  .client-entry {
+    --art-start: 33%;
+    --copy-end: 41%;
+    position: relative;
+    min-height: 100svh;
+    color: white;
+  }
+  [data-ready] .client-entry { position: absolute; inset: 0; min-height: 0; }
+  /* Keep articles out of a stacking context: both copy windows must sit above
+     both art windows along the diagonal, even when the reveals disagree. */
+  .art-window { z-index: 0; }
+  .copy-window { z-index: 2; }
+  [data-curtain] .art-window { z-index: 1; }
+  [data-curtain] .copy-window { z-index: 3; }
+  [data-curtain="up"] .client-art,
+  [data-curtain="down"] .client-copy { clip-path: inset(0 0 var(--curtain-cut, 0%) 0); }
+  [data-curtain="down"] .client-art,
+  [data-curtain="up"] .client-copy { clip-path: inset(var(--curtain-cut, 0%) 0 0 0); }
+  .art-window, .copy-window { position: absolute; overflow: clip; }
+  .art-window { inset: 0 0 0 var(--art-start); }
+  .copy-window { inset: 0 auto 0 0; width: var(--copy-end); clip-path: polygon(0 0, 100% 0, 80.5% 100%, 0 100%); }
+  .client-art, .client-copy { height: 100%; }
+  .client-art { position: relative; background: var(--backdrop); }
+  .client-entry:has(.pidge-scene) .client-art { background: #556da2; }
+  .client-entry:has(.client-video) .client-art { background: #1e2030; }
+  .pidge-cutout { filter: drop-shadow(12px 18px 14px rgb(10 15 35 / .38)); }
+  .pidge-background { position: absolute; inset: -6%; width: 112%; max-width: none; height: 112%; object-fit: cover; }
+  /* Keep the source's cropped arm and lower torso beyond the moving stage. */
+  .client-art .pidge-scene { position: absolute; inset: -8% -5% -10% -5%; width: 110%; height: 118%; max-width: none; }
+  .video-depth { position: absolute; inset: -8%; width: 116%; height: 116%; }
+  .client-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 71% 46%; }
+  .video-play { position: absolute; inset: auto auto 18% 50%; transform: translateX(-50%); padding: .7rem 1rem; border: 1px solid white; border-radius: 2rem; background: #152328e6; color: white; }
+  .client-art svg { display: block; width: 100%; height: 100%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .character-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + var(--character-float, 0px) + var(--character-shift, 0px))); }
+    .video-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + (var(--character-float, 0px) + var(--character-shift, 0px)) * .45)); }
+    .art-depth { transform: translate(calc(var(--pointer-x, 0px) * -.35), calc(var(--background-float, 0px) + var(--pointer-y, 0px) * -.35)); }
+  }
+  .client-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    gap: .75rem;
+    padding: max(4rem, env(safe-area-inset-top)) 20% 3rem clamp(1.5rem, 4vw, 5rem);
+    background: var(--panel);
+  }
+  .client-copy h1 { font-size: clamp(2.8rem, 7vw, 8rem); line-height: .95; letter-spacing: -.075em; margin: 0; }
+  .client-copy a { color: white; font-size: clamp(1rem, 1.7vw, 1.65rem); text-decoration: underline; text-underline-offset: .3em; }
+  .reel-controls { position: absolute; inset: auto max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) auto; z-index: 2; pointer-events: none; }
+  .position-marks { display: flex; align-items: center; gap: 5px; padding: 7px; border-radius: 100px; background: #152328a6; }
+  .position-marks span { width: 5px; height: 5px; border-radius: 100px; background: #ffffff80;  }
+  .position-marks [data-active] { width: 16px; background: white; }
+  @media (max-width: 680px) {
+    .client-art .pidge-scene { inset: -7% -12% -14%; width: 124%; height: 121%; }
+    .client-video { object-position: 73% 43%; }
+    .art-window { inset: 0 0 31%; }
+    .copy-window { inset: 58% 0 0; width: auto; clip-path: polygon(0 0, 100% 21%, 100% 100%, 0 100%); }
+    .client-copy { justify-content: start; padding: clamp(2.5rem, 9vh, 5rem) 1.25rem 1.25rem; }
+    .client-copy h1 { font-size: clamp(2.65rem, 12vw, 5rem); }
+  }
+  @media (prefers-reduced-motion: reduce) { .position-marks span { transition: none; } }
+</style>

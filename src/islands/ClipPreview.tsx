@@ -70,8 +70,13 @@ export default function ClipPreview() {
       if (current === video) current = null;
     };
 
+    const activeCarouselVideo = (video: HTMLVideoElement) => {
+      const slide = video.closest<HTMLElement>('[data-carousel-card]');
+      return !slide || (slide.dataset.active === 'true' && slide.closest<HTMLElement>('[data-carousel]')?.dataset.moving !== 'true');
+    };
+
     const play = (video: HTMLVideoElement) => {
-      if (viewerOpen || userPaused.has(video)) return;
+      if (viewerOpen || userPaused.has(video) || !activeCarouselVideo(video)) return;
       attach(video);
       if (current && current !== video) pause(current);
       current = video;
@@ -85,7 +90,7 @@ export default function ClipPreview() {
       let best: HTMLVideoElement | null = null;
       let bestScore = Number.POSITIVE_INFINITY;
       for (const video of videos) {
-        if (video.dataset.hero === 'true') continue;
+        if (video.dataset.hero === 'true' || !activeCarouselVideo(video)) continue;
         const ratio = ratios.get(video) ?? 0;
         if (ratio < 0.6 || userPaused.has(video)) continue;
         const rect = video.getBoundingClientRect();
@@ -155,12 +160,24 @@ export default function ClipPreview() {
       if (!viewerOpen) pickInView();
     };
 
+    const onCarousel = (event: Event) => {
+      const root = event.target;
+      if (!(root instanceof HTMLElement)) return;
+      const moving = Boolean((event as CustomEvent<{ moving: boolean }>).detail?.moving);
+      if (current && root.contains(current)) pause(current);
+      if (moving) return;
+      const active = root.querySelector<HTMLVideoElement>('[data-carousel-card][data-active="true"] video[data-preview]');
+      if (active && (ratios.get(active) ?? 0) >= 0.5) play(active);
+    };
+
+    document.addEventListener('nk:carousel', onCarousel);
     document.addEventListener('click', onPauseClick);
     document.addEventListener('nk:viewer', onViewer);
 
     return () => {
       io.disconnect();
       stopRaf();
+      document.removeEventListener('nk:carousel', onCarousel);
       document.removeEventListener('click', onPauseClick);
       document.removeEventListener('nk:viewer', onViewer);
     };
