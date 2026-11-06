@@ -88,6 +88,8 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
 </BaseLayout>
 
 <script>
+  import { mountHomeScroll } from '../lib/home-scroll';
+  mountHomeScroll();
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const mobile = window.matchMedia('(max-width: 767px)');
   const layers = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));

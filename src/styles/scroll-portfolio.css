@@ -168,3 +168,59 @@ html.poster-only .carousel-card .clip-pause { display: none; }
 .shorts-wordmark { display: block; position: relative; width: 100%; height: auto; margin: 0 0 14px; overflow: visible; }
 .shorts-wordmark path { fill: none; stroke: #9da9a3; stroke-width: 1.3; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .carousel-current { min-height: 1.45em; }
+
+/* Viewport-aware layout: the logo stays at the screen edge on every route. */
+.clean-portfolio { --section-space: clamp(24px, 5dvh, 64px); }
+html:has(.is-scroll) { --page-height: calc(100dvh - var(--site-header-height, 82px)); }
+html:has(.clean-portfolio) { scroll-padding-top: var(--site-header-height, 82px); }
+.clean-portfolio .site-bar {
+  box-sizing: border-box;
+  flex: none;
+  height: calc(clamp(64px, 9dvh, 82px) + env(safe-area-inset-top));
+  padding-inline: max(clamp(16px, 2vw, 32px), env(safe-area-inset-left)) max(clamp(16px, 2vw, 32px), env(safe-area-inset-right));
+}
+.clean-portfolio .brand { flex-shrink: 0; min-width: 0; }
+.clean-portfolio .wordmark-lockup { display: inline; }
+.clean-portfolio .nk-tile { display: none; }
+.clean-portfolio .wordmark { font-size: clamp(20px, 2vw, 26px); }
+.clean-portfolio .desk-nav { min-width: 0; }
+.clean-portfolio .bar-link { font-size: clamp(11px, .85vw, 13px); padding-inline: clamp(8px, .8vw, 14px); white-space: nowrap; }
+.clean-portfolio .menu-btn { flex-shrink: 0; }
+.clean-portfolio main { min-width: 0; }
+.clean-portfolio :is(.page-sub, .terms-body, .footer-email, .proof) { overflow-wrap: anywhere; }
+.clean-portfolio :is(input, select, textarea) { max-width: 100%; min-width: 0; }
+.clean-portfolio :is(.surface-card, .tier, .scope, .contact, .service, .narrow, .works) { min-width: 0; }
+.clean-portfolio:not(.immersive-clients) :is(img, video) { max-width: 100%; }
+.scroll-panel, .detail-panel { width: min(1400px, calc(100% - clamp(32px, 6vw, 96px))); }
+.scroll-portfolio > section { scroll-margin-top: 0; }
+.is-scroll .scroll-panel { min-height: var(--page-height); gap: clamp(24px, 4vw, 72px); padding-block: var(--section-space); }
+.is-scroll .intro-visual { width: min(100%, max(240px, calc(var(--page-height) - 2 * var(--section-space)))) ; margin-inline: auto; }
+.is-scroll .intro-copy h1 { font-size: clamp(32px, min(3.8vw, 7dvh), 64px); }
+.is-scroll .intro-copy h1 > span { font-size: clamp(64px, min(9vw, 16dvh), 144px); }
+.is-scroll .featured-visual { width: min(100%, max(240px, calc((var(--page-height) - 2 * var(--section-space) - 110px) * .92))); margin-inline: auto; }
+.is-scroll .featured-copy h2 { font-size: clamp(30px, min(3.5vw, 7dvh), 56px); }
+.is-scroll .detail-panel { min-height: var(--page-height); padding-block: var(--section-space); }
+.is-scroll .commission-panel { display: flex; flex-direction: column; justify-content: center; }
+html:has(.is-scroll):not(.home-snap-ready) { scroll-snap-type: y proximity; }
+.is-scroll .scroll-portfolio > section { scroll-snap-align: start; scroll-snap-stop: always; }
+html.home-snap-ready { scroll-behavior: auto; scroll-snap-type: none; overflow-anchor: none; }
+@media (max-width: 1039px) {
+  .clean-portfolio .desk-nav { display: none; }
+  .clean-portfolio .menu-btn { display: grid; }
+}
+@media (max-width: 767px) {
+  .clean-portfolio .site-bar { height: calc(64px + env(safe-area-inset-top)); }
+  .clean-portfolio .page-title { font-size: clamp(32px, 9vw, 48px); }
+  .is-scroll .scroll-panel { gap: 24px; padding-bottom: 44px; }
+  .is-scroll .intro-visual { width: min(100%, max(220px, 34dvh)); }
+  .is-scroll .intro-copy h1 { font-size: clamp(30px, 8vw, 44px); }
+  .is-scroll .intro-copy h1 > span { font-size: clamp(64px, 17vw, 100px); }
+  .is-scroll .featured-visual { width: min(100%, 340px); }
+  .is-scroll .featured-copy h2 { font-size: clamp(28px, 8vw, 40px); }
+  .clean-portfolio .intro-actions > :is(a, button) { flex: 1 1 150px; }
+  .clean-portfolio .contact :is(.field-grid, .form-grid) { grid-template-columns: 1fr; }
+  .clean-portfolio :is(input, select, textarea) { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.is-scroll) { scroll-behavior: auto; }
+}

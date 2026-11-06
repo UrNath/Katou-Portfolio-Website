@@ -78,6 +78,20 @@ const routes = getRoutes(prices);
 </dialog>
 
 <script>
+  const header = document.querySelector<HTMLElement>('.site-bar');
+  if (header) {
+    let previous = 0;
+    const updateSize = () => {
+      const height = header.getBoundingClientRect().height;
+      if (Math.abs(height - previous) < .5) return;
+      previous = height;
+      document.documentElement.style.setProperty('--site-header-height', `${height}px`);
+      window.dispatchEvent(new Event('nk-layout'));
+    };
+    new ResizeObserver(updateSize).observe(header);
+    updateSize();
+  }
+
   const dialog = document.getElementById('site-menu');
   const openBtn = document.getElementById('menu-open');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
