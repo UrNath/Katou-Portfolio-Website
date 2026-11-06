@@ -19,7 +19,10 @@ export class GalleryWheel {
     // A tiny, still-decreasing tail remains momentum even if event delivery
     // briefly stalls. A renewed impulse, notch, or direction change is intent.
     const tail = same && gap < 420 && magnitude < Math.max(8, this.peak * .35) && magnitude <= this.lastMagnitude * 1.1;
-    const notch = (mode !== 0 || magnitude === 100 || magnitude === 120) && gap >= 70;
+    // Browsers may combine several physical ticks into one 200/240+ delta.
+    // Keep the cadence test so a dense trackpad stream is still one gesture.
+    const coarseTick = magnitude >= 100 && (magnitude % 100 === 0 || magnitude % 120 === 0);
+    const notch = (mode !== 0 || coarseTick) && gap >= 32;
     const surge = same && time - this.started > 120 && magnitude >= 20 &&
       magnitude > this.lastMagnitude * 1.8 && this.lastMagnitude < this.peak * .5;
     const fresh = !this.direction || (gap > 140 && !tail) || notch || surge;

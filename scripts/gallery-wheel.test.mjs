@@ -67,3 +67,19 @@ test('single-line wheel and page-mode input remain responsive', () => {
   assert.equal(new GalleryWheel().feed(16, 0, 1), 1);
   assert.equal(new GalleryWheel().feed(900, 0, 2), 1);
 });
+
+
+test('rapid physical wheel ticks remain intentional rather than locking the gesture', () => {
+  const wheel = new GalleryWheel();
+  const accepted = [];
+  for (let time = 0; time <= 400; time += 40) if (wheel.feed(120, time)) accepted.push(time);
+  assert.equal(accepted.length, 11);
+});
+
+test('coalesced wheel ticks and quick reverse ticks remain responsive', () => {
+  const wheel = new GalleryWheel();
+  assert.equal(wheel.feed(240, 0), 1);
+  assert.equal(wheel.feed(360, 40), 1);
+  assert.equal(wheel.feed(-240, 80), -1);
+  assert.equal(wheel.feed(-120, 120), -1);
+});

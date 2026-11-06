@@ -95,6 +95,7 @@ const profiles: Record<string, string> = {
 
 <script>
   import { GalleryWheel } from '../lib/gallery-wheel.mjs';
+  import { GalleryReveal } from '../lib/gallery-reveal.mjs';
   const reel = document.querySelector<HTMLElement>('.client-reel');
   const controls = document.querySelector<HTMLElement>('.reel-controls');
   const status = controls?.querySelector('output');
@@ -109,6 +110,7 @@ const profiles: Record<string, string> = {
     let moving = false;
     const wheel = new GalleryWheel();
     let queuedStep = 0;
+    let accelerateWheel: (() => void) | undefined;
     let unlocked = false;
 
     let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean } | undefined;
@@ -256,7 +258,7 @@ const profiles: Record<string, string> = {
       entries[incomingIndex].style.setProperty('--character-shift', `${step * (1 - amount) * 40}px`);
     }
 
-    function settle(step: number, commit: boolean) {
+    function settle(step: number, commit: boolean, input: 'wheel' | 'gesture' = 'gesture') {
       if (moving) return;
       moving = true;
       const outgoing = entries[current];
@@ -270,12 +272,13 @@ const profiles: Record<string, string> = {
         direction = 0;
         progress = 0;
         moving = false;
+        accelerateWheel = undefined;
         incomingIndex = current;
         paintProgress();
         if (queuedStep) {
           const next = queuedStep;
           queuedStep = 0;
-          settle(next, true);
+          settle(next, true, 'wheel');
         }
       };
       if (reduced.matches || from === target) {
@@ -283,12 +286,11 @@ const profiles: Record<string, string> = {
         return;
       }
       render(step, from);
-      const duration = 180 + 460 * Math.abs(target - from);
-      const started = performance.now();
+      const clock = new GalleryReveal(from, target, performance.now(), input);
+      if (input === 'wheel') accelerateWheel = () => clock.hurry(performance.now());
       const frame = (now: number) => {
-        const time = Math.min(1, (now - started) / duration);
-        render(step, from + (target - from) * (1 - (1 - time) ** 3));
-        if (time < 1) requestAnimationFrame(frame);
+        render(step, clock.value(now));
+        if (!clock.done(now)) requestAnimationFrame(frame);
         else finish();
       };
       requestAnimationFrame(frame);
@@ -303,8 +305,10 @@ const profiles: Record<string, string> = {
       if (!step) return;
       // At most one intentional next gesture is retained while curtains settle.
       // Completion consumes it immediately; there is no post-animation cooldown.
-      if (moving) queuedStep = step;
-      else settle(step, true);
+      if (moving) {
+        queuedStep = step;
+        accelerateWheel?.();
+      } else settle(step, true, 'wheel');
     }, { passive: false });
 
     stage.addEventListener('pointerdown', (event) => {
