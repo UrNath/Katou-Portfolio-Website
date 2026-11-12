@@ -1,5 +1,6 @@
 import { GalleryWheel } from './gallery-wheel.mjs';
 import { interiorRange, sectionStep } from './home-snap.mjs';
+import { DECK_QUERY } from './screen-deck';
 
 export function mountHomeScroll() {
   const root = document.querySelector<HTMLElement>('.scroll-portfolio');
@@ -9,6 +10,8 @@ export function mountHomeScroll() {
   const footer = document.querySelector<HTMLElement>('.site-footer');
   const elements = footer ? [...panels, footer] : panels;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  // Upright phones use the tabbed deck instead of page scrolling, so snapping stands down there.
+  const deck = matchMedia(DECK_QUERY);
   const wheel = new GalleryWheel();
   let sections: { top: number; height: number }[] = [];
   let viewport = innerHeight;
@@ -123,6 +126,7 @@ export function mountHomeScroll() {
   document.documentElement.classList.add('home-snap-ready');
   measure();
   window.addEventListener('wheel', event => {
+    if (deck.matches) return;
     if (event.ctrlKey || event.shiftKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY) || modal() || opening() || editable(event.target)) return;
     const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewport : 1);
     if (nested(event.target, delta)) return;
@@ -137,12 +141,14 @@ export function mountHomeScroll() {
   }, { passive: false });
 
   window.addEventListener('touchstart', event => {
+    if (deck.matches) return;
     if (event.touches.length !== 1 || modal() || opening() || editable(event.target)) return;
     cancel(); nativeRange = undefined;
     const finger = event.touches[0];
     touch = { x: finger.clientX, y: finger.clientY, last: finger.clientY, start: position(), distance: 0, direction: 0, mode: 'pending' };
   }, { passive: true });
   window.addEventListener('touchmove', event => {
+    if (deck.matches) return;
     if (!touch) return;
     if (event.touches.length !== 1) { touch = undefined; return; }
     const finger = event.touches[0];
@@ -185,6 +191,7 @@ export function mountHomeScroll() {
   window.addEventListener('scrollend', settleNative);
 
   window.addEventListener('keydown', event => {
+    if (deck.matches) return;
     if (modal() || opening() || editable(event.target) || event.altKey || event.ctrlKey || event.metaKey) return;
     if (event.target instanceof Element && event.target.closest('[data-carousel], button, video, summary, a')) return;
     if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Home', 'End'].includes(event.key)) return;
@@ -198,6 +205,7 @@ export function mountHomeScroll() {
     } else step(direction, true);
   });
   document.addEventListener('click', event => {
+    if (deck.matches) return;
     const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href]') : null;
     if (!link || event.defaultPrevented || (event instanceof MouseEvent && (event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey))) return;
     const url = new URL(link.href, location.href);
@@ -212,6 +220,7 @@ export function mountHomeScroll() {
   window.addEventListener('orientationchange', scheduleMeasure);
   window.addEventListener('nk-layout', scheduleMeasure);
   window.addEventListener('hashchange', () => {
+    if (deck.matches) return;
     cancel(); measure();
     const index = panels.findIndex(panel => `#${panel.id}` === location.hash);
     if (index >= 0) go(sections[index].top);

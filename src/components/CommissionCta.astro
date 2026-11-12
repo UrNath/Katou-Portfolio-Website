@@ -1,0 +1,22 @@
+---
+import BrandIcon from './BrandIcon.astro';
+import { commission } from '../data/commission';
+---
+
+<article class="commission-cta">
+  <h2 class="page-title" data-reveal>{commission.heading}</h2>
+  <p class="page-sub" data-reveal style="--i:1">{commission.body}</p>
+  <div class="intro-actions" data-reveal style="--i:2">
+    {commission.discordUrl ? (
+      <a class="solid-button discord-button" href={commission.discordUrl} target="_blank" rel="noopener noreferrer">
+        <BrandIcon name="discord" size={18} /> Message Katou on Discord <span aria-hidden="true">↗</span>
+      </a>
+    ) : (
+      /* PLACEHOLDER: no Discord link has been supplied. See src/data/commission.ts. */
+      <span class="solid-button discord-button is-placeholder" data-placeholder="discord-link" role="note">
+        <BrandIcon name="discord" size={18} /> Discord link placeholder
+      </span>
+    )}
+    <a class="outline-button" href="#terms">Read the Terms <span aria-hidden="true">↑</span></a>
+  </div>
+</article>

@@ -4,7 +4,7 @@ import SiteIntro from '../components/SiteIntro.astro';
 import CharacterArt from '../components/CharacterArt.astro';
 import FeaturedCarousel from '../components/FeaturedCarousel.astro';
 import ShortsWordmark from '../components/ShortsWordmark.astro';
-import ContactSection from '../components/ContactSection.astro';
+import CommissionCta from '../components/CommissionCta.astro';
 import ServiceSection from '../components/ServiceSection.astro';
 import TermsSection from '../components/TermsSection.astro';
 import StatusChip from '../components/StatusChip.astro';
@@ -31,7 +31,7 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
       document.documentElement.classList.add('reveal-ready');
     }
   </script>
-  <div class="scroll-portfolio">
+  <div class="scroll-portfolio" data-deck>
     <section class="intro-panel scroll-panel" id="home" aria-labelledby="intro-title">
       <div class:list={['intro-visual', artOn && 'has-character']}>
         {artOn ? <CharacterArt /> : (
@@ -52,7 +52,7 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
         <p class="intro-role" data-reveal style="--i:2">{site.role}</p>
         <div class="intro-actions" data-reveal style="--i:3">
           <a class="solid-button" href="/works">View Works <span aria-hidden="true">↗</span></a>
-          <a class="outline-button" href="#commission">Contact Me <span aria-hidden="true">↓</span></a>
+          <a class="outline-button" href="#commission">Commission <span aria-hidden="true">↓</span></a>
           <button class="text-button" type="button" data-open-clip={hero.id}><span aria-hidden="true">▶</span> Play highlight reel</button>
         </div>
         <div class="intro-status" data-reveal style="--i:4">
@@ -63,7 +63,7 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
       <a class="scroll-cue" href="#services">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a>
     </section>
 
-    <section class="services-panel detail-panel" id="services" aria-labelledby="services-title">
+    <section class="services-panel detail-panel" id="services" aria-labelledby="services-title" data-ghost="Services">
       <div class="time-rule" style="--at:14" aria-hidden="true"><span></span></div>
       <p class="section-label" data-reveal>WHAT I DO</p>
       <h2 id="services-title" data-reveal style="--i:1">{site.role}</h2>
@@ -85,7 +85,7 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
       </div>
     </section>
 
-    <section class="featured-panel scroll-panel" id="featured" aria-labelledby="featured-title">
+    <section class="featured-panel scroll-panel" id="featured" aria-labelledby="featured-title" data-ghost="Featured">
       <div class="time-rule" style="--at:36" aria-hidden="true"><span></span></div>
       <div class="featured-visual" data-reveal>
         <ShortsWordmark />
@@ -97,31 +97,40 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
         <p data-reveal style="--i:2">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
         <div class="intro-actions" data-reveal style="--i:3">
           <a class="solid-button" href="/works">View Full Gallery <span aria-hidden="true">↗</span></a>
-          <a class="outline-button" href="#commission">Contact Me <span aria-hidden="true">↓</span></a>
+          <a class="outline-button" href="#commission">Commission <span aria-hidden="true">↓</span></a>
         </div>
       </div>
     </section>
 
-    <section class="detail-panel" id="editing" aria-label="Editing commissions">
+    <section class="detail-panel" id="editing" aria-label="Editing commissions" data-ghost="Editing">
       <div class="time-rule" style="--at:54" aria-hidden="true"><span></span></div>
       <div class="section-marker"><span>01 / EDITING</span><span aria-hidden="true" data-parallax="0.05">✳</span></div>
       <ServiceSection service={editing} />
     </section>
-    <section class="detail-panel web-panel" id="web-design" aria-label="Web design commissions">
+    <section class="detail-panel web-panel" id="web-design" aria-label="Web design commissions" data-ghost="Web">
       <div class="time-rule" style="--at:70" aria-hidden="true"><span></span></div>
       <div class="section-marker"><span>02 / WEB DESIGN</span><span aria-hidden="true" data-parallax="-0.05">↗</span></div>
       <ServiceSection service={web} />
     </section>
-    <section class="detail-panel terms-panel" id="terms" aria-label="Commission terms">
+    <section class="detail-panel terms-panel" id="terms" aria-label="Commission terms" data-ghost="Terms">
       <div class="time-rule" style="--at:84" aria-hidden="true"><span></span></div>
       <p class="section-label">THE DETAILS, UP FRONT</p>
       <TermsSection />
     </section>
-    <section class="detail-panel commission-panel" id="commission" aria-label="Commission Katou">
+    <section class="detail-panel commission-panel" id="commission" aria-label="Commission Katou" data-ghost="Commission" data-footer-slot>
       <div class="time-rule" style="--at:97" aria-hidden="true"><span></span></div>
       <p class="section-label">YOUR NEXT PROJECT STARTS HERE</p>
-      <ContactSection />
+      <CommissionCta />
     </section>
+    <!-- Phone deck chrome (hidden on wider screens): transition band, scroll cue, tab bar. -->
+    <div class="deck-wipe" aria-hidden="true"></div>
+    <p class="deck-cue" aria-hidden="true">More <span>▾</span></p>
+    <nav class="deck-tabs" aria-label="Home sections">
+      {[
+        ['home', 'Home'], ['services', 'Services'], ['featured', 'Featured'], ['editing', 'Editing'],
+        ['web-design', 'Web'], ['terms', 'Terms'], ['commission', 'Commission'],
+      ].map(([id, label]) => <a href={`#${id}`} data-deck-tab={id}>{label}</a>)}
+    </nav>
   </div>
   <ClipPreview client:idle />
   <ClipViewer client:idle clips={featured.map(toViewerClip)} />
@@ -129,7 +138,9 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
 
 <script>
   import { mountHomeScroll } from '../lib/home-scroll';
+  import { mountDeck } from '../lib/screen-deck';
   mountHomeScroll();
+  mountDeck();
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const mobile = window.matchMedia('(max-width: 767px)');
   const layers = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));
