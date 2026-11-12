@@ -27,11 +27,9 @@ const profiles: Record<string, string> = {
               {creator.id === 'pidge' ? (
                 <>
                 <img class="pidge-background art-depth" src="/clients/pidge-background.webp" width="1128" height="1536" alt="" aria-hidden="true" />
-                <svg class="pidge-scene" viewBox="0 0 1128 1536" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-                  <g class="character-depth pidge-cutout">
-                    <image href="/clients/pidge-foreground.webp" width="1128" height="1536" />
-                  </g>
-                </svg>
+                <div class="pidge-scene">
+                  <img class="character-depth pidge-cutout" src="/clients/pidge-foreground.webp" width="1128" height="1536" alt="" aria-hidden="true" />
+                </div>
                 </>
               ) : creator.id === 'chi' ? (
                 <>
@@ -42,7 +40,7 @@ const profiles: Record<string, string> = {
                   <button class="video-play" type="button" hidden>Play animation</button>
                 </>
               ) : (
-              <svg viewBox="0 0 800 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <svg class="drawn-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                 <g class="art-depth">
                 <rect width="800" height="900" fill="var(--backdrop)" />
                 <circle cx="430" cy="330" r="273" fill="var(--glow)" opacity=".55" />
@@ -77,8 +75,10 @@ const profiles: Record<string, string> = {
           </div>
           <div class="copy-window">
             <div class="client-copy">
-              <h1>{creator.label}</h1>
-              {profiles[creator.id] && <a href={profiles[creator.id]} aria-label={`${creator.label} on TikTok`}>TikTok</a>}
+              <h1><span class="copy-line">{creator.label}</span></h1>
+              {profiles[creator.id] && (
+                <p><a class="copy-line" href={profiles[creator.id]} aria-label={`${creator.label} on TikTok`}>TikTok <span aria-hidden="true">↗</span></a></p>
+              )}
             </div>
           </div>
         </article>
@@ -113,7 +113,9 @@ const profiles: Record<string, string> = {
     let accelerateWheel: (() => void) | undefined;
     let unlocked = false;
 
-    let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean } | undefined;
+    let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean;
+      base: number; resume: boolean; caught: boolean; detached: boolean } | undefined;
+    let interrupt: (() => boolean) | undefined;
     let direction = 0;
     let progress = 0;
     let incomingIndex = current;
@@ -161,7 +163,7 @@ const profiles: Record<string, string> = {
       document.body.style.setProperty('--scene-panel', panel);
       markers.forEach((marker, i) => {
         const weight = i === current ? 1 - amount : i === incomingIndex ? amount : 0;
-        (marker as HTMLElement).style.width = `${5 + weight * 11}px`;
+        (marker as HTMLElement).style.height = `${5 + weight * 17}px`;
         (marker as HTMLElement).style.opacity = `${.45 + weight * .55}`;
       });
     }
@@ -174,7 +176,20 @@ const profiles: Record<string, string> = {
       const bar = document.querySelector<HTMLElement>('.site-bar');
       if (bar) bar.inert = false;
     };
-    document.addEventListener('nk-intro-complete', unlock, { once: true });
+    // While the logo curtain covers the stage, hold the first scene slightly
+    // enlarged with its copy masked; both settle as the curtain lifts.
+    const opening = document.getElementById('site-opening');
+    if (opening && !opening.hidden) stage.dataset.await = '';
+    document.addEventListener('nk-gallery-ready', () => {
+      stage.dataset.intro = '';
+      delete stage.dataset.await;
+    }, { once: true });
+    document.addEventListener('nk-intro-complete', () => {
+      // Frame-driven transforms take over once the entrance has finished.
+      delete stage.dataset.await;
+      delete stage.dataset.intro;
+      unlock();
+    }, { once: true });
     // Decode the first scene before lifting the logo curtain. Other scenes load
     // eagerly and retain their media elements throughout the gallery lifetime.
     Promise.all([
@@ -185,7 +200,6 @@ const profiles: Record<string, string> = {
     ])
       .then(() => {
         artworkReady = true;
-        const opening = document.getElementById('site-opening');
         if (!opening || opening.hidden) unlock();
         else document.dispatchEvent(new Event('nk-gallery-ready'));
       });
@@ -231,6 +245,9 @@ const profiles: Record<string, string> = {
       delete entry.dataset.entering;
       entry.style.removeProperty('--curtain-cut');
       entry.style.removeProperty('--character-shift');
+      entry.style.removeProperty('--scene-scale');
+      entry.style.removeProperty('--copy-shift');
+      entry.style.removeProperty('--copy-fade');
     }
 
     function render(step: number, amount: number) {
@@ -254,8 +271,20 @@ const profiles: Record<string, string> = {
       outgoing.style.setProperty('--curtain-cut', `${amount * 100}%`);
       // SVG units keep the small depth movement proportional to the artwork.
       // The incoming character reaches zero exactly when its curtain completes.
-      outgoing.style.setProperty('--character-shift', `${-step * amount * 40}px`);
-      entries[incomingIndex].style.setProperty('--character-shift', `${step * (1 - amount) * 40}px`);
+      const incoming = entries[incomingIndex];
+      outgoing.style.setProperty('--character-shift', `${-step * amount * 56}px`);
+      incoming.style.setProperty('--character-shift', `${step * (1 - amount) * 56}px`);
+      // The arriving scene eases back from a slight enlargement.
+      incoming.style.setProperty('--scene-scale', `${1 + (1 - amount) * .06}`);
+      // Copy is unboxed, so names hand over in sequence instead of overlapping:
+      // the current name leaves its mask during the first half of the gesture
+      // and the next one rises during the second. Both follow the same progress.
+      const leave = Math.min(1, amount * 2);
+      const arrive = Math.max(0, amount * 2 - 1);
+      outgoing.style.setProperty('--copy-shift', `${-step * leave * 130}`);
+      outgoing.style.setProperty('--copy-fade', `${1 - leave}`);
+      incoming.style.setProperty('--copy-shift', `${step * (1 - arrive) * 130}`);
+      incoming.style.setProperty('--copy-fade', `${arrive}`);
     }
 
     function settle(step: number, commit: boolean, input: 'wheel' | 'gesture' = 'gesture') {
@@ -265,7 +294,18 @@ const profiles: Record<string, string> = {
       if (commit && outgoing.contains(document.activeElement)) stage.focus({ preventScroll: true });
       const from = progress;
       const target = commit ? 1 : 0;
+      let grabbed = false;
+      // A finger landing mid-settle takes the curtains over where they are.
+      interrupt = () => {
+        grabbed = true;
+        moving = false;
+        accelerateWheel = undefined;
+        queuedStep = 0;
+        interrupt = undefined;
+        return commit;
+      };
       const finish = () => {
+        interrupt = undefined;
         if (commit) current = (current + step + entries.length) % entries.length;
         show(current);
         entries.forEach(reset);
@@ -276,9 +316,10 @@ const profiles: Record<string, string> = {
         incomingIndex = current;
         paintProgress();
         if (queuedStep) {
-          const next = queuedStep;
-          queuedStep = 0;
+          const next = Math.sign(queuedStep);
+          queuedStep -= next;
           settle(next, true, 'wheel');
+          if (queuedStep) (accelerateWheel as (() => void) | undefined)?.();
         }
       };
       if (reduced.matches || from === target) {
@@ -289,6 +330,7 @@ const profiles: Record<string, string> = {
       const clock = new GalleryReveal(from, target, performance.now(), input);
       if (input === 'wheel') accelerateWheel = () => clock.hurry(performance.now());
       const frame = (now: number) => {
+        if (grabbed) return;
         render(step, clock.value(now));
         if (!clock.done(now)) requestAnimationFrame(frame);
         else finish();
@@ -312,13 +354,26 @@ const profiles: Record<string, string> = {
     }, { passive: false });
 
     stage.addEventListener('pointerdown', (event) => {
-      if (event.pointerType !== 'touch' || !event.isPrimary || moving || !unlocked) return;
+      if (event.pointerType !== 'touch' || !event.isPrimary || !unlocked || (moving && !interrupt)) return;
+      // With another client already queued the curtains keep running; further
+      // flicks are counted without taking hold of them.
+      const detached = moving && queuedStep !== 0;
+      const held = moving && direction !== 0 && !detached;
+      const resume = held ? interrupt!() : false;
       drag = { id: event.pointerId, x: event.clientX, y: event.clientY,
-        lastY: event.clientY, time: event.timeStamp, velocity: 0, locked: false };
+        lastY: event.clientY, time: event.timeStamp, velocity: 0, locked: held,
+        base: held ? direction * progress * stage.clientHeight : 0, resume, caught: resume, detached };
+      if (held) stage.setPointerCapture(event.pointerId);
     });
     stage.addEventListener('pointermove', (event) => {
       if (!drag || drag.id !== event.pointerId) return;
-      const distance = drag.y - event.clientY;
+      if (drag.detached) {
+        drag.velocity = (drag.lastY - event.clientY) / Math.max(1, event.timeStamp - drag.time);
+        drag.lastY = event.clientY;
+        drag.time = event.timeStamp;
+        return;
+      }
+      const distance = drag.base + drag.y - event.clientY;
       const horizontal = Math.abs(drag.x - event.clientX);
       if (!drag.locked) {
         if (horizontal > 9 && horizontal > Math.abs(distance)) {
@@ -329,6 +384,7 @@ const profiles: Record<string, string> = {
         drag.locked = true;
         stage.setPointerCapture(event.pointerId);
       }
+      if (Math.abs(drag.y - event.clientY) >= 9) drag.resume = false;
       const elapsed = Math.max(1, event.timeStamp - drag.time);
       drag.velocity = (drag.lastY - event.clientY) / elapsed;
       drag.lastY = event.clientY;
@@ -340,12 +396,35 @@ const profiles: Record<string, string> = {
       if (!drag || drag.id !== event.pointerId) return;
       const gesture = drag;
       drag = undefined;
+      if (gesture.detached) {
+        const travel = gesture.y - gesture.lastY;
+        const quick = event.timeStamp - gesture.time < 100 && Math.abs(gesture.velocity) > .45;
+        if (event.type !== 'pointerup' || Math.abs(travel) < 24 || !quick) return;
+        if (moving) {
+          queuedStep = Math.max(-2, Math.min(2, queuedStep + Math.sign(travel)));
+          accelerateWheel?.();
+        } else settle(Math.sign(travel), true);
+        return;
+      }
       if (!gesture.locked) return;
-      const distance = gesture.y - gesture.lastY;
+      const distance = gesture.base + gesture.y - gesture.lastY;
       const step = Math.sign(distance) || direction || 1;
       const speed = event.timeStamp - gesture.time < 100 ? gesture.velocity * step : 0;
-      const commit = event.type === 'pointerup' &&
-        (Math.abs(distance) >= stage.clientHeight * .25 || (Math.abs(distance) >= 24 && speed > .45));
+      // A touch that only caught a committing transition lets it finish; a
+      // flick against the motion always returns to the current client.
+      const commit = gesture.resume || (event.type === 'pointerup' && speed > -.45 &&
+        (Math.abs(distance) >= stage.clientHeight * .25 || (Math.abs(distance) >= 24 && speed > .45)));
+      // A fresh flick onto a transition already under way asks for one more
+      // client: finish the current one quickly and continue.
+      const own = gesture.y - gesture.lastY;
+      if (commit && gesture.caught && Math.sign(own) === step && Math.abs(own) >= 24 && speed > .45) {
+        settle(step, true, 'wheel');
+        if (moving) {
+          queuedStep = step;
+          accelerateWheel?.();
+        }
+        return;
+      }
       settle(step, commit);
     }
     stage.addEventListener('pointerup', release);
@@ -354,10 +433,19 @@ const profiles: Record<string, string> = {
       if (event.target === stage) release(event);
     });
 
-    stage.addEventListener('keydown', (event) => {
+    // Page-level keys: the gallery is the whole page, so it should not need
+    // focus first. Controls that use these keys themselves keep them.
+    document.addEventListener('keydown', (event) => {
       const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1 }[event.key];
-      if (!unlocked || moving || drag || !step || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const target = event.target as HTMLElement | null;
+      if (!unlocked || drag || !step || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (target?.closest('input, textarea, select, [contenteditable], dialog, [role="menu"], [role="dialog"]')) return;
       event.preventDefault();
+      if (moving) {
+        queuedStep = step;
+        accelerateWheel?.();
+        return;
+      }
       if (direction && direction !== step) render(step, 0);
       settle(step, true);
     });
@@ -412,58 +500,89 @@ const profiles: Record<string, string> = {
     color: white;
   }
   [data-ready] .client-entry { position: absolute; inset: 0; min-height: 0; }
-  /* Keep articles out of a stacking context: both copy windows must sit above
-     both art windows along the diagonal, even when the reveals disagree. */
+  /* Art fills the stage; copy sits over it. Articles stay out of a stacking
+     context so both copy layers remain above both art layers mid-gesture. */
   .art-window { z-index: 0; }
-  .copy-window { z-index: 2; }
+  .copy-window { z-index: 2; pointer-events: none; }
   [data-curtain] .art-window { z-index: 1; }
   [data-curtain] .copy-window { z-index: 3; }
-  [data-curtain="up"] .client-art,
-  [data-curtain="down"] .client-copy { clip-path: inset(0 0 var(--curtain-cut, 0%) 0); }
-  [data-curtain="down"] .client-art,
-  [data-curtain="up"] .client-copy { clip-path: inset(var(--curtain-cut, 0%) 0 0 0); }
-  .art-window, .copy-window { position: absolute; overflow: clip; }
-  .art-window { inset: 0 0 0 var(--art-start); }
-  .copy-window { inset: 0 auto 0 0; width: var(--copy-end); clip-path: polygon(0 0, 100% 0, 80.5% 100%, 0 100%); }
-  .client-art, .client-copy { height: 100%; }
-  .client-art { position: relative; background: var(--backdrop); }
+  [data-curtain="up"] .client-art { clip-path: inset(0 0 var(--curtain-cut, 0%) 0); }
+  [data-curtain="down"] .client-art { clip-path: inset(var(--curtain-cut, 0%) 0 0 0); }
+  .art-window, .copy-window { position: absolute; inset: 0; overflow: clip; }
+  .client-art { position: relative; height: 100%; background: var(--backdrop); }
+  /* The legibility wash belongs to the art so it travels with its curtain. */
+  .client-art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to top, color-mix(in srgb, var(--panel) 86%, transparent), transparent 44%),
+      linear-gradient(to right, color-mix(in srgb, var(--panel) 62%, transparent), transparent 42%);
+  }
+  .client-art > * { scale: var(--scene-scale, 1); }
   .client-entry:has(.pidge-scene) .client-art { background: #556da2; }
   .client-entry:has(.client-video) .client-art { background: #1e2030; }
-  .pidge-cutout { filter: drop-shadow(12px 18px 14px rgb(10 15 35 / .38)); }
   .pidge-background { position: absolute; inset: -6%; width: 112%; max-width: none; height: 112%; object-fit: cover; }
-  /* Keep the source's cropped arm and lower torso beyond the moving stage. */
-  .client-art .pidge-scene { position: absolute; inset: -8% -5% -10% -5%; width: 110%; height: 118%; max-width: none; }
+  /* Landscape: the figure keeps its full proportions on the right, with the
+     source's cropped arm and lower torso beyond the stage edges. */
+  .pidge-scene { position: absolute; top: -9%; right: -3%; height: 122%; aspect-ratio: 1128 / 1536; }
+  .pidge-cutout { display: block; width: 100%; max-width: none; height: 100%; object-fit: cover; filter: drop-shadow(12px 18px 14px rgb(10 15 35 / .38)); }
   .video-depth { position: absolute; inset: -8%; width: 116%; height: 116%; }
   .client-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 71% 46%; }
-  .video-play { position: absolute; inset: auto auto 18% 50%; transform: translateX(-50%); padding: .7rem 1rem; border: 1px solid white; border-radius: 2rem; background: #152328e6; color: white; }
-  .client-art svg { display: block; width: 100%; height: 100%; }
+  .video-play { position: absolute; z-index: 1; inset: auto auto 18% 50%; transform: translateX(-50%); padding: .7rem 1rem; border: 1px solid white; border-radius: 2rem; background: #152328e6; color: white; }
+  .drawn-scene { position: absolute; inset: 0 0 0 auto; display: block; width: 84%; height: 100%; overflow: visible; }
   @media (prefers-reduced-motion: no-preference) {
     .character-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + var(--character-float, 0px) + var(--character-shift, 0px))); }
     .video-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + (var(--character-float, 0px) + var(--character-shift, 0px)) * .45)); }
-    .art-depth { transform: translate(calc(var(--pointer-x, 0px) * -.35), calc(var(--background-float, 0px) + var(--pointer-y, 0px) * -.35)); }
+    .art-depth { transform: translate(calc(var(--pointer-x, 0px) * -.35), calc(var(--background-float, 0px) + var(--pointer-y, 0px) * -.35 + var(--character-shift, 0px) * -.3)); }
+    .pidge-cutout, .pidge-background, .video-depth { will-change: transform; }
+    /* Entrance: held behind the logo curtain, released as it lifts. */
+    [data-await] .client-art > * { scale: 1.08; }
+    [data-await] .copy-line { transform: translateY(130%); opacity: 0; }
+    [data-intro] .client-art > * { transition: scale 850ms cubic-bezier(.2, .7, .2, 1); }
+    [data-intro] .copy-line { transition: transform 600ms cubic-bezier(.2, .7, .2, 1) 250ms, opacity 400ms linear 250ms; }
+    [data-intro] p .copy-line { transition-delay: 330ms; }
   }
   .client-copy {
+    position: absolute;
+    inset: auto 4.5rem max(clamp(1.5rem, 6vh, 4.5rem), env(safe-area-inset-bottom)) max(clamp(1.25rem, 4vw, 5rem), env(safe-area-inset-left));
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: start;
-    gap: .75rem;
-    padding: max(4rem, env(safe-area-inset-top)) 20% 3rem clamp(1.5rem, 4vw, 5rem);
-    background: var(--panel);
+    text-shadow: 0 2px 28px rgb(0 0 0 / .28);
   }
-  .client-copy h1 { font-size: clamp(2.8rem, 7vw, 8rem); line-height: .95; letter-spacing: -.075em; margin: 0; }
-  .client-copy a { color: white; font-size: clamp(1rem, 1.7vw, 1.65rem); text-decoration: underline; text-underline-offset: .3em; }
-  .reel-controls { position: absolute; inset: auto max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) auto; z-index: 2; pointer-events: none; }
-  .position-marks { display: flex; align-items: center; gap: 5px; padding: 7px; border-radius: 100px; background: #152328a6; }
-  .position-marks span { width: 5px; height: 5px; border-radius: 100px; background: #ffffff80;  }
-  .position-marks [data-active] { width: 16px; background: white; }
-  @media (max-width: 680px) {
-    .client-art .pidge-scene { inset: -7% -12% -14%; width: 124%; height: 121%; }
+  /* Each line moves inside its own mask; padding keeps descenders unclipped. */
+  .client-copy h1, .client-copy p { margin: 0; overflow: clip; }
+  .client-copy h1 { padding: .06em .08em .1em 0; font-size: clamp(3.4rem, min(13vw, 24vh), 12rem); font-weight: 600; line-height: .9; letter-spacing: -.065em; }
+  .copy-line { display: block; transform: translateY(calc(var(--copy-shift, 0) * 1%)); opacity: var(--copy-fade, 1); }
+  .client-copy a {
+    display: flex;
+    align-items: center;
+    gap: .4em;
+    min-height: 44px;
+    padding-inline: .15em;
+    color: white;
+    font-size: clamp(1rem, 1.35vw, 1.35rem);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .35em;
+    pointer-events: auto;
+  }
+  .client-copy a span { display: inline-block; font-size: .85em; }
+  .client-copy a:hover { text-decoration-thickness: 2px; }
+  .client-copy a:focus-visible { outline: 2px solid white; outline-offset: 2px; border-radius: 4px; }
+  .reel-controls { position: absolute; inset: 50% max(.9rem, env(safe-area-inset-right)) auto auto; z-index: 2; transform: translateY(-50%); pointer-events: none; }
+  .position-marks { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 6px; border-radius: 100px; background: #15232873; }
+  .position-marks span { width: 4px; height: 5px; border-radius: 100px; background: white; opacity: .45; }
+  .position-marks [data-active] { height: 22px; opacity: 1; }
+  /* Portrait stages: every scene is composed around the full height. */
+  @media (max-aspect-ratio: 1/1) {
+    .client-art::after { background: linear-gradient(to top, color-mix(in srgb, var(--panel) 90%, transparent), transparent 46%); }
+    .pidge-scene { inset: -7% -12% -14%; height: auto; aspect-ratio: auto; }
     .client-video { object-position: 73% 43%; }
-    .art-window { inset: 0 0 31%; }
-    .copy-window { inset: 58% 0 0; width: auto; clip-path: polygon(0 0, 100% 21%, 100% 100%, 0 100%); }
-    .client-copy { justify-content: start; padding: clamp(2.5rem, 9vh, 5rem) 1.25rem 1.25rem; }
-    .client-copy h1 { font-size: clamp(2.65rem, 12vw, 5rem); }
+    .drawn-scene { inset: 0 0 auto; width: 100%; height: 82%; }
+    .client-copy h1 { font-size: clamp(3.4rem, 17vw, 9rem); }
   }
   @media (prefers-reduced-motion: reduce) { .position-marks span { transition: none; } }
 </style>
