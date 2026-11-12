@@ -41,9 +41,18 @@ export function mountDeck() {
     const screen = screens[active];
     if (screen) root.toggleAttribute('data-more', screen.scrollHeight - screen.clientHeight - screen.scrollTop > 12);
   };
-  function show(id: string, animate = true) {
+  function show(id: string, animate = true): boolean {
     const index = screens.findIndex((screen) => screen.id === id);
-    if (index < 0 || index === active) return index >= 0;
+    if (index < 0) {
+      // A link to something inside a screen (a Terms entry, for example) opens that screen first.
+      const inner = id ? document.getElementById(id) : null;
+      const host = inner?.closest<HTMLElement>('[data-deck] > section[id]');
+      if (!inner || !host) return false;
+      show(host.id, animate);
+      if (phone.matches) requestAnimationFrame(() => inner.scrollIntoView({ block: 'start', behavior: 'instant' }));
+      return true;
+    }
+    if (index === active) return true;
     const forward = index > active;
     screens.forEach((screen, position) => {
       screen.classList.toggle('is-screen', position === index);

@@ -179,7 +179,7 @@ Remove a skin: delete its object. Keep at least one skin per client.
 
 ## 7. Home page and sample carousel
 
-Home (`src/pages/index.astro`) has: hero, What I do, Featured works (carousel), Editing, Web design, Terms, Commission. Layout styles are in `src/styles/scroll-portfolio.css`; colours and the dark look are in `src/styles/arcade.css` (section 15). On phones the sections become tabbed screens (section 16).
+Home (`src/pages/index.astro`) has: hero, What I do, Featured works (carousel), Pricing (Editing and Web design as two tabs), Terms, Commission. Layout styles are in `src/styles/scroll-portfolio.css`; colours and the dark look are in `src/styles/arcade.css` (section 15). On phones the sections become tabbed screens (section 16).
 
 - Hero art is a placeholder until human-drawn art exists. To turn real art on, set `characterArt.enabled` to `true` and `src` to the image path in `src/data/site.ts`.
 - What I do cards read title, subtitle, and "from" price from the service files in section 9.
@@ -246,6 +246,9 @@ Do not add back the ids listed under "Do not add these clip ids back" in `CONTEN
 | Editing packages, add-ons, lists | `src/content/services/editing.md` (the block between the `---` lines) |
 | Web design packages | `src/content/services/web-design.md` |
 | Open / Waitlist / Closed and the "updated" month | `src/data/status.json` |
+| The two tabs and the section | `src/pages/index.astro`, `<section id="pricing">` |
+
+How it is shown: Home has one Pricing section with two tabs, Editing and Web design. Each tab shows that service's title, "from" price and status, read from the files above. Links to `/#editing` or `/#web-design` (the phone menu, the What I do cards, and the old `/editing` and `/web-design` addresses) open the matching tab. The function `pickPrice` in the `<script>` of `index.astro` does this; do not rename the panel ids `editing` and `web-design`.
 
 Change a price
 
@@ -287,7 +290,7 @@ Set the real Discord link
 
 To mark it as a placeholder again, set it back to `null`. Never type a made-up link.
 
-Left in place but no longer shown: `src/components/ContactSection.astro`, `src/data/contact.json`, and `src/data/contact.ts` (the old form and notes). `/keystatic` still lists the contact notes; editing them changes nothing on the site. Do not delete `contact.json` without also removing its entry from `keystatic.config.ts`, or the editor breaks.
+Removed with the form: `src/components/ContactSection.astro`, `src/data/contact.ts`, `src/data/contact.json`, and the "Contact notes" entry in `keystatic.config.ts`. Nothing else referred to them.
 
 ## 11. Terms
 
@@ -295,11 +298,11 @@ Left in place but no longer shown: `src/components/ContactSection.astro`, `src/d
 
 ## 12. Navigation bar
 
-Links: `src/data/site.ts`, array `navLinks` (`href`, `label`). Phone menu routes: `src/data/routes.ts`. The tab look (uppercase labels, slanted block on the current page) is at the end of `src/styles/scroll-portfolio.css` under "Tab-style navigation". A page can recolour it by setting `--nav-accent`; Meet the Clients does this with the current client's colour.
+Links: `src/data/site.ts`, array `navLinks` (`href`, `label`). The desktop bar is Home, Works, Clients, Pricing, Terms, and the Commission button. To add, rename or reorder a link, edit that array; an `href` starting with `/#` must match a section `id` on Home. Phone menu routes: `src/data/routes.ts`. The tab look (uppercase labels, slanted block on the current page) is at the end of `src/styles/scroll-portfolio.css` under "Tab-style navigation". A page can recolour it by setting `--nav-accent`; Meet the Clients does this with the current client's colour.
 
 ## 13. Opening curtain
 
-`src/components/SiteIntro.astro`. On Home it shows once per browser session. On Meet the Clients it lifts when the first client's art has loaded. It is skipped with reduced motion.
+`src/components/SiteIntro.astro`. It is a dark panel with the wordmark and a counter that lifts away. On Home it shows once per browser session. On Meet the Clients it lifts when the first client's art has loaded. It is skipped with reduced motion.
 
 ## 14. Admin and content management
 
@@ -329,7 +332,7 @@ The theme applies to pages whose `<body>` has the class `arcade`. `src/component
 
 What it does: on upright phones (up to 767px wide) public pages never scroll as a whole.
 
-- Home: each section is a screen. A tab bar at the bottom (Home, Services, Featured, Editing, Web, Terms, Commission) switches screens with a slanted band and a slide. The tab bar itself scrolls sideways.
+- Home: each section is a screen. A tab bar at the bottom (Home, Services, Featured, Pricing, Terms, Commission) switches screens with a slanted band and a slide. The tab bar itself scrolls sideways. On the Pricing screen the Editing / Web design tabs stay pinned at the top while the details scroll.
 - Long screens (pricing, Terms) scroll inside themselves. A small "More" tag appears at the bottom while there is more below.
 - Works: the title, search and filter rows stay in place; filter rows scroll sideways; the results scroll in their own panel with the same "More" tag.
 - The footer moves to the end of the last Home screen and the end of the Works results.
@@ -352,6 +355,22 @@ Rename or reorder tabs: edit the same list. The first value must match a section
 
 Change the phone breakpoint: change it in both `DECK_QUERY` and every matching `@media` line in `arcade.css`. If they differ, tabs appear without the layout or the reverse.
 
-Links such as `/#terms` open the matching screen. Section snapping on Home (`src/lib/home-scroll.ts`) switches itself off on phones; do not remove the `if (deck.matches) return;` lines there or touch scrolling inside screens will break.
+Links such as `/#terms` open the matching screen, and a link to something inside a screen (for example `/#term-refunds`) opens that screen and scrolls to it. Section snapping on Home (`src/lib/home-scroll.ts`) switches itself off on phones; do not remove the `if (deck.matches) return;` lines there or touch scrolling inside screens will break.
 
 Known limits: very short phones hide the hero art placeholder and the service descriptions so the first screens fit. Sideways phones use the normal scrolling page.
+
+## 17. Not-found page
+
+`src/pages/404.astro`. Shows a large "404" that flickers apart in the accent colours (still under reduced motion), the existing message, and buttons to Home, Works and Clients. The effect is in `src/styles/arcade.css` under "Not-found page". To change the buttons, edit the links in `404.astro`.
+
+## 18. Removed in the redesign
+
+Listed so nobody looks for them:
+
+- The contact form and its notes (see section 10).
+- Separate Editing and Web design sections on Home. They are now two tabs of one Pricing section (section 9).
+- Nav links "Editing", "Web design" and the long "Meet the Clients!" label. The bar now has Pricing and Clients.
+- `src/components/ServicePage.astro` (an older standalone pricing page nothing used).
+- `src/lib/gallery-reveal.mjs` and `scripts/gallery-reveal.test.mjs` (maths for the old vertical client gallery).
+- The cream "Paper & Stage" colours on public pages. The admin studio still uses them.
+- The frosted blur on content cards (kept on the nav bar only), because it slowed scrolling on phones.

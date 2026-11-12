@@ -32,7 +32,9 @@ html:has(.arcade) { background: #0d1117; color-scheme: dark; }
 /* ---- Entrance: a slanted band crosses each page as its content settles ---- */
 @media (prefers-reduced-motion: no-preference) {
   .arcade:not(.immersive-clients)::after { content: ""; position: fixed; inset: -10% auto -10% 0; z-index: 70; width: 46vw; background: linear-gradient(to right, transparent, var(--accent) 18% 82%, transparent); pointer-events: none; transform: translateX(-260%) skewX(-16deg); animation: arcade-band 900ms cubic-bezier(.6, 0, .3, 1) 60ms both; }
-  .arcade:not(.immersive-clients) main { animation: arcade-in 620ms cubic-bezier(.2, .7, .2, 1) 300ms both; }
+  /* The opening curtain lives inside <main>, so the content beside it animates, not <main> itself. */
+  .arcade:not(.immersive-clients) main > :not(.opening, script, style) { animation: arcade-in 620ms cubic-bezier(.2, .7, .2, 1) 300ms both; }
+  .arcade:has(.opening:not([hidden]))::after { animation: none; }
 }
 @keyframes arcade-band { from { transform: translateX(-260%) skewX(-16deg); } to { transform: translateX(480%) skewX(-16deg); } }
 @keyframes arcade-in { from { opacity: 0; transform: translateX(-22px); } }
@@ -52,7 +54,6 @@ html:has(.arcade) { background: #0d1117; color-scheme: dark; }
 .arcade .page-sub { color: var(--muted); }
 .arcade :is(.surface-card, .tier, .service-card, .terms, .scroll-portfolio .service .surface-card, .scroll-portfolio .tier, .scroll-portfolio .contact .surface-card) {
   background: var(--panel-fill); color: var(--text); border: 1px solid var(--panel-line); border-radius: 4px; box-shadow: none;
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
 }
 .arcade :is(.surface-card, .tier, .service-card) { border-left: 3px solid var(--accent); }
 .arcade .scroll-portfolio .service .stage-tier { background: rgb(0 0 0 / .45); border-left-color: var(--pink-ink); }
@@ -77,6 +78,35 @@ html:has(.arcade) { background: #0d1117; color-scheme: dark; }
 .arcade .section-marker { color: var(--accent); }
 .arcade .commission-cta .page-sub { max-width: 44ch; }
 
+/* Pricing: two slanted tabs choose the service shown underneath. */
+.price-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: clamp(20px, 4dvh, 44px); }
+.price-tabs button { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 14px; min-height: 64px; padding: 12px 26px; border: 0; background: rgb(255 255 255 / .07); color: #fff; font: inherit; text-align: left; clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%); transition: background-color .2s ease, color .2s ease; }
+.price-tabs button:hover { background: rgb(255 255 255 / .16); }
+.price-tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); }
+.price-tabs button:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+.price-tab-index { grid-row: span 2; font: 500 13px "Geist Mono", monospace; opacity: .7; }
+.price-tab-name { font-size: clamp(18px, 2vw, 28px); font-weight: 800; letter-spacing: -.03em; text-transform: uppercase; }
+.price-tab-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 12px; }
+.price-tabs button[aria-selected="true"] .status-chip { color: inherit; }
+.price-panel[hidden] { display: none; }
+.arcade .cta { width: auto; min-height: 52px; padding-inline: 32px; border: 0; border-radius: 0; background: var(--accent); color: var(--on-accent); font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+.arcade .cta:hover { background: #fff; filter: none; }
+.arcade .cta:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+@media (prefers-reduced-motion: no-preference) { .price-panel:not([hidden]) { animation: screen-in 460ms cubic-bezier(.2, .7, .2, 1) both; } }
+
+/* Not-found page: the number flickers apart in the accent colours. */
+.lost { display: grid; justify-items: start; gap: 6px; }
+.lost-code { position: relative; margin: 0; font-size: clamp(6rem, 24vw, 16rem); font-weight: 800; line-height: .85; letter-spacing: -.06em; color: #fff; }
+.lost-code::before, .lost-code::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; }
+.lost-code::before { color: var(--accent); clip-path: inset(0 0 62% 0); transform: translateX(-6px); }
+.lost-code::after { color: var(--pink-ink); clip-path: inset(58% 0 0 0); transform: translateX(6px); }
+@media (prefers-reduced-motion: no-preference) {
+  .lost-code::before { animation: lost-a 2.6s steps(1) infinite; }
+  .lost-code::after { animation: lost-b 2.6s steps(1) infinite; }
+}
+@keyframes lost-a { 0%, 100% { clip-path: inset(0 0 62% 0); transform: translateX(-6px); } 40% { clip-path: inset(20% 0 55% 0); transform: translateX(10px); } 46% { clip-path: inset(0 0 62% 0); transform: translateX(-6px); } 80% { clip-path: inset(8% 0 80% 0); transform: translateX(-14px); } 84% { clip-path: inset(0 0 62% 0); transform: translateX(-6px); } }
+@keyframes lost-b { 0%, 100% { clip-path: inset(58% 0 0 0); transform: translateX(6px); } 42% { clip-path: inset(70% 0 8% 0); transform: translateX(-12px); } 48% { clip-path: inset(58% 0 0 0); transform: translateX(6px); } 82% { clip-path: inset(44% 0 30% 0); transform: translateX(14px); } 86% { clip-path: inset(58% 0 0 0); transform: translateX(6px); } }
+
 /* ---- Works ---- */
 .arcade .works-search input { background: rgb(0 0 0 / .35); border: 1px solid var(--panel-line); border-radius: 0; color: #fff; }
 .arcade .works-search input::placeholder { color: var(--muted); }
@@ -93,7 +123,7 @@ html:has(.arcade) { background: #0d1117; color-scheme: dark; }
 @media (max-width: 767px) and (max-aspect-ratio: 1/1) {
   html:has(.arcade:not(.immersive-clients)) { height: 100%; overflow: hidden; scroll-snap-type: none !important; }
   .arcade:not(.immersive-clients) { height: 100svh; min-height: 0; overflow: hidden; }
-  .arcade:not(.immersive-clients) main { display: flex; flex-direction: column; min-height: 0; }
+  .arcade:not(.immersive-clients) main { display: flex; flex-direction: column; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; }
   .arcade:not(.immersive-clients) main > * { min-height: 0; }
 
   [data-deck] { flex: 1; display: grid; grid-template: minmax(0, 1fr) auto / minmax(0, 1fr); position: relative; overflow: clip; }
@@ -150,7 +180,11 @@ html:has(.arcade) { background: #0d1117; color-scheme: dark; }
   [data-deck] .shorts-wordmark, [data-deck] .carousel-help { display: none; }
   [data-deck] .commission-panel { display: flex; flex-direction: column; }
   [data-deck] .commission-cta { margin-block: auto; }
-  [data-deck] .section-marker > span:last-child { font-size: 30px; }
+  [data-deck] .price-tabs { position: sticky; top: -14px; z-index: 2; margin: 0 -18px 14px; padding: 8px 14px; gap: 4px; background: rgb(13 17 23 / .94); }
+  [data-deck] .price-tabs button { grid-template-columns: 1fr; min-height: 56px; padding: 8px 18px; }
+  [data-deck] .price-tab-index { display: none; }
+  [data-deck] .price-tab-name { font-size: 16px; }
+  [data-deck] .price-tab-meta { font-size: 11px; }
 
   /* Short phones: drop the art placeholder and extra copy so the first screens still fit. */
   @media (max-height: 600px) {
@@ -175,7 +209,9 @@ html:has(.arcade) { background: #0d1117; color-scheme: dark; }
   .works-results { flex: 1; min-height: 0; margin-top: 10px; border-top: 1px solid var(--panel-line); }
   .works-scroll { position: absolute; inset: 0; padding: 12px 16px 44px; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / .3) transparent; }
   .works-scroll .site-footer { margin: 28px -16px -44px; }
-  .arcade .narrow { margin-block: auto; padding: 24px 20px; }
+  .arcade .narrow { margin-block: auto; padding: 20px; }
+  .arcade .lost .intro-actions { margin-top: 12px; }
+  .arcade main:has(.lost) ~ .site-footer { display: none; }
 }
 @media (max-width: 767px) and (max-aspect-ratio: 1/1) and (prefers-reduced-motion: no-preference) {
   .deck-wipe.is-running { animation: deck-wipe 760ms cubic-bezier(.6, 0, .3, 1) both; }

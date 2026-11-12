@@ -24,7 +24,7 @@ Compare tiers is hidden while a service has only one tier. To add a package, app
 | Editing packages, tiers, add-ons, scope | `src/content/services/editing.md` |
 | Web design packages, process, tiers, add-ons | `src/content/services/web-design.md` |
 | Terms and FAQ | `src/data/terms.ts` |
-| Contact form options and guidelines | `src/data/contact.ts` |
+| Commission section (Discord link, heading, text) | `src/data/commission.ts` |
 | Filter tag labels | `src/data/works-layout.json` `tags`, rendered by `src/data/tags.ts` |
 | Clip list | `src/data/clips.json` |
 | Posters | `src/assets/posters/` |

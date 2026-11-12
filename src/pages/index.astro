@@ -102,18 +102,31 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
       </div>
     </section>
 
-    <section class="detail-panel" id="editing" aria-label="Editing commissions" data-ghost="Editing">
-      <div class="time-rule" style="--at:54" aria-hidden="true"><span></span></div>
-      <div class="section-marker"><span>01 / EDITING</span><span aria-hidden="true" data-parallax="0.05">✳</span></div>
-      <ServiceSection service={editing} />
-    </section>
-    <section class="detail-panel web-panel" id="web-design" aria-label="Web design commissions" data-ghost="Web">
-      <div class="time-rule" style="--at:70" aria-hidden="true"><span></span></div>
-      <div class="section-marker"><span>02 / WEB DESIGN</span><span aria-hidden="true" data-parallax="-0.05">↗</span></div>
-      <ServiceSection service={web} />
+    <section class="detail-panel pricing-panel" id="pricing" aria-label="Pricing" data-ghost="Pricing">
+      <div class="time-rule" style="--at:60" aria-hidden="true"><span></span></div>
+      <p class="section-label" data-reveal>PRICING</p>
+      <div class="price-tabs" role="tablist" aria-label="Services" data-reveal style="--i:1">
+        {[
+          { entry: editing, state: status.editing },
+          { entry: web, state: status.webDesign },
+        ].map(({ entry, state }, index) => (
+          <button type="button" role="tab" id={`tab-${entry.id}`} aria-controls={entry.id} data-price-tab={entry.id}
+            aria-selected={index === 0 ? 'true' : 'false'} tabindex={index === 0 ? 0 : -1}>
+            <span class="price-tab-index">0{index + 1}</span>
+            <span class="price-tab-name">{entry.data.title}</span>
+            <span class="price-tab-meta">From {entry.data.fromPrice} <StatusChip status={state} /></span>
+          </button>
+        ))}
+      </div>
+      <div class="price-panel" role="tabpanel" id="editing" aria-labelledby="tab-editing">
+        <ServiceSection service={editing} />
+      </div>
+      <div class="price-panel" role="tabpanel" id="web-design" aria-labelledby="tab-web-design" hidden>
+        <ServiceSection service={web} />
+      </div>
     </section>
     <section class="detail-panel terms-panel" id="terms" aria-label="Commission terms" data-ghost="Terms">
-      <div class="time-rule" style="--at:84" aria-hidden="true"><span></span></div>
+      <div class="time-rule" style="--at:82" aria-hidden="true"><span></span></div>
       <p class="section-label">THE DETAILS, UP FRONT</p>
       <TermsSection />
     </section>
@@ -127,8 +140,8 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
     <p class="deck-cue" aria-hidden="true">More <span>▾</span></p>
     <nav class="deck-tabs" aria-label="Home sections">
       {[
-        ['home', 'Home'], ['services', 'Services'], ['featured', 'Featured'], ['editing', 'Editing'],
-        ['web-design', 'Web'], ['terms', 'Terms'], ['commission', 'Commission'],
+        ['home', 'Home'], ['services', 'Services'], ['featured', 'Featured'],
+        ['pricing', 'Pricing'], ['terms', 'Terms'], ['commission', 'Commission'],
       ].map(([id, label]) => <a href={`#${id}`} data-deck-tab={id}>{label}</a>)}
     </nav>
   </div>
@@ -139,6 +152,42 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
 <script>
   import { mountHomeScroll } from '../lib/home-scroll';
   import { mountDeck } from '../lib/screen-deck';
+  // Pricing tabs. Links to #editing or #web-design (nav menu, service cards,
+  // the old /editing and /web-design addresses) pick the tab, then go to #pricing.
+  const priceTabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-price-tab]'));
+  function pickPrice(id: string, focus = false) {
+    const chosen = priceTabs.find((tab) => tab.dataset.priceTab === id);
+    if (!chosen) return false;
+    priceTabs.forEach((tab) => {
+      const on = tab === chosen;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+      const panel = document.getElementById(tab.dataset.priceTab!);
+      if (panel) panel.hidden = !on;
+    });
+    if (focus) chosen.focus();
+    window.dispatchEvent(new Event('nk-layout'));
+    return true;
+  }
+  priceTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => pickPrice(tab.dataset.priceTab!));
+    tab.addEventListener('keydown', (event) => {
+      const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+      if (!step) return;
+      event.preventDefault();
+      pickPrice(priceTabs[(index + step + priceTabs.length) % priceTabs.length].dataset.priceTab!, true);
+    });
+  });
+  if (pickPrice(location.hash.slice(1))) history.replaceState(null, '', '#pricing');
+  document.addEventListener('click', (event) => {
+    const link = (event.target as HTMLElement).closest?.<HTMLAnchorElement>('a[href*="#"]');
+    if (!link || link.pathname !== location.pathname || !pickPrice(link.hash.slice(1))) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (location.hash === '#pricing') window.dispatchEvent(new HashChangeEvent('hashchange'));
+    else location.hash = 'pricing';
+  }, true);
+
   mountHomeScroll();
   mountDeck();
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');

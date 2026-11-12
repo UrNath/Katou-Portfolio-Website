@@ -296,13 +296,5 @@ export default config({
         ),
       },
     }),
-    contact: singleton({
-      label: 'Contact notes',
-      path: 'src/data/contact',
-      format: { data: 'json' },
-      schema: {
-        guidelines: lines('Contact page notes'),
-      },
-    }),
   },
 });
