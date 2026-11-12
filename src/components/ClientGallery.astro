@@ -18,7 +18,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
 
   <nav class="roster-nav" aria-label="Choose a client">
     <button class="roster-switch" type="button" data-step="1">
-      <span aria-hidden="true">⇄</span> Switch client
+      <span aria-hidden="true">⇄</span> <span class="switch-text">Switch client</span>
     </button>
     <div class="roster-names">
       {clients.map((client, index) => (
@@ -45,8 +45,8 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
             <span class="bg-band">{`${client.label} `.repeat(6)}</span>
           </div>
           {profile.skins.map((skin, skinIndex) => (
-            <div class="char" data-skin={skin.id} hidden={skinIndex !== 0}
-              style={skin.art ? `--h:${skin.art.height_pct}%;--b:${skin.art.bottom_pct}%;--r:${skin.art.right_pct}%;--ratio:${skin.art.width}/${skin.art.height}` : undefined}>
+            <div class:list={['char', skin.art?.framed && 'is-framed']} data-skin={skin.id} hidden={skinIndex !== 0}
+              style={skin.art ? `--h:${skin.art.height_pct}%;--b:${skin.art.bottom_pct}%;--r:${skin.art.right_pct}%;--ratio:${skin.art.framed ? '4/3' : `${skin.art.width}/${skin.art.height}`};--focus:${skin.art.focus ?? '50% 50%'}` : undefined}>
               <div class="char-move character-depth">
                 {skin.art ? (
                   <>
@@ -133,7 +133,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
               <li>
                 {profile.socials[key] ? (
                   <a href={profile.socials[key]} target="_blank" rel="noopener noreferrer">
-                    <BrandIcon name={key} size={16} /> {socialLabel[key]}
+                    <BrandIcon name={key} size={16} /> <span class="social-name">{socialLabel[key]}</span>
                   </a>
                 ) : (
                   <span class="is-placeholder"><BrandIcon name={key} size={16} /> {socialLabel[key]} {PLACEHOLDER}</span>
@@ -172,6 +172,9 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
     const wipe = stage.querySelector<HTMLElement>('.wipe')!;
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     const posterOnly = () => document.documentElement.classList.contains('poster-only');
+    // Timing and gesture tuning (documented in docs/FEATURES.md).
+    const SWITCH = { leave: 340, enter: 900, reducedLeave: 160, reducedEnter: 200 };
+    const SWIPE = { start: 10, distance: .28, velocity: .45, settle: 280 };
     let current = 0;
     let busy = false;
     let pending: number | undefined;
@@ -199,8 +202,8 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
       disarm();
       if (from.contains(document.activeElement)) picks[target]?.focus({ preventScroll: true });
       const simple = reduced.matches;
-      const leave = simple ? 160 : 340;
-      const enter = simple ? 200 : 900;
+      const leave = simple ? SWITCH.reducedLeave : SWITCH.leave;
+      const enter = simple ? SWITCH.reducedEnter : SWITCH.enter;
       from.classList.add('is-leaving');
       if (!simple) {
         wipe.style.setProperty('--wipe', to.style.getPropertyValue('--accent'));
@@ -239,20 +242,88 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
       go((pending ?? current) + step);
     });
 
-    // A sideways swipe on the art also switches; vertical scrolling stays native.
-    let swipe: { x: number; y: number } | undefined;
+    // ---- Touch swipe: the current client follows the finger and its neighbour
+    // peeks in from the side. Release commits past a distance or speed
+    // threshold, otherwise both slide back. Transforms only. ----
+    let drag: { id: number; x: number; y: number; lastX: number; time: number; velocity: number; locked: boolean; side: number } | undefined;
+    let swiped = false;
+    const neighbour = (side: number) => clients[(current + side + clients.length) % clients.length];
+    function place(dx: number) {
+      const width = stage.clientWidth;
+      const side = dx < 0 ? 1 : -1;
+      if (drag && drag.side !== side) {
+        if (drag.side) { const old = neighbour(drag.side); old.hidden = true; old.style.transform = ''; }
+        drag.side = side;
+        neighbour(side).hidden = false;
+      }
+      clients[current].style.transform = `translate3d(${dx}px, 0, 0)`;
+      neighbour(side).style.transform = `translate3d(${dx + side * width}px, 0, 0)`;
+    }
+    function settleSwipe(dx: number, side: number, commit: boolean) {
+      const width = stage.clientWidth;
+      const from = clients[current];
+      const to = neighbour(side);
+      const end = commit ? -side * width : 0;
+      busy = true;
+      const options = { duration: SWIPE.settle, easing: 'cubic-bezier(.2, .8, .2, 1)' };
+      from.style.transform = '';
+      to.style.transform = '';
+      to.animate([{ transform: `translate3d(${dx + side * width}px, 0, 0)` }, { transform: `translate3d(${end + side * width}px, 0, 0)` }], options);
+      from.animate([{ transform: `translate3d(${dx}px, 0, 0)` }, { transform: `translate3d(${end}px, 0, 0)` }], options).finished.finally(() => {
+        if (commit) {
+          from.hidden = true;
+          current = clients.indexOf(to);
+          paint();
+        } else to.hidden = true;
+        busy = false;
+      });
+    }
     stage.addEventListener('pointerdown', (event) => {
-      swipe = event.pointerType === 'touch' && (event.target as HTMLElement).closest('.stage')
-        ? { x: event.clientX, y: event.clientY } : undefined;
+      swiped = false;
+      if (event.pointerType !== 'touch' || !event.isPrimary || busy || clients.length < 2) return;
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, lastX: event.clientX, time: event.timeStamp, velocity: 0, locked: false, side: 0 };
     });
-    stage.addEventListener('pointerup', (event) => {
-      if (!swipe) return;
-      const dx = event.clientX - swipe.x;
-      const dy = event.clientY - swipe.y;
-      swipe = undefined;
-      if (Math.abs(dx) > 56 && Math.abs(dx) > Math.abs(dy) * 1.5) go(current + (dx < 0 ? 1 : -1));
+    stage.addEventListener('pointermove', (event) => {
+      if (!drag || drag.id !== event.pointerId) return;
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+      if (!drag.locked) {
+        // Below the threshold this is still a tap; a mostly vertical move is not a swipe.
+        if (Math.abs(dy) > SWIPE.start && Math.abs(dy) >= Math.abs(dx)) { drag = undefined; return; }
+        if (Math.abs(dx) < SWIPE.start) return;
+        drag.locked = true;
+        swiped = true;
+        disarm();
+        stage.setPointerCapture(event.pointerId);
+      }
+      drag.velocity = (event.clientX - drag.lastX) / Math.max(1, event.timeStamp - drag.time);
+      drag.lastX = event.clientX;
+      drag.time = event.timeStamp;
+      if (!reduced.matches) place(dx);
     });
-    stage.addEventListener('pointercancel', () => { swipe = undefined; });
+    function endDrag(event: PointerEvent) {
+      if (!drag || drag.id !== event.pointerId) return;
+      const gesture = drag;
+      drag = undefined;
+      if (!gesture.locked) return;
+      const dx = gesture.lastX - gesture.x;
+      const side = dx < 0 ? 1 : -1;
+      const speed = event.timeStamp - gesture.time < 100 ? gesture.velocity * -side : 0;
+      const commit = event.type === 'pointerup' && speed > -SWIPE.velocity &&
+        (Math.abs(dx) >= stage.clientWidth * SWIPE.distance || (Math.abs(dx) >= 24 && speed > SWIPE.velocity));
+      // Reduced motion: nothing tracked the finger, so a committed swipe uses the plain fade.
+      if (reduced.matches) { if (commit) go(current + side); return; }
+      settleSwipe(dx, gesture.side || side, commit);
+    }
+    stage.addEventListener('pointerup', endDrag);
+    stage.addEventListener('pointercancel', endDrag);
+    // A finished swipe must not also count as a tap on whatever it started on.
+    stage.addEventListener('click', (event) => {
+      if (!swiped) return;
+      swiped = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
 
     // ---- Tabs and skins ----
     stage.querySelectorAll<HTMLElement>('[role="tablist"]').forEach((list) => {
@@ -472,6 +543,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
     overflow: clip;
     color: white;
     isolation: isolate;
+    touch-action: pan-y pinch-zoom;
   }
   .roster > * { grid-area: 1 / 1; min-width: 0; }
   .is-placeholder { opacity: .72; font-style: italic; }
@@ -509,6 +581,9 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
     -webkit-user-drag: none; user-select: none; }
   /* A flat tinted echo of the silhouette, offset behind the figure. */
   .char-echo { position: absolute; inset: 0; background: var(--accent); opacity: .5; -webkit-mask: var(--art) bottom / contain no-repeat; mask: var(--art) bottom / contain no-repeat; transform: translate(-7%, 1.5%) scale(1.03); transform-origin: bottom; }
+  /* Rectangular art without a cutout: the whole illustration in a lit frame. */
+  .is-framed .char-art { object-fit: cover; object-position: var(--focus, 50% 50%); border: 3px solid var(--rim); border-radius: 14px; rotate: -2.5deg; filter: none; box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 55%, transparent), 16px 24px 30px rgb(0 0 0 / .42); }
+  .is-framed .char-echo { -webkit-mask: none; mask: none; border-radius: 14px; rotate: -2.5deg; transform: translate(-4.5%, 5%); opacity: .55; }
   .art-placeholder { display: grid; place-content: center; gap: .35rem; width: 100%; height: 100%; border: 2px dashed var(--accent); border-radius: 18px; background: repeating-linear-gradient(-45deg, rgb(255 255 255 / .05) 0 14px, transparent 14px 28px), rgb(0 0 0 / .22); color: var(--rim); text-align: center; text-transform: uppercase; letter-spacing: .14em; font-size: clamp(.7rem, 1vw, .85rem); box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 35%, transparent), 16px 22px 30px rgb(0 0 0 / .35); }
   .art-placeholder strong { font-size: 1.6em; letter-spacing: .08em; }
   @media (prefers-reduced-motion: no-preference) {
@@ -618,19 +693,63 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .reel-close { position: absolute; top: -6px; right: -6px; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: white; color: #0d1320; transform: translate(40%, -40%); }
   .reel-dialog :is(button, a):focus-visible { outline: 2px solid var(--scene-accent, white); outline-offset: 3px; }
 
-  /* ---- Portrait and narrow screens: art on top, details below, page scrolls ---- */
-  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
-    .client { display: block; }
-    .stage { position: relative; height: clamp(320px, 56svh, 620px); background: linear-gradient(165deg, var(--panel) 0 55%, var(--deep) 55.1%); }
-    .stage::after { background: linear-gradient(to top, var(--scene-panel, var(--deep)), transparent 26%); }
+  /* ---- Portrait screens (phones, upright tablets): the whole page is one
+     screen tall, sized to fit a 9:16 display under the navbar. Art fills the
+     flexible top row; the details stack beneath it and never scroll. ---- */
+  @media (max-aspect-ratio: 1/1) {
+    .roster { height: 100svh; min-height: 0; }
+    .client { display: grid; grid-template: minmax(0, 1fr) auto / minmax(0, 1fr); align-items: stretch; height: 100%; min-height: 0; }
+    .stage { position: relative; min-height: 0; background: linear-gradient(165deg, var(--panel) 0 55%, var(--deep) 55.1%); }
+    .stage::after { background: linear-gradient(to top, var(--deep), transparent 34%); }
     .bg-band { left: 50%; transform: translate(-50%, -50%) rotate(-74deg); }
-    .char { inset: auto 0 var(--b, 6%) 0; height: min(var(--h, 70%), 96%); max-width: none; margin-inline: auto; }
-    .char[data-skin="rat-thief"] { height: 104%; inset-block-end: -8%; }
-    .char:has(.art-placeholder) { height: 68%; }
-    .info { width: 100%; padding: 18px max(20px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
-    .name { font-size: clamp(3rem, 17vw, 6rem); }
-    .gems { justify-content: space-around; padding-inline: 8px; }
-    .roster-nav { margin-inline: max(14px, env(safe-area-inset-left)); }
+    /* The figure sits between the roster switch and the name that overlaps its base. */
+    .char { inset: auto 0 0 0; height: calc(100% - var(--bar) - 58px); max-width: none; margin-inline: auto; }
+    .char[data-skin="rat-thief"] { height: calc(100% - var(--bar) - 20px); inset-block-end: -6%; }
+    .char:has(.art-placeholder) { height: calc((100% - var(--bar) - 58px) * .74); inset-block-end: 3.4rem; }
+    .char.is-framed { width: 90%; height: auto; max-height: calc(100% - var(--bar) - 58px - 3rem); inset-block-end: 3.2rem; }
+    .info { align-self: end; gap: clamp(5px, 1.1svh, 12px); width: 100%; margin-top: -3.1rem; padding: 0 max(16px, env(safe-area-inset-right)) max(clamp(8px, 1.8svh, 20px), env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+    .name { font-size: clamp(2.3rem, min(15vw, 7.4svh), 5.4rem); }
+    .chips { gap: 4px; }
+    .chips li { padding: 3px 9px 3px 7px; font-size: 11px; }
+    .desc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 13px; line-height: 1.4; }
+    .tabs { margin-top: 0; }
+    .panel { gap: clamp(5px, 1.1svh, 12px); min-height: calc(clamp(44px, 7.6svh, 68px) * 1.42 + 62px); }
+    .gems { justify-content: space-around; gap: 8px; padding: calc(clamp(44px, 7.6svh, 68px) * .21 + 2px) 8px 0; }
+    .gem { gap: calc(clamp(44px, 7.6svh, 68px) * .21 + 3px); min-width: 64px; }
+    .gem-face { width: clamp(44px, 7.6svh, 68px); height: clamp(44px, 7.6svh, 68px); }
+    .gem[data-live] .gem-face { transform: rotate(0deg) scale(1.34); }
+    .gem-label { font-size: 11px; }
+    .strip { padding: 6px 12px; font-size: 12px; }
+    .skins { padding-top: 8px; gap: 8px; }
+    .skins button { min-height: 56px; padding-right: 12px; }
+    .skin-thumb { width: 44px; height: 44px; }
+    .socials { flex-wrap: nowrap; gap: 6px; }
+    .socials :is(a, span) { padding: 0 9px; gap: 6px; font-size: 12px; white-space: nowrap; }
+    .roster-nav { margin: calc(var(--bar) + 8px) max(12px, env(safe-area-inset-left)) 0; gap: 4px 6px; }
+    .roster-switch { padding: 0 14px 0 10px; }
+    .roster-names button { padding: 0 10px; }
     .reel-close { transform: none; top: 8px; right: 8px; }
+  }
+  /* Very narrow phones: confirmed links show as icons so the row still fits. */
+  @media (max-aspect-ratio: 1/1) and (max-width: 379px) {
+    .socials a { min-width: 44px; justify-content: center; }
+    .social-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  }
+  @media (max-aspect-ratio: 1/1) and (max-width: 379px) {
+    .roster-switch { min-width: 44px; padding: 0 16px 0 12px; }
+    .switch-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  }
+  /* Shorter phones give the art its room back by trimming the copy. */
+  @media (max-aspect-ratio: 1/1) and (max-height: 700px) {
+    .desc { -webkit-line-clamp: 1; }
+    .gem-label { display: none; }
+    .gem { gap: 0; padding-bottom: calc(clamp(44px, 7.6svh, 68px) * .21); }
+    .panel { min-height: calc(clamp(44px, 7.6svh, 68px) * 1.42 + 40px); }
+  }
+  /* Narrow landscape windows keep the side-by-side layout and may scroll. */
+  @media (min-aspect-ratio: 1/1) and (max-width: 899px) {
+    .info { width: min(100%, 52%); }
+    .name { font-size: clamp(2.4rem, 8vw, 4rem); }
+    .char { max-width: 46%; }
   }
 </style>

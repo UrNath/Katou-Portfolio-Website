@@ -11,6 +11,10 @@ export interface ClientArt {
   height_pct: number;
   bottom_pct: number;
   right_pct: number;
+  /** Rectangular artwork with no transparent cutout: shown whole in a 4:3 frame. */
+  framed?: boolean;
+  /** Which part of framed art stays in view when it is cropped, as CSS object-position. */
+  focus?: string;
 }
 
 export interface ClientSkin {
@@ -34,6 +38,11 @@ export interface ClientProfile {
   /** Backdrop, accent and rim-light colours for this client's stage. */
   palette: { panel: string; deep: string; accent: string; rim: string };
   skins: ClientSkin[];
+  /**
+   * Optional: up to three clip ids from clips.json to use as the highlight
+   * diamonds, in order. Leave out to use this client's featured clips.
+   */
+  reels?: string[];
 }
 
 const neutral = { panel: '#27323a', deep: '#141b20', accent: '#a3f0db', rim: '#e9fffa' };
@@ -73,7 +82,14 @@ export const clientProfiles: Record<string, ClientProfile> = {
     weapon: 'Blood scythe, made from her blood',
     socials: { youtube: 'https://www.youtube.com/@chiseyi', discord: null, tiktok: 'https://www.tiktok.com/@chiseyivt' },
     palette: { panel: '#5a1622', deep: '#22070d', accent: '#ff6b78', rim: '#ffe9ec' },
-    skins: [{ id: 'default', label: 'Default', note: 'Art placeholder', art: null }],
+    skins: [
+      {
+        id: 'default',
+        label: 'Default',
+        note: 'Illustration',
+        art: { src: '/clients/chi-illustration.webp', width: 1800, height: 840, height_pct: 60, bottom_pct: 17, right_pct: 5, framed: true, focus: '66% 50%' },
+      },
+    ],
   },
   miu: {
     description: null,
@@ -88,6 +104,10 @@ export const clientProfiles: Record<string, ClientProfile> = {
 };
 
 /** A client added in the studio shows up with every field as a placeholder. */
+export function hasProfile(id: string): boolean {
+  return id in clientProfiles;
+}
+
 export function profileFor(id: string): ClientProfile {
   return clientProfiles[id] ?? {
     description: null, type: null, role: null, element: null, weapon: null,
