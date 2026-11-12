@@ -1,215 +1,404 @@
 ---
-interface Props { creators: { id: string; label: string }[] }
-const { creators } = Astro.props;
-const colors = [
-  { panel: '#283b62', backdrop: '#556da2', glow: '#a3f0db', ink: '#192d46' },
-  { panel: '#654653', backdrop: '#b88698', glow: '#f5b4d2', ink: '#33264b' },
-  { panel: '#693e35', backdrop: '#a96653', glow: '#ffdb9e', ink: '#432d46' },
-];
-// Profile paths come from the credited TikTok video URLs in clips.json.
-const profiles: Record<string, string> = {
-  pidge: 'https://www.tiktok.com/@pidgeira',
-  chi: 'https://www.tiktok.com/@chiseyivt',
-  miu: 'https://www.tiktok.com/@miuonivt',
-};
+import BrandIcon from './BrandIcon.astro';
+import Icon from './Icon.astro';
+import type { ClientProfile } from '../data/clients';
+
+interface Reel { title: string; poster: string; preview: string; youtube: string }
+interface Props {
+  clients: { id: string; label: string; profile: ClientProfile; reels: (Reel | null)[] }[];
+}
+const { clients } = Astro.props;
+const PLACEHOLDER = 'placeholder';
+const socialOrder = ['youtube', 'discord', 'tiktok'] as const;
+const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' };
 ---
 
-<div class="client-gallery">
-  <div class="client-reel" tabindex="0" role="region" aria-label="Meet the Clients" aria-describedby="gallery-input">
-    <span id="gallery-input" class="gallery-sr">Browse clients with the up and down arrow keys.</span>
-    {creators.map((creator, index) => {
-      const palette = colors[index % colors.length];
-      return (
-        <article class="client-entry" aria-label={creator.label}
-          style={`--panel:${palette.panel};--backdrop:${palette.backdrop};--glow:${palette.glow};--portrait-ink:${palette.ink}`}>
-          <div class="art-window">
-            <div class="client-art">
-              {creator.id === 'pidge' ? (
-                <>
-                <img class="pidge-background art-depth" src="/clients/pidge-background.webp" width="1128" height="1536" alt="" aria-hidden="true" />
-                <div class="pidge-scene">
-                  <img class="character-depth pidge-cutout" src="/clients/pidge-foreground.webp" width="1128" height="1536" alt="" aria-hidden="true" />
-                </div>
-                </>
-              ) : creator.id === 'chi' ? (
-                <>
-                  <div class="video-depth">
-                    <video class="client-video" src="/clients/chiseyi-loop.mp4" poster="/clients/chiseyi-poster.webp"
-                      width="1280" height="720" autoplay muted loop playsinline preload="auto" aria-label="Chiseyi animated artwork"></video>
-                  </div>
-                  <button class="video-play" type="button" hidden>Play animation</button>
-                </>
-              ) : (
-              <svg class="drawn-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-                <g class="art-depth">
-                <rect width="800" height="900" fill="var(--backdrop)" />
-                <circle cx="430" cy="330" r="273" fill="var(--glow)" opacity=".55" />
-                <path d="M-50 790 670 -40M100 950 850 80M-80 420 390 -90" stroke="var(--glow)" stroke-width="18" opacity=".28" />
-                <circle cx="430" cy="330" r="300" fill="none" stroke="var(--glow)" stroke-width="2" />
-                </g>
-                <g class="character-depth"><g transform={[
-                  'translate(35 55) scale(.9)',
-                  'translate(745 135) scale(-.73 .73) rotate(-12 400 500)',
-                  'translate(90 210) scale(.77) rotate(10 400 500)',
-                ][index % 3]}>
-                  {index === 1 && <path d="M180 775 70 575 88 440 135 415 161 468 149 561 292 711" fill="#f7cfc1" stroke="var(--portrait-ink)" stroke-width="18" />}
-                  {index === 2 && <path d="M130 570Q-50 340 155 200L275 230 220 580M560 240Q780 210 760 610L610 630" fill="var(--portrait-ink)" />}
-                  <path d={index === 1 ? 'M190 560c-70-210 2-422 223-422 210 0 290 220 220 422z' : 'M156 714c-37-132 1-226 15-323 19-153 91-253 242-253 154 0 230 111 230 252 0 119 69 200 23 324z'} fill="var(--portrait-ink)" />
-                  <path d="M65 930c19-159 123-251 300-285l125 4c170 23 266 129 294 281z" fill="var(--portrait-ink)" />
-                  <path d="m358 590-14 69 85 106 91-109-21-77z" fill="#d9968d" />
-                  <path d="M245 376c20-113 96-158 181-158 108 0 172 68 173 169l-9 116c-10 83-80 149-158 149-84 0-157-62-170-143z" fill="#f7cfc1" />
-                  <path d="M218 439c-20-175 53-293 205-293 123 0 225 81 217 237l-37 99-40-119-109-76 23 75-126-55-99 155z" fill="var(--portrait-ink)" />
-                  <path d="m284 484 59-16 53 14m75-2 53-17 48 10" fill="none" stroke="var(--portrait-ink)" stroke-width="12" stroke-linecap="round" />
-                  <ellipse cx="348" cy="489" rx="13" ry="17" fill="var(--backdrop)" />
-                  <ellipse cx="521" cy="486" rx="13" ry="17" fill="var(--backdrop)" />
-                  {index === 2 && <g fill="none" stroke="var(--glow)" stroke-width="9"><circle cx="348" cy="489" r="43" /><circle cx="521" cy="486" r="43" /><path d="M391 486h87" /></g>}
-                  <path d="M408 563q27 24 57-3" fill="none" stroke="#a15068" stroke-width="7" stroke-linecap="round" />
-                  <path d="m319 665 109 100 114-100 58 46-169 172-164-171z" fill="var(--glow)" />
-                  <path d="m194 359 32-83 25 79 80 23-83 21-25 79-23-82-77-25z" fill="var(--glow)" />
-                </g>
-                <path d="m651 199 15-43 13 43 43 14-43 13-13 44-15-44-42-13zM111 563l11-30 9 30 31 9-31 10-9 30-11-30-29-10z" fill="var(--glow)" />
-                </g>
-              </svg>
-              )}
-            </div>
-          </div>
-          <div class="copy-window">
-            <div class="client-copy">
-              <h1><span class="copy-line">{creator.label}</span></h1>
-              {profiles[creator.id] && (
-                <p><a class="copy-line" href={profiles[creator.id]} aria-label={`${creator.label} on TikTok`}>TikTok <span aria-hidden="true">↗</span></a></p>
-              )}
-            </div>
-          </div>
-        </article>
-      );
-    })}
-  </div>
-  <div class="reel-controls" hidden>
-    <output class="gallery-sr" aria-live="polite"></output>
-    <div class="position-marks" aria-hidden="true">
-      {creators.map(() => <span data-position></span>)}
+<section class="roster" data-roster aria-label="Meet the Clients">
+  <h1 class="sr">Meet the Clients</h1>
+
+  <nav class="roster-nav" aria-label="Choose a client">
+    <button class="roster-switch" type="button" data-step="1">
+      <span aria-hidden="true">⇄</span> Switch client
+    </button>
+    <div class="roster-names">
+      {clients.map((client, index) => (
+        <button type="button" data-goto={index} aria-pressed={index === 0}>{client.label}</button>
+      ))}
     </div>
-  </div>
-</div>
+  </nav>
+
+  {clients.map((client, index) => {
+    const { profile } = client;
+    const chips = [
+      { name: 'Type', value: profile.type },
+      { name: 'Class', value: profile.role },
+      { name: 'Element', value: profile.element },
+    ];
+    return (
+      <article class="client" data-client={client.id} hidden={index !== 0} aria-label={client.label}
+        style={`--panel:${profile.palette.panel};--deep:${profile.palette.deep};--accent:${profile.palette.accent};--rim:${profile.palette.rim}`}>
+        <div class="stage" aria-hidden="true">
+          <div class="stage-bg art-depth">
+            {profile.skins.filter((skin) => skin.background).map((skin) => (
+              <img class="bg-paint" data-skin-bg={skin.id} src={skin.background} alt="" loading="lazy" decoding="async" />
+            ))}
+            <span class="bg-band">{`${client.label} `.repeat(6)}</span>
+          </div>
+          {profile.skins.map((skin, skinIndex) => (
+            <div class="char" data-skin={skin.id} hidden={skinIndex !== 0}
+              style={skin.art ? `--h:${skin.art.height_pct}%;--b:${skin.art.bottom_pct}%;--r:${skin.art.right_pct}%;--ratio:${skin.art.width}/${skin.art.height}` : undefined}>
+              <div class="char-move character-depth">
+                {skin.art ? (
+                  <>
+                    <span class="char-echo" style={`--art:url(${skin.art.src})`}></span>
+                    <img class="char-art" src={skin.art.src} width={skin.art.width} height={skin.art.height} alt=""
+                      loading={index === 0 && skinIndex === 0 ? 'eager' : 'lazy'} decoding="async" draggable="false" />
+                  </>
+                ) : (
+                  /* PLACEHOLDER: no character art has been supplied for this client yet. */
+                  <div class="art-placeholder" data-placeholder="client-art">
+                    <span>Character art</span>
+                    <strong>Placeholder</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="info">
+          <h2 class="name" data-seq style="--i:0">{client.label}</h2>
+          <ul class="chips" data-seq style="--i:1" aria-label="Character details">
+            {chips.map((chip) => (
+              <li class:list={[!chip.value && 'is-placeholder']}>
+                <span>{chip.name}</span> {chip.value ?? PLACEHOLDER}
+              </li>
+            ))}
+          </ul>
+          <p class:list={['desc', !profile.description && 'is-placeholder']} data-seq style="--i:2">
+            {profile.description ?? 'Description placeholder. To be supplied.'}
+          </p>
+
+          <div class="tabs" role="tablist" aria-label={`${client.label} views`} data-seq style="--i:3">
+            <button type="button" role="tab" id={`tab-${client.id}-profile`} aria-controls={`panel-${client.id}-profile`} aria-selected="true">Highlights</button>
+            <button type="button" role="tab" id={`tab-${client.id}-skins`} aria-controls={`panel-${client.id}-skins`} aria-selected="false" tabindex="-1">Skins</button>
+          </div>
+
+          <div class="panel" role="tabpanel" id={`panel-${client.id}-profile`} aria-labelledby={`tab-${client.id}-profile`}>
+            <ul class="gems">
+              {client.reels.map((reel, reelIndex) => (
+                <li style={`--n:${reelIndex}`}>
+                  <button class:list={['gem', !reel && 'is-placeholder']} type="button"
+                    data-title={reel?.title} data-youtube={reel?.youtube} data-preview={reel?.preview} data-poster={reel?.poster}
+                    aria-label={reel ? `Highlight reel ${reelIndex + 1}: ${reel.title}` : `Highlight reel ${reelIndex + 1}: placeholder`}>
+                    <span class="gem-face">
+                      {reel && (
+                        <span class="gem-media">
+                          <img src={reel.poster} alt="" loading="lazy" decoding="async" width="108" height="108" />
+                          <video muted loop playsinline preload="none" data-src={reel.preview} width="108" height="108" tabindex="-1"></video>
+                        </span>
+                      )}
+                      <span class="gem-icon">{reel ? <Icon name="play" size={18} /> : '?'}</span>
+                    </span>
+                    <span class="gem-label">{reel ? `Reel 0${reelIndex + 1}` : 'Placeholder'}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p class:list={['strip', !profile.weapon && 'is-placeholder']} data-seq style="--i:5">
+              <span>Main weapon</span> {profile.weapon ?? PLACEHOLDER}
+            </p>
+          </div>
+
+          <div class="panel" role="tabpanel" id={`panel-${client.id}-skins`} aria-labelledby={`tab-${client.id}-skins`} hidden>
+            <ul class="skins">
+              {profile.skins.map((skin, skinIndex) => (
+                <li>
+                  <button type="button" data-skin-pick={skin.id} aria-pressed={skinIndex === 0}>
+                    <span class="skin-thumb">
+                      {skin.art
+                        ? <img src={skin.art.src} alt="" loading="lazy" decoding="async" width="72" height="72" />
+                        : <span aria-hidden="true">?</span>}
+                    </span>
+                    <span class="skin-text"><strong>{skin.label}</strong><small>{skin.note}</small></span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {profile.skins.length < 2 && <p class="strip is-placeholder">No other skins yet.</p>}
+          </div>
+
+          <ul class="socials" data-seq style="--i:6" aria-label={`${client.label} links`}>
+            {socialOrder.map((key) => (
+              <li>
+                {profile.socials[key] ? (
+                  <a href={profile.socials[key]} target="_blank" rel="noopener noreferrer">
+                    <BrandIcon name={key} size={16} /> {socialLabel[key]}
+                  </a>
+                ) : (
+                  <span class="is-placeholder"><BrandIcon name={key} size={16} /> {socialLabel[key]} {PLACEHOLDER}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </article>
+    );
+  })}
+
+  <div class="wipe" aria-hidden="true"></div>
+  <output class="sr" aria-live="polite"></output>
+
+  <dialog class="reel-dialog" aria-labelledby="reel-title">
+    <div class="reel-card">
+      <button class="reel-close" type="button" data-reel-close aria-label="Close highlight reel"><Icon name="x" size={20} /></button>
+      <div class="reel-frame">
+        <video muted loop playsinline preload="none" width="540" height="960"></video>
+        <div class="reel-empty" hidden><span>Highlight reel</span><strong>Placeholder</strong></div>
+      </div>
+      <p class="reel-title" id="reel-title"></p>
+      <a class="reel-link" target="_blank" rel="noopener noreferrer" hidden>Watch the full video <span aria-hidden="true">↗</span></a>
+    </div>
+  </dialog>
+</section>
 
 <script>
-  import { GalleryWheel } from '../lib/gallery-wheel.mjs';
-  import { GalleryReveal } from '../lib/gallery-reveal.mjs';
-  const reel = document.querySelector<HTMLElement>('.client-reel');
-  const controls = document.querySelector<HTMLElement>('.reel-controls');
-  const status = controls?.querySelector('output');
-  const markers = Array.from(controls?.querySelectorAll('[data-position]') ?? []);
-  const entries = Array.from(reel?.querySelectorAll<HTMLElement>('.client-entry') ?? []);
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-
-  if (reel && controls && status && entries.length > 1) {
-    const stage = reel;
-    const announcement = status;
+  const root = document.querySelector<HTMLElement>('[data-roster]');
+  if (root) {
+    const stage = root;
+    const clients = Array.from(stage.querySelectorAll<HTMLElement>('.client'));
+    const picks = Array.from(stage.querySelectorAll<HTMLButtonElement>('[data-goto]'));
+    const status = stage.querySelector('output')!;
+    const wipe = stage.querySelector<HTMLElement>('.wipe')!;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const posterOnly = () => document.documentElement.classList.contains('poster-only');
     let current = 0;
-    let moving = false;
-    const wheel = new GalleryWheel();
-    let queuedStep = 0;
-    let accelerateWheel: (() => void) | undefined;
-    let unlocked = false;
+    let busy = false;
+    let pending: number | undefined;
 
-    let drag: { id: number; x: number; y: number; lastY: number; time: number; velocity: number; locked: boolean;
-      base: number; resume: boolean; caught: boolean; detached: boolean } | undefined;
-    let interrupt: (() => boolean) | undefined;
-    let direction = 0;
-    let progress = 0;
-    let incomingIndex = current;
-    stage.dataset.ready = '';
-    stage.inert = true;
-    controls.hidden = false;
-    const media = new Map<HTMLVideoElement, () => void>();
-    stage.querySelectorAll<HTMLVideoElement>('video').forEach((video) => {
-      const playButton = video.closest('.client-art')?.querySelector<HTMLButtonElement>('.video-play');
-      const play = () => {
-        video.muted = true;
-        video.play().then(() => { if (playButton) playButton.hidden = true; })
-          .catch(() => { if (playButton) playButton.hidden = false; });
+    function paint() {
+      const active = clients[current];
+      document.body.style.setProperty('--scene-panel', active.style.getPropertyValue('--deep'));
+      document.body.style.setProperty('--scene-accent', active.style.getPropertyValue('--accent'));
+      picks.forEach((pick, index) => pick.setAttribute('aria-pressed', String(index === current)));
+      status.textContent = active.getAttribute('aria-label') ?? '';
+    }
+    paint();
+
+    // ---- Client switch: info leaves, a slanted band crosses the stage, and the
+    // next client arrives behind it with its diamonds dealt back in order. ----
+    function go(index: number) {
+      const target = (index + clients.length) % clients.length;
+      if (target === current) return;
+      if (busy) { pending = target; return; }
+      busy = true;
+      const from = clients[current];
+      const to = clients[target];
+      const forward = target > current !== (Math.abs(target - current) === clients.length - 1 && clients.length > 2);
+      stage.dataset.dir = forward ? 'next' : 'prev';
+      disarm();
+      if (from.contains(document.activeElement)) picks[target]?.focus({ preventScroll: true });
+      const simple = reduced.matches;
+      const leave = simple ? 160 : 340;
+      const enter = simple ? 200 : 900;
+      from.classList.add('is-leaving');
+      if (!simple) {
+        wipe.style.setProperty('--wipe', to.style.getPropertyValue('--accent'));
+        wipe.classList.remove('is-running');
+        void wipe.offsetWidth;
+        wipe.classList.add('is-running');
+      }
+      setTimeout(() => {
+        from.hidden = true;
+        from.classList.remove('is-leaving');
+        to.hidden = false;
+        to.classList.add('is-entering');
+        current = target;
+        paint();
+        setTimeout(() => {
+          to.classList.remove('is-entering');
+          wipe.classList.remove('is-running');
+          busy = false;
+          if (pending !== undefined && pending !== current) {
+            const next = pending;
+            pending = undefined;
+            go(next);
+          } else pending = undefined;
+        }, enter);
+      }, leave);
+    }
+    stage.querySelector('[data-step]')?.addEventListener('click', () => go((pending ?? current) + 1));
+    picks.forEach((pick, index) => pick.addEventListener('click', () => go(index)));
+
+    document.addEventListener('keydown', (event) => {
+      const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+      const target = event.target as HTMLElement | null;
+      if (!step || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (target?.closest('input, textarea, select, [contenteditable], dialog, [role="tablist"], [role="menu"], video')) return;
+      event.preventDefault();
+      go((pending ?? current) + step);
+    });
+
+    // A sideways swipe on the art also switches; vertical scrolling stays native.
+    let swipe: { x: number; y: number } | undefined;
+    stage.addEventListener('pointerdown', (event) => {
+      swipe = event.pointerType === 'touch' && (event.target as HTMLElement).closest('.stage')
+        ? { x: event.clientX, y: event.clientY } : undefined;
+    });
+    stage.addEventListener('pointerup', (event) => {
+      if (!swipe) return;
+      const dx = event.clientX - swipe.x;
+      const dy = event.clientY - swipe.y;
+      swipe = undefined;
+      if (Math.abs(dx) > 56 && Math.abs(dx) > Math.abs(dy) * 1.5) go(current + (dx < 0 ? 1 : -1));
+    });
+    stage.addEventListener('pointercancel', () => { swipe = undefined; });
+
+    // ---- Tabs and skins ----
+    stage.querySelectorAll<HTMLElement>('[role="tablist"]').forEach((list) => {
+      const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+      const select = (tab: HTMLButtonElement, focus = false) => {
+        tabs.forEach((other) => {
+          const on = other === tab;
+          other.setAttribute('aria-selected', String(on));
+          other.tabIndex = on ? 0 : -1;
+          const panel = document.getElementById(other.getAttribute('aria-controls')!);
+          if (panel) panel.hidden = !on;
+        });
+        disarm();
+        if (focus) tab.focus();
       };
-      playButton?.addEventListener('click', play);
-      video.addEventListener('playing', () => { if (playButton) playButton.hidden = true; });
-      video.addEventListener('error', () => { if (playButton) playButton.hidden = false; });
-      media.set(video, play);
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => select(tab));
+        tab.addEventListener('keydown', (event) => {
+          const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+          if (!step) return;
+          event.preventDefault();
+          select(tabs[(index + step + tabs.length) % tabs.length], true);
+        });
+      });
+    });
+    stage.querySelectorAll<HTMLButtonElement>('[data-skin-pick]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const client = button.closest<HTMLElement>('.client')!;
+        const id = button.dataset.skinPick!;
+        client.querySelectorAll<HTMLButtonElement>('[data-skin-pick]').forEach((other) =>
+          other.setAttribute('aria-pressed', String(other === button)));
+        client.querySelectorAll<HTMLElement>('.char').forEach((char) => {
+          const on = char.dataset.skin === id;
+          if (on && char.hidden) {
+            char.classList.add('is-swapping');
+            char.addEventListener('animationend', () => char.classList.remove('is-swapping'), { once: true });
+          }
+          char.hidden = !on;
+        });
+        client.querySelectorAll<HTMLElement>('[data-skin-bg]').forEach((bg) =>
+          bg.toggleAttribute('data-on', bg.dataset.skinBg === id));
+      });
     });
 
-    function resumeMedia(entry: HTMLElement) {
-      // Retry suspended offscreen media without seeking or replacing its element.
-      entry.querySelectorAll('video').forEach((video) => media.get(video)?.());
+    // ---- Highlight diamonds ----
+    const gems = Array.from(stage.querySelectorAll<HTMLButtonElement>('.gem'));
+    function wake(gem: HTMLButtonElement) {
+      if (gem.hasAttribute('data-live')) return;
+      gem.setAttribute('data-live', '');
+      const video = gem.querySelector('video');
+      if (!video || posterOnly()) return;
+      if (!video.src) video.src = video.dataset.src!;
+      video.play().catch(() => {});
     }
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) entries.filter((entry) => !entry.hidden).forEach(resumeMedia);
+    function rest(gem: HTMLButtonElement) {
+      gem.removeAttribute('data-live');
+      gem.removeAttribute('data-armed');
+      gem.querySelector('video')?.pause();
+    }
+    function disarm(except?: HTMLButtonElement) {
+      gems.forEach((gem) => { if (gem !== except) rest(gem); });
+    }
+    gems.forEach((gem) => {
+      let touch = false;
+      let wasArmed = false;
+      gem.addEventListener('pointerdown', (event) => {
+        touch = event.pointerType === 'touch';
+        wasArmed = gem.hasAttribute('data-armed');
+      });
+      gem.addEventListener('pointerenter', (event) => { if (event.pointerType === 'mouse') wake(gem); });
+      gem.addEventListener('pointerleave', (event) => { if (event.pointerType === 'mouse' && document.activeElement !== gem) rest(gem); });
+      gem.addEventListener('focus', () => { if (!restoring && gem.matches(':focus-visible')) wake(gem); });
+      gem.addEventListener('blur', () => { if (!gem.matches(':hover')) rest(gem); });
+      gem.addEventListener('click', () => {
+        // On touch the first tap previews in place; the second opens the reel.
+        if (touch && !wasArmed) {
+          disarm(gem);
+          gem.setAttribute('data-armed', '');
+          wake(gem);
+          touch = false;
+          return;
+        }
+        touch = false;
+        openReel(gem);
+      });
+    });
+    document.addEventListener('pointerdown', (event) => {
+      if (!(event.target as HTMLElement).closest?.('.gem')) gems.forEach((gem) => { if (gem.hasAttribute('data-armed')) rest(gem); });
     });
 
-    function show(index: number) {
-      entries.forEach((entry, i) => {
-        entry.hidden = i !== index;
-        entry.inert = i !== index;
-        if (i !== index) entry.querySelectorAll('video').forEach(video => video.pause());
-      });
-      announcement.textContent = entries[index].getAttribute('aria-label') ?? '';
-      markers.forEach((marker, i) => marker.toggleAttribute('data-active', i === index));
-      resumeMedia(entries[index]);
+    // ---- Enlarged reel ----
+    const dialog = stage.querySelector<HTMLDialogElement>('.reel-dialog')!;
+    const card = dialog.querySelector<HTMLElement>('.reel-card')!;
+    const player = dialog.querySelector('video')!;
+    const empty = dialog.querySelector<HTMLElement>('.reel-empty')!;
+    const title = dialog.querySelector<HTMLElement>('.reel-title')!;
+    const link = dialog.querySelector<HTMLAnchorElement>('.reel-link')!;
+    let opener: HTMLButtonElement | undefined;
+    // Returning focus after the dialog closes must not restart a preview.
+    let restoring = false;
+    function openReel(gem: HTMLButtonElement) {
+      opener = gem;
+      const face = gem.querySelector('.gem-face')!.getBoundingClientRect();
+      rest(gem);
+      const has = Boolean(gem.dataset.preview);
+      player.hidden = !has;
+      empty.hidden = has;
+      title.textContent = has ? gem.dataset.title ?? '' : 'This highlight reel has not been added yet.';
+      link.hidden = !gem.dataset.youtube;
+      if (gem.dataset.youtube) link.href = gem.dataset.youtube;
+      if (has) {
+        player.poster = gem.dataset.poster ?? '';
+        player.src = gem.dataset.preview!;
+        player.controls = true;
+      }
+      dialog.showModal();
+      if (has && !posterOnly()) player.play().catch(() => {});
+      if (!reduced.matches) {
+        // Grow from the diamond it came from.
+        const box = card.getBoundingClientRect();
+        const dx = face.left + face.width / 2 - (box.left + box.width / 2);
+        const dy = face.top + face.height / 2 - (box.top + box.height / 2);
+        const scale = Math.max(.08, face.width / box.width);
+        card.animate(
+          [{ transform: `translate(${dx}px, ${dy}px) scale(${scale}) rotate(45deg)`, opacity: .2 }, { transform: 'none', opacity: 1 }],
+          { duration: 460, easing: 'cubic-bezier(.2, .8, .2, 1)' },
+        );
+      }
     }
-    show(current);
-    function palette(entry: HTMLElement) {
-      return [entry.style.getPropertyValue('--panel'), entry.style.getPropertyValue('--backdrop')];
-    }
-    function paintProgress(amount = 0) {
-      const [panel] = palette(entries[current]);
-      document.body.style.setProperty('--scene-panel', panel);
-      markers.forEach((marker, i) => {
-        const weight = i === current ? 1 - amount : i === incomingIndex ? amount : 0;
-        (marker as HTMLElement).style.height = `${5 + weight * 17}px`;
-        (marker as HTMLElement).style.opacity = `${.45 + weight * .55}`;
-      });
-    }
-    paintProgress();
-    let artworkReady = false;
-    const unlock = () => {
-      if (!artworkReady) return;
-      unlocked = true;
-      stage.inert = false;
-      const bar = document.querySelector<HTMLElement>('.site-bar');
-      if (bar) bar.inert = false;
-    };
-    // While the logo curtain covers the stage, hold the first scene slightly
-    // enlarged with its copy masked; both settle as the curtain lifts.
-    const opening = document.getElementById('site-opening');
-    if (opening && !opening.hidden) stage.dataset.await = '';
-    document.addEventListener('nk-gallery-ready', () => {
-      stage.dataset.intro = '';
-      delete stage.dataset.await;
-    }, { once: true });
-    document.addEventListener('nk-intro-complete', () => {
-      // Frame-driven transforms take over once the entrance has finished.
-      delete stage.dataset.await;
-      delete stage.dataset.intro;
-      unlock();
-    }, { once: true });
-    // Decode the first scene before lifting the logo curtain. Other scenes load
-    // eagerly and retain their media elements throughout the gallery lifetime.
-    Promise.all([
-      ...['/clients/pidge-background.webp', '/clients/pidge-foreground.webp', '/clients/chiseyi-poster.webp'].map(src => {
-        const image = new Image(); image.src = src; return image.decode().catch(() => {});
-      }),
-      new Promise(resolve => setTimeout(resolve, 900)),
-    ])
-      .then(() => {
-        artworkReady = true;
-        if (!opening || opening.hidden) unlock();
-        else document.dispatchEvent(new Event('nk-gallery-ready'));
-      });
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog || (event.target as HTMLElement).closest('[data-reel-close]')) dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+      player.pause();
+      player.removeAttribute('src');
+      player.load();
+      restoring = true;
+      opener?.focus({ preventScroll: true });
+      restoring = false;
+    });
 
-    // One clock for every scene, including hidden neighbours. Revealing a layer
-    // or completing a gesture never restarts its idle phase.
-    const motionOrigin = performance.now();
-    let idleFrame = 0;
-    let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0;
-    stage.addEventListener('pointermove', event => {
+    // ---- Depth: one clock and one pointer for every layer ----
+    const origin = performance.now();
+    let frame = 0;
+    let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0, last = origin;
+    stage.addEventListener('pointermove', (event) => {
       if (event.pointerType !== 'mouse') return;
       const bounds = stage.getBoundingClientRect();
       pointerX = ((event.clientX - bounds.left) / bounds.width - .5) * 2;
@@ -218,371 +407,230 @@ const profiles: Record<string, string> = {
     const neutral = () => { pointerX = pointerY = 0; };
     stage.addEventListener('pointerleave', neutral);
     window.addEventListener('blur', neutral);
-    let previousFrame = performance.now();
-    function floatLayers(now: number) {
-      const seconds = (now - motionOrigin) / 1000;
-      const blend = 1 - Math.exp(-(now - previousFrame) / 130);
-      previousFrame = now;
+    function drift(now: number) {
+      const blend = 1 - Math.exp(-(now - last) / 130);
+      last = now;
       smoothX += (pointerX - smoothX) * blend;
       smoothY += (pointerY - smoothY) * blend;
-      stage.style.setProperty('--pointer-x', `${smoothX * 16}px`);
-      stage.style.setProperty('--pointer-y', `${smoothY * 12}px`);
-      stage.style.setProperty('--character-float', `${Math.sin(seconds * Math.PI * 2 / 6) * 9}px`);
-      stage.style.setProperty('--background-float', `${Math.sin(seconds * Math.PI * 2 / 8) * -4}px`);
-      idleFrame = requestAnimationFrame(floatLayers);
+      const seconds = (now - origin) / 1000;
+      stage.style.setProperty('--pointer-x', `${(smoothX * 18).toFixed(2)}px`);
+      stage.style.setProperty('--pointer-y', `${(smoothY * 12).toFixed(2)}px`);
+      stage.style.setProperty('--float', `${(Math.sin(seconds * Math.PI / 3) * 7).toFixed(2)}px`);
+      frame = requestAnimationFrame(drift);
     }
-    function updateMotionPreference() {
-      cancelAnimationFrame(idleFrame);
-      stage.style.removeProperty('--character-float');
-      stage.style.removeProperty('--background-float');
-      if (!reduced.matches) idleFrame = requestAnimationFrame(floatLayers);
+    function motion() {
+      cancelAnimationFrame(frame);
+      ['--pointer-x', '--pointer-y', '--float'].forEach((name) => stage.style.removeProperty(name));
+      if (!reduced.matches) frame = requestAnimationFrame(drift);
     }
-    reduced.addEventListener('change', updateMotionPreference);
-    updateMotionPreference();
+    reduced.addEventListener('change', motion);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) cancelAnimationFrame(frame); else motion(); });
+    motion();
 
-    function reset(entry: HTMLElement) {
-      delete entry.dataset.curtain;
-      delete entry.dataset.entering;
-      entry.style.removeProperty('--curtain-cut');
-      entry.style.removeProperty('--character-shift');
-      entry.style.removeProperty('--scene-scale');
-      entry.style.removeProperty('--copy-shift');
-      entry.style.removeProperty('--copy-fade');
-    }
-
-    function render(step: number, amount: number) {
-      const outgoing = entries[current];
-      if (step !== direction) {
-        if (direction) {
-          entries[incomingIndex].hidden = true;
-          reset(entries[incomingIndex]);
-        }
-        direction = step;
-        incomingIndex = (current + step + entries.length) % entries.length;
-        entries[incomingIndex].dataset.entering = '';
-        entries[incomingIndex].hidden = false;
-        resumeMedia(entries[incomingIndex]);
-        outgoing.dataset.curtain = step > 0 ? 'up' : 'down';
-      }
-      progress = amount;
-      paintProgress(amount);
-      // One progress value drives opposing masks inside fixed panel windows.
-      // Incoming art and copy remain opaque beneath their outgoing counterparts.
-      outgoing.style.setProperty('--curtain-cut', `${amount * 100}%`);
-      // SVG units keep the small depth movement proportional to the artwork.
-      // The incoming character reaches zero exactly when its curtain completes.
-      const incoming = entries[incomingIndex];
-      outgoing.style.setProperty('--character-shift', `${-step * amount * 56}px`);
-      incoming.style.setProperty('--character-shift', `${step * (1 - amount) * 56}px`);
-      // The arriving scene eases back from a slight enlargement.
-      incoming.style.setProperty('--scene-scale', `${1 + (1 - amount) * .06}`);
-      // Copy is unboxed, so names hand over in sequence instead of overlapping:
-      // the current name leaves its mask during the first half of the gesture
-      // and the next one rises during the second. Both follow the same progress.
-      const leave = Math.min(1, amount * 2);
-      const arrive = Math.max(0, amount * 2 - 1);
-      outgoing.style.setProperty('--copy-shift', `${-step * leave * 130}`);
-      outgoing.style.setProperty('--copy-fade', `${1 - leave}`);
-      incoming.style.setProperty('--copy-shift', `${step * (1 - arrive) * 130}`);
-      incoming.style.setProperty('--copy-fade', `${arrive}`);
-    }
-
-    function settle(step: number, commit: boolean, input: 'wheel' | 'gesture' = 'gesture') {
-      if (moving) return;
-      moving = true;
-      const outgoing = entries[current];
-      if (commit && outgoing.contains(document.activeElement)) stage.focus({ preventScroll: true });
-      const from = progress;
-      const target = commit ? 1 : 0;
-      let grabbed = false;
-      // A finger landing mid-settle takes the curtains over where they are.
-      interrupt = () => {
-        grabbed = true;
-        moving = false;
-        accelerateWheel = undefined;
-        queuedStep = 0;
-        interrupt = undefined;
-        return commit;
-      };
-      const finish = () => {
-        interrupt = undefined;
-        if (commit) current = (current + step + entries.length) % entries.length;
-        show(current);
-        entries.forEach(reset);
-        direction = 0;
-        progress = 0;
-        moving = false;
-        accelerateWheel = undefined;
-        incomingIndex = current;
-        paintProgress();
-        if (queuedStep) {
-          const next = Math.sign(queuedStep);
-          queuedStep -= next;
-          settle(next, true, 'wheel');
-          if (queuedStep) (accelerateWheel as (() => void) | undefined)?.();
-        }
-      };
-      if (reduced.matches || from === target) {
-        finish();
-        return;
-      }
-      render(step, from);
-      const clock = new GalleryReveal(from, target, performance.now(), input);
-      if (input === 'wheel') accelerateWheel = () => clock.hurry(performance.now());
-      const frame = (now: number) => {
-        if (grabbed) return;
-        render(step, clock.value(now));
-        if (!clock.done(now)) requestAnimationFrame(frame);
-        else finish();
-      };
-      requestAnimationFrame(frame);
-    }
-
-    stage.addEventListener('wheel', (event) => {
-      if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-      event.preventDefault();
-      if (!unlocked || drag) return;
-      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
-      const step = wheel.feed(delta, performance.now(), event.deltaMode);
-      if (!step) return;
-      // At most one intentional next gesture is retained while curtains settle.
-      // Completion consumes it immediately; there is no post-animation cooldown.
-      if (moving) {
-        queuedStep = step;
-        accelerateWheel?.();
-      } else settle(step, true, 'wheel');
-    }, { passive: false });
-
-    stage.addEventListener('pointerdown', (event) => {
-      if (event.pointerType !== 'touch' || !event.isPrimary || !unlocked || (moving && !interrupt)) return;
-      // With another client already queued the curtains keep running; further
-      // flicks are counted without taking hold of them.
-      const detached = moving && queuedStep !== 0;
-      const held = moving && direction !== 0 && !detached;
-      const resume = held ? interrupt!() : false;
-      drag = { id: event.pointerId, x: event.clientX, y: event.clientY,
-        lastY: event.clientY, time: event.timeStamp, velocity: 0, locked: held,
-        base: held ? direction * progress * stage.clientHeight : 0, resume, caught: resume, detached };
-      if (held) stage.setPointerCapture(event.pointerId);
-    });
-    stage.addEventListener('pointermove', (event) => {
-      if (!drag || drag.id !== event.pointerId) return;
-      if (drag.detached) {
-        drag.velocity = (drag.lastY - event.clientY) / Math.max(1, event.timeStamp - drag.time);
-        drag.lastY = event.clientY;
-        drag.time = event.timeStamp;
-        return;
-      }
-      const distance = drag.base + drag.y - event.clientY;
-      const horizontal = Math.abs(drag.x - event.clientX);
-      if (!drag.locked) {
-        if (horizontal > 9 && horizontal > Math.abs(distance)) {
-          drag = undefined;
-          return;
-        }
-        if (Math.abs(distance) < 9) return;
-        drag.locked = true;
-        stage.setPointerCapture(event.pointerId);
-      }
-      if (Math.abs(drag.y - event.clientY) >= 9) drag.resume = false;
-      const elapsed = Math.max(1, event.timeStamp - drag.time);
-      drag.velocity = (drag.lastY - event.clientY) / elapsed;
-      drag.lastY = event.clientY;
-      drag.time = event.timeStamp;
-      if (!reduced.matches) render(Math.sign(distance) || direction || 1, Math.min(1, Math.abs(distance) / stage.clientHeight));
-    });
-
-    function release(event: PointerEvent) {
-      if (!drag || drag.id !== event.pointerId) return;
-      const gesture = drag;
-      drag = undefined;
-      if (gesture.detached) {
-        const travel = gesture.y - gesture.lastY;
-        const quick = event.timeStamp - gesture.time < 100 && Math.abs(gesture.velocity) > .45;
-        if (event.type !== 'pointerup' || Math.abs(travel) < 24 || !quick) return;
-        if (moving) {
-          queuedStep = Math.max(-2, Math.min(2, queuedStep + Math.sign(travel)));
-          accelerateWheel?.();
-        } else settle(Math.sign(travel), true);
-        return;
-      }
-      if (!gesture.locked) return;
-      const distance = gesture.base + gesture.y - gesture.lastY;
-      const step = Math.sign(distance) || direction || 1;
-      const speed = event.timeStamp - gesture.time < 100 ? gesture.velocity * step : 0;
-      // A touch that only caught a committing transition lets it finish; a
-      // flick against the motion always returns to the current client.
-      const commit = gesture.resume || (event.type === 'pointerup' && speed > -.45 &&
-        (Math.abs(distance) >= stage.clientHeight * .25 || (Math.abs(distance) >= 24 && speed > .45)));
-      // A fresh flick onto a transition already under way asks for one more
-      // client: finish the current one quickly and continue.
-      const own = gesture.y - gesture.lastY;
-      if (commit && gesture.caught && Math.sign(own) === step && Math.abs(own) >= 24 && speed > .45) {
-        settle(step, true, 'wheel');
-        if (moving) {
-          queuedStep = step;
-          accelerateWheel?.();
-        }
-        return;
-      }
-      settle(step, commit);
-    }
-    stage.addEventListener('pointerup', release);
-    stage.addEventListener('pointercancel', release);
-    stage.addEventListener('lostpointercapture', (event) => {
-      if (event.target === stage) release(event);
-    });
-
-    // Page-level keys: the gallery is the whole page, so it should not need
-    // focus first. Controls that use these keys themselves keep them.
-    document.addEventListener('keydown', (event) => {
-      const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1 }[event.key];
-      const target = event.target as HTMLElement | null;
-      if (!unlocked || drag || !step || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-      if (target?.closest('input, textarea, select, [contenteditable], dialog, [role="menu"], [role="dialog"]')) return;
-      event.preventDefault();
-      if (moving) {
-        queuedStep = step;
-        accelerateWheel?.();
-        return;
-      }
-      if (direction && direction !== step) render(step, 0);
-      settle(step, true);
+    // ---- Opening curtain handshake (SiteIntro) ----
+    const bar = document.querySelector<HTMLElement>('.site-bar');
+    const opening = document.getElementById('site-opening');
+    document.addEventListener('nk-intro-complete', () => { if (bar) bar.inert = false; }, { once: true });
+    const first = clients[0].querySelector<HTMLImageElement>('.char:not([hidden]) .char-art');
+    Promise.all([first ? first.decode().catch(() => {}) : null, new Promise((done) => setTimeout(done, 900))]).then(() => {
+      if (opening && !opening.hidden) {
+        clients[0].classList.add('is-entering');
+        setTimeout(() => clients[0].classList.remove('is-entering'), 1400);
+        document.dispatchEvent(new Event('nk-gallery-ready'));
+      } else if (bar) bar.inert = false;
     });
   }
 </script>
 
 <style>
-  :global(.immersive-clients) { background: var(--scene-panel, #283b62); }
+  :global(.immersive-clients) { background: var(--scene-panel, #131d3a); }
   :global(.immersive-clients .site-bar) {
     position: fixed;
     inset: 0 0 auto;
-    height: calc(56px + env(safe-area-inset-top));
-    background: rgb(8 16 24 / .60);
+    background: rgb(8 12 20 / .62);
     -webkit-backdrop-filter: blur(14px) saturate(115%);
     backdrop-filter: blur(14px) saturate(115%);
     color: white;
     border: 0;
     border-bottom: 1px solid rgb(255 255 255 / .12);
-    text-shadow: 0 1px 3px rgb(0 0 0 / .4);
   }
-  :global(.immersive-clients .commission-link) { border-color: rgb(255 255 255 / .35); }
   :global(.immersive-clients .bar-link),
   :global(.immersive-clients .brand),
   :global(.immersive-clients .menu-btn),
   :global(.immersive-clients .site-bar .wordmark .nassu) { color: white; }
-  :global(.immersive-clients .site-bar .wordmark .katou) { color: #a3f0db; }
-  :global(.immersive-clients .bar-link[aria-current]),
-  :global(.immersive-clients .bar-link:hover) { color: #132c30; background: #eaf7f4; }
-  .gallery-sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-  .client-gallery { position: relative; }
-  .client-reel[data-ready] {
+  :global(.immersive-clients .site-bar .wordmark .katou) { color: var(--scene-accent, #8fc8ff); }
+  :global(.immersive-clients) { --nav-accent: var(--scene-accent, #8fc8ff); --nav-on: #0d1320; --nav-line: rgb(255 255 255 / .4); }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .roster {
+    --bar: var(--site-header-height, 72px);
+    --pad: max(clamp(1.1rem, 4vw, 4.5rem), env(safe-area-inset-left));
     position: relative;
-    height: 100svh;
-    height: 100dvh;
-    overflow: clip;
-    isolation: isolate;
-    touch-action: pan-x pinch-zoom;
-  }
-  .client-reel:focus-visible { outline: 2px solid white; outline-offset: -4px; }
-  .client-entry {
-    --art-start: 33%;
-    --copy-end: 41%;
-    position: relative;
+    display: grid;
     min-height: 100svh;
+    min-height: 100dvh;
+    overflow: clip;
     color: white;
+    isolation: isolate;
   }
-  [data-ready] .client-entry { position: absolute; inset: 0; min-height: 0; }
-  /* Art fills the stage; copy sits over it. Articles stay out of a stacking
-     context so both copy layers remain above both art layers mid-gesture. */
-  .art-window { z-index: 0; }
-  .copy-window { z-index: 2; pointer-events: none; }
-  [data-curtain] .art-window { z-index: 1; }
-  [data-curtain] .copy-window { z-index: 3; }
-  [data-curtain="up"] .client-art { clip-path: inset(0 0 var(--curtain-cut, 0%) 0); }
-  [data-curtain="down"] .client-art { clip-path: inset(var(--curtain-cut, 0%) 0 0 0); }
-  .art-window, .copy-window { position: absolute; inset: 0; overflow: clip; }
-  .client-art { position: relative; height: 100%; background: var(--backdrop); }
-  /* The legibility wash belongs to the art so it travels with its curtain. */
-  .client-art::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(to top, color-mix(in srgb, var(--panel) 86%, transparent), transparent 44%),
-      linear-gradient(to right, color-mix(in srgb, var(--panel) 62%, transparent), transparent 42%);
-  }
-  .client-art > * { scale: var(--scene-scale, 1); }
-  .client-entry:has(.pidge-scene) .client-art { background: #556da2; }
-  .client-entry:has(.client-video) .client-art { background: #1e2030; }
-  .pidge-background { position: absolute; inset: -6%; width: 112%; max-width: none; height: 112%; object-fit: cover; }
-  /* Landscape: the figure keeps its full proportions on the right, with the
-     source's cropped arm and lower torso beyond the stage edges. */
-  .pidge-scene { position: absolute; top: -9%; right: -3%; height: 122%; aspect-ratio: 1128 / 1536; }
-  .pidge-cutout { display: block; width: 100%; max-width: none; height: 100%; object-fit: cover; filter: drop-shadow(12px 18px 14px rgb(10 15 35 / .38)); }
-  .video-depth { position: absolute; inset: -8%; width: 116%; height: 116%; }
-  .client-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 71% 46%; }
-  .video-play { position: absolute; z-index: 1; inset: auto auto 18% 50%; transform: translateX(-50%); padding: .7rem 1rem; border: 1px solid white; border-radius: 2rem; background: #152328e6; color: white; }
-  .drawn-scene { position: absolute; inset: 0 0 0 auto; display: block; width: 84%; height: 100%; overflow: visible; }
+  .roster > * { grid-area: 1 / 1; min-width: 0; }
+  .is-placeholder { opacity: .72; font-style: italic; }
+
+  /* ---- Roster switch ---- */
+  .roster-nav { z-index: 5; align-self: start; justify-self: start; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: calc(var(--bar) + 14px) var(--pad) 0; }
+  .roster-switch, .roster-names button { min-height: 44px; border: 0; color: white; font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .roster-switch { display: inline-flex; align-items: center; gap: 10px; padding: 0 18px 0 14px; background: rgb(0 0 0 / .42); clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+  .roster-switch span { font-size: 16px; }
+  .roster-names { display: flex; gap: 2px; }
+  .roster-names button { position: relative; padding: 0 14px; background: none; opacity: .68; transition: opacity .2s ease; }
+  .roster-names button::before { content: ""; position: absolute; inset: 7px 0; z-index: -1; background: var(--scene-accent, white); opacity: 0; transform: skewX(-14deg) scaleX(.6); transition: opacity .25s ease, transform .3s cubic-bezier(.2, .7, .2, 1); }
+  .roster-names button:hover { opacity: 1; }
+  .roster-names button[aria-pressed="true"] { opacity: 1; color: #0d1320; }
+  .roster-names button[aria-pressed="true"]::before { opacity: 1; transform: skewX(-14deg); }
+  .roster :is(button, a):focus-visible { outline: 2px solid white; outline-offset: 3px; }
+
+  /* ---- Stage: backdrop and character are separate layers ---- */
+  .client { position: relative; display: grid; align-items: end; }
+  .client[hidden] { display: none; }
+  .stage { position: absolute; inset: 0; overflow: clip; background: linear-gradient(105deg, var(--panel) 0 46%, var(--deep) 46.1%); }
+  .stage-bg { position: absolute; inset: -4%; background-image: radial-gradient(rgb(255 255 255 / .09) 1.2px, transparent 1.6px); background-size: 18px 18px; }
+  .bg-band { position: absolute; top: 50%; left: 30%; width: 180%; padding: .1em 0; background: rgb(255 255 255 / .06); color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / .16); font-size: clamp(5rem, 15vw, 15rem); font-weight: 800; letter-spacing: -.04em; line-height: 1; text-transform: uppercase; white-space: nowrap; transform: translate(-30%, -50%) rotate(-74deg); user-select: none; }
+  .bg-paint { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s ease; }
+  .bg-paint[data-on] { opacity: 1; }
+  .bg-paint[data-on] ~ .bg-band { opacity: .35; }
+  .stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to right, color-mix(in srgb, var(--deep) 82%, transparent), transparent 58%), linear-gradient(to top, color-mix(in srgb, var(--deep) 70%, transparent), transparent 30%); pointer-events: none; }
+
+  .char { position: absolute; inset: auto var(--r, 6%) var(--b, 7%) auto; height: var(--h, 74%); aspect-ratio: var(--ratio, 3 / 4); max-width: 62%; }
+  .char[hidden] { display: none; }
+  .char-move { position: relative; width: 100%; height: 100%; }
+  .char-art { position: relative; display: block; width: 100%; max-width: none; height: 100%; object-fit: contain; object-position: bottom;
+    /* Rim light, coloured glow, then a soft cast shadow. Static, so it rasterises once. */
+    filter: drop-shadow(0 0 1.5px var(--rim)) drop-shadow(0 0 1.5px var(--rim)) drop-shadow(0 0 26px color-mix(in srgb, var(--accent) 60%, transparent)) drop-shadow(16px 22px 20px rgb(0 0 0 / .42));
+    -webkit-user-drag: none; user-select: none; }
+  /* A flat tinted echo of the silhouette, offset behind the figure. */
+  .char-echo { position: absolute; inset: 0; background: var(--accent); opacity: .5; -webkit-mask: var(--art) bottom / contain no-repeat; mask: var(--art) bottom / contain no-repeat; transform: translate(-7%, 1.5%) scale(1.03); transform-origin: bottom; }
+  .art-placeholder { display: grid; place-content: center; gap: .35rem; width: 100%; height: 100%; border: 2px dashed var(--accent); border-radius: 18px; background: repeating-linear-gradient(-45deg, rgb(255 255 255 / .05) 0 14px, transparent 14px 28px), rgb(0 0 0 / .22); color: var(--rim); text-align: center; text-transform: uppercase; letter-spacing: .14em; font-size: clamp(.7rem, 1vw, .85rem); box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 35%, transparent), 16px 22px 30px rgb(0 0 0 / .35); }
+  .art-placeholder strong { font-size: 1.6em; letter-spacing: .08em; }
   @media (prefers-reduced-motion: no-preference) {
-    .character-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + var(--character-float, 0px) + var(--character-shift, 0px))); }
-    .video-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + (var(--character-float, 0px) + var(--character-shift, 0px)) * .45)); }
-    .art-depth { transform: translate(calc(var(--pointer-x, 0px) * -.35), calc(var(--background-float, 0px) + var(--pointer-y, 0px) * -.35 + var(--character-shift, 0px) * -.3)); }
-    .pidge-cutout, .pidge-background, .video-depth { will-change: transform; }
-    /* Entrance: held behind the logo curtain, released as it lifts. */
-    [data-await] .client-art > * { scale: 1.08; }
-    [data-await] .copy-line { transform: translateY(130%); opacity: 0; }
-    [data-intro] .client-art > * { transition: scale 850ms cubic-bezier(.2, .7, .2, 1); }
-    [data-intro] .copy-line { transition: transform 600ms cubic-bezier(.2, .7, .2, 1) 250ms, opacity 400ms linear 250ms; }
-    [data-intro] p .copy-line { transition-delay: 330ms; }
+    .character-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + var(--float, 0px))); will-change: transform; }
+    .art-depth { transform: translate(calc(var(--pointer-x, 0px) * -.4), calc(var(--pointer-y, 0px) * -.4 + var(--float, 0px) * -.35)); will-change: transform; }
   }
-  .client-copy {
-    position: absolute;
-    inset: auto 4.5rem max(clamp(1.5rem, 6vh, 4.5rem), env(safe-area-inset-bottom)) max(clamp(1.25rem, 4vw, 5rem), env(safe-area-inset-left));
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    text-shadow: 0 2px 28px rgb(0 0 0 / .28);
+
+  /* ---- Info block ---- */
+  .info { position: relative; z-index: 1; display: flex; flex-direction: column; gap: clamp(.7rem, 1.6dvh, 1.1rem); width: min(100%, 39rem); padding: calc(var(--bar) + 78px) var(--pad) max(clamp(1.2rem, 4dvh, 2.6rem), env(safe-area-inset-bottom)); align-self: center; }
+  .name { margin: 0; font-size: clamp(3.2rem, min(9vw, 17dvh), 8.5rem); font-weight: 800; line-height: .88; letter-spacing: -.05em; text-transform: uppercase; text-shadow: 0 3px 30px rgb(0 0 0 / .3); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .chips li { padding: 5px 12px 5px 10px; background: rgb(0 0 0 / .4); border-left: 3px solid var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+  .chips span { color: var(--accent); margin-right: 4px; font-weight: 600; }
+  .chips .is-placeholder { border-left-style: dashed; }
+  .desc { max-width: 46ch; margin: 0; font-size: clamp(.9rem, 1.05vw, 1rem); line-height: 1.55; color: rgb(255 255 255 / .88); }
+  .tabs { display: flex; gap: 4px; margin-top: .3rem; border-bottom: 1px solid rgb(255 255 255 / .2); }
+  .tabs button { position: relative; min-height: 44px; padding: 0 16px; border: 0; background: none; color: rgb(255 255 255 / .7); font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .tabs button::after { content: ""; position: absolute; inset: auto 0 -1px; height: 3px; background: var(--accent); transform: scaleX(0); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+  .tabs button[aria-selected="true"] { color: white; }
+  .tabs button[aria-selected="true"]::after { transform: scaleX(1); }
+  .panel { display: flex; flex-direction: column; gap: clamp(.7rem, 1.6dvh, 1.1rem); min-height: 178px; }
+  .panel[hidden] { display: none; }
+
+  /* ---- Highlight diamonds ---- */
+  .gems { display: flex; gap: clamp(22px, 3vw, 38px); margin: 0; padding: 22px 16px 0; list-style: none; }
+  .gem { display: grid; justify-items: center; gap: 22px; padding: 0; border: 0; background: none; color: white; font: inherit; }
+  .gem-face { position: relative; display: block; width: 76px; height: 76px; border: 2px solid var(--accent); background: rgb(0 0 0 / .5); overflow: hidden; transform: rotate(45deg); transition: transform .45s cubic-bezier(.2, .8, .2, 1); box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .gem-media, .gem-icon { position: absolute; inset: 0; transform: rotate(-45deg); transition: transform .45s cubic-bezier(.2, .8, .2, 1), opacity .3s ease; }
+  .gem-media { transform: rotate(-45deg) scale(1.45); opacity: 0; }
+  .gem-media :is(img, video) { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; }
+  .gem-icon { display: grid; place-items: center; color: var(--accent); font-weight: 800; }
+  .gem-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgb(255 255 255 / .82); }
+  /* Diamond turns square and grows into the reel, in place. */
+  .gem[data-live] .gem-face { transform: rotate(0deg) scale(1.42); }
+  .gem[data-live] .gem-media { transform: none; opacity: 1; }
+  .gem[data-live] .gem-icon { transform: none; opacity: 0; }
+  .gem.is-placeholder .gem-face { border-style: dashed; box-shadow: none; }
+  .gem.is-placeholder[data-live] .gem-face { transform: rotate(45deg) scale(1.12); }
+  .gem.is-placeholder[data-live] .gem-icon { transform: rotate(-45deg); opacity: 1; }
+  .gem[data-live] { position: relative; z-index: 2; }
+
+  .strip { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; padding: 10px 14px; background: rgb(0 0 0 / .38); border-left: 3px solid var(--accent); font-size: 13px; line-height: 1.4; }
+  .strip span { color: var(--accent); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 11px; align-self: center; }
+
+  /* ---- Skins ---- */
+  .skins { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 14px 0 0; list-style: none; }
+  .skins button { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 6px 18px 6px 6px; border: 2px solid rgb(255 255 255 / .22); background: rgb(0 0 0 / .38); color: white; font: inherit; text-align: left; transition: border-color .2s ease; }
+  .skins button:hover { border-color: rgb(255 255 255 / .6); }
+  .skins button[aria-pressed="true"] { border-color: var(--accent); }
+  .skin-thumb { display: grid; place-items: center; width: 60px; height: 60px; overflow: hidden; background: var(--panel); font-weight: 800; color: var(--accent); }
+  .skin-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; }
+  .skin-text { display: grid; gap: 2px; }
+  .skin-text strong { font-size: 14px; letter-spacing: .04em; text-transform: uppercase; }
+  .skin-text small { font-size: 12px; color: rgb(255 255 255 / .74); }
+
+  .socials { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 0; padding: 0; list-style: none; }
+  .socials :is(a, span) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid rgb(255 255 255 / .3); color: white; font-size: 13px; font-weight: 600; }
+  .socials a { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+  .socials a:hover { background: var(--accent); border-color: var(--accent); color: #0d1320; }
+  .socials span { border-style: dashed; }
+
+  /* ---- Switch choreography (transform and opacity only) ---- */
+  .wipe { z-index: 4; justify-self: center; width: 44%; background: linear-gradient(to right, transparent, var(--wipe, white) 18% 82%, transparent); opacity: 0; pointer-events: none; transform: translateX(-260%) skewX(-16deg); }
+  @media (prefers-reduced-motion: no-preference) {
+    .wipe.is-running { animation: wipe-pass 820ms cubic-bezier(.6, 0, .3, 1) both; }
+    [data-dir="prev"] .wipe.is-running { animation-direction: reverse; }
+    .is-leaving .char { animation: char-out 320ms cubic-bezier(.5, 0, .9, .4) both; }
+    .is-leaving [data-seq] { animation: seq-out 240ms ease-in both; animation-delay: calc((6 - var(--i)) * 14ms); }
+    .is-leaving .gems li { animation: gem-out 240ms ease-in both; animation-delay: calc((2 - var(--n)) * 30ms); }
+    .is-entering .stage-bg { animation: bg-in 900ms cubic-bezier(.2, .7, .2, 1) both; }
+    .is-entering .char, .char.is-swapping { animation: char-in 760ms cubic-bezier(.16, .8, .2, 1) both; }
+    .is-entering .char-echo, .is-swapping .char-echo { animation: echo-in 760ms cubic-bezier(.16, .8, .2, 1) 160ms both; }
+    .is-entering [data-seq] { animation: seq-in 560ms cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(80ms + var(--i) * 55ms); }
+    .is-entering .gems li { animation: gem-in 620ms cubic-bezier(.2, 1.3, .3, 1) both; animation-delay: calc(300ms + var(--n) * 110ms); }
+    [data-dir="prev"] .is-entering .gems li { animation-delay: calc(300ms + (2 - var(--n)) * 110ms); }
   }
-  /* Each line moves inside its own mask; padding keeps descenders unclipped. */
-  .client-copy h1, .client-copy p { margin: 0; overflow: clip; }
-  .client-copy h1 { padding: .06em .08em .1em 0; font-size: clamp(3.4rem, min(13vw, 24vh), 12rem); font-weight: 600; line-height: .9; letter-spacing: -.065em; }
-  .copy-line { display: block; transform: translateY(calc(var(--copy-shift, 0) * 1%)); opacity: var(--copy-fade, 1); }
-  .client-copy a {
-    display: flex;
-    align-items: center;
-    gap: .4em;
-    min-height: 44px;
-    padding-inline: .15em;
-    color: white;
-    font-size: clamp(1rem, 1.35vw, 1.35rem);
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: .35em;
-    pointer-events: auto;
+  @media (prefers-reduced-motion: reduce) {
+    .is-leaving { animation: fade-out 160ms linear both; }
+    .is-entering { animation: fade-in 200ms linear both; }
+    .gem-face, .gem-media, .gem-icon, .bg-paint, .tabs button::after, .roster-names button::before { transition: none; }
   }
-  .client-copy a span { display: inline-block; font-size: .85em; }
-  .client-copy a:hover { text-decoration-thickness: 2px; }
-  .client-copy a:focus-visible { outline: 2px solid white; outline-offset: 2px; border-radius: 4px; }
-  .reel-controls { position: absolute; inset: 50% max(.9rem, env(safe-area-inset-right)) auto auto; z-index: 2; transform: translateY(-50%); pointer-events: none; }
-  .position-marks { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 6px; border-radius: 100px; background: #15232873; }
-  .position-marks span { width: 4px; height: 5px; border-radius: 100px; background: white; opacity: .45; }
-  .position-marks [data-active] { height: 22px; opacity: 1; }
-  /* Portrait stages: every scene is composed around the full height. */
-  @media (max-aspect-ratio: 1/1) {
-    .client-art::after { background: linear-gradient(to top, color-mix(in srgb, var(--panel) 90%, transparent), transparent 46%); }
-    .pidge-scene { inset: -7% -12% -14%; height: auto; aspect-ratio: auto; }
-    .client-video { object-position: 73% 43%; }
-    .drawn-scene { inset: 0 0 auto; width: 100%; height: 82%; }
-    .client-copy h1 { font-size: clamp(3.4rem, 17vw, 9rem); }
+  @keyframes wipe-pass { 0% { transform: translateX(-260%) skewX(-16deg); opacity: .95; } 100% { transform: translateX(260%) skewX(-16deg); opacity: .95; } }
+  @keyframes char-out { to { transform: translateX(7%) scale(.98); opacity: 0; } }
+  @keyframes char-in { from { transform: translateX(-9%) scale(1.05); opacity: 0; } }
+  @keyframes echo-in { from { transform: translate(-22%, 1.5%) scale(1.03); opacity: 0; } }
+  @keyframes bg-in { from { transform: scale(1.08); opacity: .4; } }
+  @keyframes seq-out { to { transform: translateX(-26px); opacity: 0; } }
+  @keyframes seq-in { from { transform: translateY(22px); opacity: 0; } }
+  @keyframes gem-out { to { transform: scale(.3) rotate(-60deg); opacity: 0; } }
+  @keyframes gem-in { from { transform: translateY(18px) scale(.2) rotate(120deg); opacity: 0; } }
+  @keyframes fade-out { to { opacity: 0; } }
+  @keyframes fade-in { from { opacity: 0; } }
+
+  /* ---- Enlarged reel ---- */
+  .reel-dialog { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); border: 0; background: transparent; color: white; }
+  .reel-dialog[open] { display: grid; place-items: center; }
+  .reel-dialog::backdrop { background: rgb(5 8 14 / .82); }
+  .reel-card { position: relative; display: grid; gap: 10px; justify-items: start; width: min(100%, calc((100dvh - 190px) * 9 / 16), 420px); }
+  .reel-frame { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; border: 2px solid var(--scene-accent, white); background: #05080e; box-shadow: 0 0 40px color-mix(in srgb, var(--scene-accent, white) 40%, transparent); }
+  .reel-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  .reel-frame [hidden] { display: none; }
+  .reel-empty { position: absolute; inset: 0; display: grid; place-content: center; gap: .3rem; text-align: center; text-transform: uppercase; letter-spacing: .14em; font-size: .8rem; background: repeating-linear-gradient(-45deg, rgb(255 255 255 / .05) 0 14px, transparent 14px 28px); }
+  .reel-empty strong { font-size: 1.5em; }
+  .reel-title { margin: 0; font-size: 14px; line-height: 1.4; }
+  .reel-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--scene-accent, white); font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: .3em; }
+  .reel-link[hidden] { display: none; }
+  .reel-close { position: absolute; top: -6px; right: -6px; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: white; color: #0d1320; transform: translate(40%, -40%); }
+  .reel-dialog :is(button, a):focus-visible { outline: 2px solid var(--scene-accent, white); outline-offset: 3px; }
+
+  /* ---- Portrait and narrow screens: art on top, details below, page scrolls ---- */
+  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
+    .client { display: block; }
+    .stage { position: relative; height: clamp(320px, 56svh, 620px); background: linear-gradient(165deg, var(--panel) 0 55%, var(--deep) 55.1%); }
+    .stage::after { background: linear-gradient(to top, var(--scene-panel, var(--deep)), transparent 26%); }
+    .bg-band { left: 50%; transform: translate(-50%, -50%) rotate(-74deg); }
+    .char { inset: auto 0 var(--b, 6%) 0; height: min(var(--h, 70%), 96%); max-width: none; margin-inline: auto; }
+    .char[data-skin="rat-thief"] { height: 104%; inset-block-end: -8%; }
+    .char:has(.art-placeholder) { height: 68%; }
+    .info { width: 100%; padding: 18px max(20px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+    .name { font-size: clamp(3rem, 17vw, 6rem); }
+    .gems { justify-content: space-around; padding-inline: 8px; }
+    .roster-nav { margin-inline: max(14px, env(safe-area-inset-left)); }
+    .reel-close { transform: none; top: 8px; right: 8px; }
   }
-  @media (prefers-reduced-motion: reduce) { .position-marks span { transition: none; } }
 </style>

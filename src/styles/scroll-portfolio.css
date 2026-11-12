@@ -277,3 +277,22 @@ html.home-snap-ready { scroll-behavior: auto; scroll-snap-type: none; overflow-a
 /* The centre sample only plays on request, so its control reads as play until it does. */
 .carousel-card .clip-card:not(.is-playing) .clip-pause .when-playing { display: none; }
 .carousel-card .clip-card:not(.is-playing) .clip-pause .when-paused { display: grid; }
+
+/* Tab-style navigation on every page: uppercase labels, with the current
+   page set on a slanted block. Pages can retint it with --nav-accent. */
+.clean-portfolio .bar-link { position: relative; z-index: 0; border-radius: 0; background: none; color: var(--muted); font-size: clamp(10.5px, .8vw, 12.5px); font-weight: 700; letter-spacing: .07em; text-transform: uppercase; transition: color .2s ease; }
+.clean-portfolio .bar-link::before { content: ""; position: absolute; inset: 7px 1px; z-index: -1; background: var(--nav-accent, var(--teal-ink)); opacity: 0; transform: skewX(-14deg) scaleX(.7); transition: opacity .2s ease, transform .3s cubic-bezier(.2, .7, .2, 1); }
+.clean-portfolio .bar-link:hover { background: none; color: var(--ink); }
+.clean-portfolio .bar-link:hover::before { opacity: .16; transform: skewX(-14deg); }
+.clean-portfolio .bar-link[aria-current] { background: none; color: var(--nav-on, #fff); }
+.clean-portfolio .bar-link[aria-current]::before { opacity: 1; transform: skewX(-14deg); }
+.clean-portfolio .commission-link { border: 0; margin-left: 10px; padding-inline: 20px; color: var(--ink); }
+.clean-portfolio .commission-link::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--nav-line, var(--ink)); opacity: 1; transform: skewX(-14deg); }
+.clean-portfolio .commission-link:hover { color: var(--nav-on, #fff); }
+.clean-portfolio .commission-link:hover::before { background: var(--nav-accent, var(--teal-ink)); box-shadow: none; opacity: 1; }
+.clean-portfolio .bar-link:focus-visible { outline: 2px solid var(--nav-accent, var(--teal-ink)); outline-offset: 2px; }
+.clean-portfolio.immersive-clients .bar-link { color: rgb(255 255 255 / .82); }
+.clean-portfolio.immersive-clients .bar-link:hover { color: #fff; }
+.clean-portfolio.immersive-clients .bar-link[aria-current],
+.clean-portfolio.immersive-clients .commission-link:hover { color: var(--nav-on); }
+@media (prefers-reduced-motion: reduce) { .clean-portfolio .bar-link, .clean-portfolio .bar-link::before { transition: none; } }
