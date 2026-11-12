@@ -24,12 +24,21 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
 ---
 <BaseLayout>
   <SiteIntro />
+  <script is:inline>
+    // Reveals are opt-in: content stays visible without scripting, without
+    // IntersectionObserver, and for visitors who prefer reduced motion.
+    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('reveal-ready');
+    }
+  </script>
   <div class="scroll-portfolio">
     <section class="intro-panel scroll-panel" id="home" aria-labelledby="intro-title">
       <div class:list={['intro-visual', artOn && 'has-character']}>
         {artOn ? <CharacterArt /> : (
-          <div class="type-art" aria-hidden="true">
-            <span class="art-label">NASSUKATOU / CREATIVE STUDIO</span>
+          /* PLACEHOLDER: typographic stand-in until Katou supplies human-drawn OC art
+             (enable site.characterArt). The square frame keeps its dimensions either way. */
+          <div class="type-art" data-placeholder="hero-art" aria-hidden="true">
+            <span class="art-label">PLACEHOLDER / CHARACTER ART TO COME</span>
             <span class="art-orbit" data-parallax="-0.07"></span>
             <span class="art-word" data-parallax="0.09">Cut.<br /><em>Create.</em></span>
             <span class="art-star" data-parallax="-0.13">✳</span>
@@ -38,52 +47,83 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
         )}
       </div>
       <div class="intro-copy">
-        <p class="section-label">THE PERSON BEHIND THE TIMELINE</p>
-        <h1 id="intro-title">Meet the Editor!<br /><span>Katou</span></h1>
-        <p class="intro-role">{site.role}</p>
-        <div class="intro-actions">
-          <a class="outline-button" href="#editing">Commission Info <span aria-hidden="true">↗</span></a>
-          <button class="solid-button" type="button" data-open-clip={hero.id}>Play Highlight Reel <span aria-hidden="true">▶</span></button>
+        <p class="section-label" data-reveal>THE PERSON BEHIND THE TIMELINE</p>
+        <h1 id="intro-title" data-reveal style="--i:1">Meet the Editor!<br /><span>Katou</span></h1>
+        <p class="intro-role" data-reveal style="--i:2">{site.role}</p>
+        <div class="intro-actions" data-reveal style="--i:3">
+          <a class="solid-button" href="/works">View Works <span aria-hidden="true">↗</span></a>
+          <a class="outline-button" href="#commission">Contact Me <span aria-hidden="true">↓</span></a>
+          <button class="text-button" type="button" data-open-clip={hero.id}><span aria-hidden="true">▶</span> Play highlight reel</button>
         </div>
-        <div class="intro-status">
+        <div class="intro-status" data-reveal style="--i:4">
           <span>Editing <StatusChip status={status.editing} /></span>
           <span>Web design <StatusChip status={status.webDesign} /></span>
         </div>
       </div>
-      <a class="scroll-cue" href="#featured">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a>
+      <a class="scroll-cue" href="#services">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a>
+    </section>
+
+    <section class="services-panel detail-panel" id="services" aria-labelledby="services-title">
+      <div class="time-rule" style="--at:14" aria-hidden="true"><span></span></div>
+      <p class="section-label" data-reveal>WHAT I DO</p>
+      <h2 id="services-title" data-reveal style="--i:1">{site.role}</h2>
+      <div class="service-cards">
+        {[
+          { entry: editing, href: '#editing', state: status.editing, approx: undefined },
+          { entry: web, href: '#web-design', state: status.webDesign, approx: web.data.fromApprox },
+        ].map(({ entry, href, state, approx }, index) => (
+          <a class="service-card" href={href} data-reveal style={`--i:${index + 2}`}>
+            <span class="service-card-top"><span class="service-card-index">0{index + 1}</span><StatusChip status={state} /></span>
+            <span class="service-card-title">{entry.data.title}</span>
+            <span class="service-card-sub">{entry.data.subtitle}</span>
+            <span class="service-card-foot">
+              <span>From <strong>{entry.data.fromPrice}</strong>{approx && <small> {approx}</small>}</span>
+              <span class="service-card-arrow" aria-hidden="true">→</span>
+            </span>
+          </a>
+        ))}
+      </div>
     </section>
 
     <section class="featured-panel scroll-panel" id="featured" aria-labelledby="featured-title">
-      <div class="featured-visual">
+      <div class="time-rule" style="--at:36" aria-hidden="true"><span></span></div>
+      <div class="featured-visual" data-reveal>
         <ShortsWordmark />
         <FeaturedCarousel clips={featured} initialId={hero.id} />
       </div>
       <div class="featured-copy">
-        <p class="section-label">FEATURED WORKS</p>
-        <h2 id="featured-title">Engaging edits that keep viewers hooked.</h2>
-        <p>Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
-        <a class="solid-button" href="/works">View Full Gallery <span aria-hidden="true">↗</span></a>
+        <p class="section-label" data-reveal>FEATURED WORKS</p>
+        <h2 id="featured-title" data-reveal style="--i:1">Engaging edits that keep viewers hooked.</h2>
+        <p data-reveal style="--i:2">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
+        <div class="intro-actions" data-reveal style="--i:3">
+          <a class="solid-button" href="/works">View Full Gallery <span aria-hidden="true">↗</span></a>
+          <a class="outline-button" href="#commission">Contact Me <span aria-hidden="true">↓</span></a>
+        </div>
       </div>
     </section>
 
     <section class="detail-panel" id="editing" aria-label="Editing commissions">
+      <div class="time-rule" style="--at:54" aria-hidden="true"><span></span></div>
       <div class="section-marker"><span>01 / EDITING</span><span aria-hidden="true" data-parallax="0.05">✳</span></div>
       <ServiceSection service={editing} />
     </section>
     <section class="detail-panel web-panel" id="web-design" aria-label="Web design commissions">
+      <div class="time-rule" style="--at:70" aria-hidden="true"><span></span></div>
       <div class="section-marker"><span>02 / WEB DESIGN</span><span aria-hidden="true" data-parallax="-0.05">↗</span></div>
       <ServiceSection service={web} />
     </section>
     <section class="detail-panel terms-panel" id="terms" aria-label="Commission terms">
+      <div class="time-rule" style="--at:84" aria-hidden="true"><span></span></div>
       <p class="section-label">THE DETAILS, UP FRONT</p>
       <TermsSection />
     </section>
     <section class="detail-panel commission-panel" id="commission" aria-label="Commission Katou">
+      <div class="time-rule" style="--at:97" aria-hidden="true"><span></span></div>
       <p class="section-label">YOUR NEXT PROJECT STARTS HERE</p>
       <ContactSection />
     </section>
   </div>
-  <ClipPreview client:visible />
+  <ClipPreview client:idle />
   <ClipViewer client:idle clips={featured.map(toViewerClip)} />
 </BaseLayout>
 
@@ -116,6 +156,25 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
   reduced.addEventListener('change', schedule);
   mobile.addEventListener('change', schedule);
   paint();
+
+  // Light staggered reveals, and a playhead that advances along each section's
+  // timeline rule. Transform and opacity only; each element animates once.
+  const revealed = document.querySelectorAll<HTMLElement>('[data-reveal], .time-rule');
+  if (document.documentElement.classList.contains('reveal-ready')) {
+    const reveal = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('is-in');
+        reveal.unobserve(entry.target);
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: .1 });
+    revealed.forEach((element) => reveal.observe(element));
+    reduced.addEventListener('change', () => {
+      if (!reduced.matches) return;
+      document.documentElement.classList.remove('reveal-ready');
+      reveal.disconnect();
+    });
+  }
 
   // Keep section links readable and useful for keyboard and browser history navigation.
   const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.desk-nav a[href^="/#"]'));
