@@ -323,7 +323,7 @@ Common changes
 3. The outlined word behind a Home section: the `data-ghost="..."` attribute on that `<section>` in `src/pages/index.astro`. Remove the attribute to remove the word.
 4. Page-opening band: `@keyframes arcade-band` and the `::after` rule above it. Delete that rule to turn it off.
 
-Do not move the `@import`/import order in `src/components/BaseLayout.astro`; `arcade.css` must stay last. The admin studio and `/keystatic` do not use this theme.
+The theme applies to pages whose `<body>` has the class `arcade`. `src/components/BaseLayout.astro` adds it to every page except those under `/admin`, so the studio keeps its light look; `/keystatic` is separate and unaffected. Do not change the import order in `BaseLayout.astro`; `arcade.css` must stay last.
 
 ## 16. Phone deck (one screen per page, tabs at the bottom)
 

@@ -28,7 +28,7 @@ const pathname = Astro.url.pathname;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#0D1117" />
+    <meta name="theme-color" content={pathname.startsWith('/admin') ? '#FCFCFA' : '#0D1117'} />
     <meta name="generator" content={Astro.generator} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -50,7 +50,7 @@ const pathname = Astro.url.pathname;
       })();
     </script>
   </head>
-  <body class:list={['clean-portfolio', pathname === '/' && 'is-scroll', immersive && 'immersive-clients']}>
+  <body class:list={['clean-portfolio', !pathname.startsWith('/admin') && 'arcade', pathname === '/' && 'is-scroll', immersive && 'immersive-clients']}>
     <a class="skip" href="#main">Skip to content</a>
     <SiteBar pathname={pathname} prices={{ editing, web }} />
     <main id="main">

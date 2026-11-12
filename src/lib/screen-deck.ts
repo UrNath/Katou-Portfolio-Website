@@ -27,8 +27,9 @@ export function dockFooter(phone: MediaQueryList) {
 }
 
 export function mountDeck() {
-  const root = document.querySelector<HTMLElement>('[data-deck]');
-  if (!root) return;
+  const found = document.querySelector<HTMLElement>('[data-deck]');
+  if (!found) return;
+  const root: HTMLElement = found;
   const phone = matchMedia(DECK_QUERY);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const screens = Array.from(root.querySelectorAll<HTMLElement>(':scope > section[id]'));
