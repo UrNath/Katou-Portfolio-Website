@@ -70,8 +70,13 @@ export default function ClipPreview() {
       if (current === video) current = null;
     };
 
+    const activeCarouselVideo = (video: HTMLVideoElement) => {
+      const slide = video.closest<HTMLElement>('[data-carousel-card]');
+      return !slide || (slide.dataset.active === 'true' && slide.closest<HTMLElement>('[data-carousel]')?.dataset.moving !== 'true');
+    };
+
     const play = (video: HTMLVideoElement) => {
-      if (viewerOpen || userPaused.has(video)) return;
+      if (viewerOpen || userPaused.has(video) || !activeCarouselVideo(video)) return;
       attach(video);
       if (current && current !== video) pause(current);
       current = video;
@@ -85,7 +90,7 @@ export default function ClipPreview() {
       let best: HTMLVideoElement | null = null;
       let bestScore = Number.POSITIVE_INFINITY;
       for (const video of videos) {
-        if (video.dataset.hero === 'true') continue;
+        if (video.dataset.hero === 'true' || !activeCarouselVideo(video)) continue;
         const ratio = ratios.get(video) ?? 0;
         if (ratio < 0.6 || userPaused.has(video)) continue;
         const rect = video.getBoundingClientRect();
@@ -104,10 +109,9 @@ export default function ClipPreview() {
         for (const entry of entries) {
           const video = entry.target as HTMLVideoElement;
           ratios.set(video, entry.intersectionRatio);
-          if (video.dataset.hero === 'true') {
-            if (entry.intersectionRatio >= 0.5 && !userPaused.has(video)) play(video);
-            else if (!entry.isIntersecting) pause(video);
-          }
+          // The carousel's centre sample never starts on its own: it plays on
+          // hover or focus, or from its play button on touch screens.
+          if (video.dataset.hero === 'true' && !entry.isIntersecting) pause(video);
         }
         pickInView();
       },
@@ -117,7 +121,7 @@ export default function ClipPreview() {
     for (const video of videos) {
       io.observe(video);
       const card = cardOf(video);
-      if (fine && card && video.dataset.hero !== 'true') {
+      if (fine && card) {
         const enter = () => play(video);
         const leave = () => {
           if (!userPaused.has(video)) pause(video);
@@ -155,12 +159,25 @@ export default function ClipPreview() {
       if (!viewerOpen) pickInView();
     };
 
+    const onCarousel = (event: Event) => {
+      const root = event.target;
+      if (!(root instanceof HTMLElement)) return;
+      const moving = Boolean((event as CustomEvent<{ moving: boolean }>).detail?.moving);
+      if (current && root.contains(current)) pause(current);
+      if (moving) return;
+      const active = root.querySelector<HTMLVideoElement>('[data-carousel-card][data-active="true"] video[data-preview]');
+      // Resume only where the pointer or focus already rests on the new centre sample.
+      if (active && (ratios.get(active) ?? 0) >= 0.5 && cardOf(active)?.matches(':hover, :focus-within')) play(active);
+    };
+
+    document.addEventListener('nk:carousel', onCarousel);
     document.addEventListener('click', onPauseClick);
     document.addEventListener('nk:viewer', onViewer);
 
     return () => {
       io.disconnect();
       stopRaf();
+      document.removeEventListener('nk:carousel', onCarousel);
       document.removeEventListener('click', onPauseClick);
       document.removeEventListener('nk:viewer', onViewer);
     };

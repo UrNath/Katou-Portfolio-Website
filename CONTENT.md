@@ -24,7 +24,7 @@ Compare tiers is hidden while a service has only one tier. To add a package, app
 | Editing packages, tiers, add-ons, scope | `src/content/services/editing.md` |
 | Web design packages, process, tiers, add-ons | `src/content/services/web-design.md` |
 | Terms and FAQ | `src/data/terms.ts` |
-| Contact form options and guidelines | `src/data/contact.ts` |
+| Commission section (Discord link, heading, text) | `src/data/commission.ts` |
 | Filter tag labels | `src/data/works-layout.json` `tags`, rendered by `src/data/tags.ts` |
 | Clip list | `src/data/clips.json` |
 | Posters | `src/assets/posters/` |
@@ -104,3 +104,11 @@ In **`/admin` → Thumbnails**, use Edit to change an entry's title, client, han
 On `/works`, content types **Short Form**, **Long Form**, and **Thumbnails** use a separate filter row from VTuber/client filters and optional tags. Each dimension is independent: selecting `Chi` and `Thumbnails` displays only Chi's thumbnail designs, selecting `Miu` and `Long Form` displays Miu's long videos, etc. `All creators`, `All types`, and `All tags` each clear only their corresponding selection. Filters are reflected in shareable URL search parameters `creator`, `type`, and `tag`; existing `?creator=...` and `?tag=...` links keep working. Search text `q` works simultaneously with each filter. Visible-card counts and empty sections are updated after filtering.
 
 Thumbnail cards intentionally have **no visible overlay text or gradient**, including on mobile. Titles remain searchable and available via the card's accessible label and in the enlarged thumbnail dialog.
+
+## Meet the Clients
+
+`/clients` is a character-select page. One entry per creator chip that has videos. Profile facts live in `src/data/clients.ts`: description, type, class, element, main weapon, YouTube / Discord / TikTok links, stage colours, and skins. A `null` field shows on the page as a marked placeholder; do not fill unknowns in. A skin with `art: null` shows the dashed "Character art placeholder" frame.
+
+Character art is a transparent cutout in `public/clients/`, kept separate from the backdrop so the two layers move independently. Pidge's current art is `pidge-cat.webp`; her former rat thief persona is the `rat-thief` skin (`pidge-foreground.webp` over `pidge-background.webp`). Chi and Miu have no art yet.
+
+The three highlight diamonds per client are that client's vertical clips with a preview loop, featured ones first (chosen in `src/pages/clients.astro`). A slot with no clip renders as a placeholder. Previews load on hover, focus, or first tap, never on their own.

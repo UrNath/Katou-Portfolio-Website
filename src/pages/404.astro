@@ -3,11 +3,15 @@ import BaseLayout from '../components/BaseLayout.astro';
 ---
 
 <BaseLayout title="Not found" description="That page is not on the NassuKatou hub.">
-  <article class="narrow">
+  <article class="narrow lost">
+    <p class="section-label">Not found</p>
+    <p class="lost-code" data-text="404" aria-hidden="true">404</p>
     <h1 class="page-title">That page is not on the hub.</h1>
     <p class="page-sub">The link might be old, or the page was never added.</p>
-    <p class="terms-nudge" style="text-align: left">
-      <a href="/">← Home</a>
-    </p>
+    <div class="intro-actions">
+      <a class="solid-button" href="/">Home <span aria-hidden="true">↗</span></a>
+      <a class="outline-button" href="/works">Works</a>
+      <a class="outline-button" href="/clients">Clients</a>
+    </div>
   </article>
 </BaseLayout>

@@ -1,0 +1,226 @@
+/* Applies to pages whose <body> has the class "arcade" (every page except the
+   admin studio; see BaseLayout.astro).
+   "Arcade" theme: the dark, slanted, tab-driven look of Meet the Clients on
+   every public page, plus the one-screen phone deck. Loaded after the older
+   stylesheets so it only has to restate what changes. */
+html:has(.arcade) { background: #0d1117; color-scheme: dark; }
+.arcade {
+  --bg: #0d1117; --bar: #0d1117; --ink: #f3f6f8; --text: #f3f6f8; --muted: #a9b4c0;
+  --teal-ink: #6ff2dc; --accent: #6ff2dc; --pink-ink: #ff8fb8; --teal: #6ff2dc;
+  --surface: #161d27; --surface-2: #1d2632; --hairline: rgb(255 255 255 / .12); --shadow: none;
+  --panel-line: rgb(255 255 255 / .14); --panel-fill: rgb(255 255 255 / .045); --on-accent: #0b1016;
+  --nav-on: #0b1016;
+  color: var(--text);
+  background:
+    radial-gradient(rgb(255 255 255 / .07) 1.1px, transparent 1.5px) 0 0 / 18px 18px,
+    linear-gradient(105deg, #131b26 0 42%, #0d1117 42.1%) fixed;
+}
+.arcade:not(.immersive-clients) .site-bar {
+  background: rgb(8 12 20 / .72);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  backdrop-filter: blur(14px) saturate(115%);
+  border-bottom: 1px solid rgb(255 255 255 / .1);
+}
+.arcade .site-bar .wordmark .nassu, .arcade .brand, .arcade .menu-btn { color: #fff; }
+.arcade:not(.immersive-clients) .bar-link { color: rgb(255 255 255 / .78); }
+.arcade:not(.immersive-clients) .bar-link:hover { color: #fff; }
+.arcade:not(.immersive-clients) .bar-link[aria-current] { color: var(--nav-on); }
+.arcade .commission-link { color: #fff; --nav-line: rgb(255 255 255 / .45); }
+.arcade .commission-link[aria-current]::before { background: var(--nav-accent, var(--accent)); box-shadow: none; }
+.arcade .site-footer { background: rgb(0 0 0 / .35); border-top: 1px solid var(--panel-line); }
+
+/* ---- Entrance: a slanted band crosses each page as its content settles ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .arcade:not(.immersive-clients)::after { content: ""; position: fixed; inset: -10% auto -10% 0; z-index: 70; width: 46vw; background: linear-gradient(to right, transparent, var(--accent) 18% 82%, transparent); pointer-events: none; transform: translateX(-260%) skewX(-16deg); animation: arcade-band 900ms cubic-bezier(.6, 0, .3, 1) 60ms both; }
+  /* The opening curtain lives inside <main>, so the content beside it animates, not <main> itself. */
+  .arcade:not(.immersive-clients) main > :not(.opening, script, style) { animation: arcade-in 620ms cubic-bezier(.2, .7, .2, 1) 300ms both; }
+  .arcade:has(.opening:not([hidden]))::after { animation: none; }
+}
+@keyframes arcade-band { from { transform: translateX(-260%) skewX(-16deg); } to { transform: translateX(480%) skewX(-16deg); } }
+@keyframes arcade-in { from { opacity: 0; transform: translateX(-22px); } }
+
+/* ---- Shared pieces ---- */
+.arcade .section-label { display: flex; align-items: center; gap: 10px; color: var(--accent); }
+.arcade .section-label::before { content: ""; flex: none; width: 22px; height: 12px; background: repeating-linear-gradient(105deg, var(--accent) 0 4px, transparent 4px 8px); }
+.arcade :is(.solid-button, .outline-button) { border: 0; border-radius: 0; padding-inline: 26px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: background-color .2s ease, color .2s ease; }
+.arcade .solid-button { background: var(--accent); color: var(--on-accent); }
+.arcade .solid-button:hover { background: #fff; }
+.arcade .outline-button { background: rgb(255 255 255 / .1); color: #fff; box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / .5); }
+.arcade .outline-button:hover { background: rgb(255 255 255 / .22); }
+.arcade .solid-button.is-placeholder { background: transparent; color: var(--accent); clip-path: none; border: 2px dashed var(--accent); font-style: italic; cursor: default; }
+.arcade :is(.solid-button, .outline-button, .text-button, .service-card, .scroll-cue, .filter-chip, .deck-tabs a):focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.arcade .text-button { color: #fff; text-decoration-color: rgb(255 255 255 / .4); }
+.arcade .page-title, .arcade .services-panel h2, .arcade .featured-copy h2 { text-transform: uppercase; font-weight: 800; }
+.arcade .page-sub { color: var(--muted); }
+.arcade :is(.surface-card, .tier, .service-card, .terms, .scroll-portfolio .service .surface-card, .scroll-portfolio .tier, .scroll-portfolio .contact .surface-card) {
+  background: var(--panel-fill); color: var(--text); border: 1px solid var(--panel-line); border-radius: 4px; box-shadow: none;
+}
+.arcade :is(.surface-card, .tier, .service-card) { border-left: 3px solid var(--accent); }
+.arcade .scroll-portfolio .service .stage-tier { background: rgb(0 0 0 / .45); border-left-color: var(--pink-ink); }
+.arcade .service-card:hover { background: rgb(255 255 255 / .1); border-color: var(--accent); }
+.arcade .kicker, .arcade .works-kicker { color: var(--accent); }
+
+/* ---- Home ---- */
+.scroll-portfolio > section { position: relative; }
+.scroll-portfolio > section[data-ghost]::after { content: attr(data-ghost); position: absolute; right: -2vw; bottom: 3%; z-index: -1; color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / .09); font-size: clamp(5rem, 15vw, 14rem); font-weight: 800; letter-spacing: -.04em; line-height: .8; text-transform: uppercase; white-space: nowrap; pointer-events: none; user-select: none; }
+.arcade .intro-visual { background: var(--panel-fill); border: 2px dashed color-mix(in srgb, var(--accent) 70%, transparent); border-radius: 6px; box-shadow: 0 0 40px color-mix(in srgb, var(--accent) 18%, transparent); }
+.arcade .intro-visual.has-character { border-style: solid; }
+.arcade .art-orbit { border-color: rgb(255 255 255 / .2); }
+.arcade .art-label { color: var(--accent); }
+.arcade .intro-copy h1 { text-transform: uppercase; }
+.arcade .time-rule { background: repeating-linear-gradient(to right, rgb(255 255 255 / .22) 0 1px, transparent 1px 12px) bottom / 100% 6px no-repeat, repeating-linear-gradient(to right, rgb(255 255 255 / .4) 0 1px, transparent 1px 96px) bottom / 100% 12px no-repeat; border-bottom-color: rgb(255 255 255 / .22); }
+.arcade .shorts-wordmark path { stroke: rgb(255 255 255 / .35); }
+.arcade .carousel-arrow { border: 1px solid rgb(255 255 255 / .35); border-radius: 0; color: #fff; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+.arcade .carousel-arrow:hover { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.arcade .carousel-dot span { background: rgb(255 255 255 / .3); border-radius: 0; transform: skewX(-20deg); }
+.arcade .carousel-dot[aria-pressed="true"] span { background: var(--accent); }
+.arcade .service-card-top, .arcade .service-card-sub, .arcade .service-card-foot small { color: var(--muted); }
+.arcade .section-marker { color: var(--accent); }
+.arcade .commission-cta .page-sub { max-width: 44ch; }
+
+/* Pricing: two slanted tabs choose the service shown underneath. */
+.price-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: clamp(20px, 4dvh, 44px); }
+.price-tabs button { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 14px; min-height: 64px; padding: 12px 26px; border: 0; background: rgb(255 255 255 / .07); color: #fff; font: inherit; text-align: left; clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%); transition: background-color .2s ease, color .2s ease; }
+.price-tabs button:hover { background: rgb(255 255 255 / .16); }
+.price-tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); }
+.price-tabs button:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+.price-tab-index { grid-row: span 2; font: 500 13px "Geist Mono", monospace; opacity: .7; }
+.price-tab-name { font-size: clamp(18px, 2vw, 28px); font-weight: 800; letter-spacing: -.03em; text-transform: uppercase; }
+.price-tab-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 12px; }
+.price-tabs button[aria-selected="true"] .status-chip { color: inherit; }
+.price-panel[hidden] { display: none; }
+.arcade .cta { width: auto; min-height: 52px; padding-inline: 32px; border: 0; border-radius: 0; background: var(--accent); color: var(--on-accent); font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+.arcade .cta:hover { background: #fff; filter: none; }
+.arcade .cta:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+@media (prefers-reduced-motion: no-preference) { .price-panel:not([hidden]) { animation: screen-in 460ms cubic-bezier(.2, .7, .2, 1) both; } }
+
+/* Not-found page: the number flickers apart in the accent colours. */
+.lost { display: grid; justify-items: start; gap: 6px; }
+.lost-code { position: relative; margin: 0; font-size: clamp(6rem, 24vw, 16rem); font-weight: 800; line-height: .85; letter-spacing: -.06em; color: #fff; }
+.lost-code::before, .lost-code::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; }
+.lost-code::before { color: var(--accent); clip-path: inset(0 0 62% 0); transform: translateX(-6px); }
+.lost-code::after { color: var(--pink-ink); clip-path: inset(58% 0 0 0); transform: translateX(6px); }
+@media (prefers-reduced-motion: no-preference) {
+  .lost-code::before { animation: lost-a 2.6s steps(1) infinite; }
+  .lost-code::after { animation: lost-b 2.6s steps(1) infinite; }
+}
+@keyframes lost-a { 0%, 100% { clip-path: inset(0 0 62% 0); transform: translateX(-6px); } 40% { clip-path: inset(20% 0 55% 0); transform: translateX(10px); } 46% { clip-path: inset(0 0 62% 0); transform: translateX(-6px); } 80% { clip-path: inset(8% 0 80% 0); transform: translateX(-14px); } 84% { clip-path: inset(0 0 62% 0); transform: translateX(-6px); } }
+@keyframes lost-b { 0%, 100% { clip-path: inset(58% 0 0 0); transform: translateX(6px); } 42% { clip-path: inset(70% 0 8% 0); transform: translateX(-12px); } 48% { clip-path: inset(58% 0 0 0); transform: translateX(6px); } 82% { clip-path: inset(44% 0 30% 0); transform: translateX(14px); } 86% { clip-path: inset(58% 0 0 0); transform: translateX(6px); } }
+
+/* ---- Works ---- */
+.arcade .works-search input { background: rgb(0 0 0 / .35); border: 1px solid var(--panel-line); border-radius: 0; color: #fff; }
+.arcade .works-search input::placeholder { color: var(--muted); }
+.arcade .filter-chip { border-radius: 0; border: 0; background: rgb(255 255 255 / .08); color: rgb(255 255 255 / .82); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); padding-inline: 18px; min-height: 44px; }
+.arcade .filter-chip:hover { background: rgb(255 255 255 / .18); color: #fff; }
+.arcade .filter-chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.arcade .works-filter-label, .arcade .clip-count { color: var(--muted); }
+.arcade .clip-title { color: var(--text); }
+.arcade .clip-credit, .arcade .works-thumbnails-note { color: var(--muted); }
+.works-results { position: relative; }
+.deck-cue, .deck-tabs, .deck-wipe { display: none; }
+
+/* ---- Phone deck: one screen, tabs along the bottom, long screens scroll inside ---- */
+@media (max-width: 767px) and (max-aspect-ratio: 1/1) {
+  html:has(.arcade:not(.immersive-clients)) { height: 100%; overflow: hidden; scroll-snap-type: none !important; }
+  .arcade:not(.immersive-clients) { height: 100svh; min-height: 0; overflow: hidden; }
+  .arcade:not(.immersive-clients) main { display: flex; flex-direction: column; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; }
+  .arcade:not(.immersive-clients) main > * { min-height: 0; }
+
+  [data-deck] { flex: 1; display: grid; grid-template: minmax(0, 1fr) auto / minmax(0, 1fr); position: relative; overflow: clip; }
+  [data-deck] > section { grid-area: 1 / 1; width: auto; min-height: 0 !important; margin: 0; padding: 14px 18px 30px; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / .3) transparent; }
+  [data-deck][data-deck-ready] > section:not(.is-screen), [data-deck]:not([data-deck-ready]) > section:not(:first-of-type) { display: none; }
+  [data-deck] > section[data-ghost]::after { display: none; }
+  [data-deck] .time-rule { margin-bottom: 14px; }
+  [data-deck] .scroll-cue { display: none; }
+  [data-deck] .site-footer { margin: 28px -18px -30px; }
+
+  .deck-tabs { grid-area: 2 / 1; display: flex; gap: 2px; padding: 6px max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); overflow: auto hidden; overscroll-behavior: contain; scrollbar-width: none; background: rgb(6 9 14 / .92); border-top: 1px solid rgb(255 255 255 / .14); -webkit-mask-image: linear-gradient(to right, transparent, #000 14px calc(100% - 14px), transparent); mask-image: linear-gradient(to right, transparent, #000 14px calc(100% - 14px), transparent); }
+  .deck-tabs::-webkit-scrollbar { display: none; }
+  .deck-tabs a { position: relative; z-index: 0; flex: none; display: grid; place-items: center; min-width: 60px; min-height: 44px; padding: 0 14px; color: rgb(255 255 255 / .72); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .deck-tabs a::before { content: ""; position: absolute; inset: 4px 0; z-index: -1; background: var(--accent); opacity: 0; transform: skewX(-14deg) scaleX(.6); transition: opacity .2s ease, transform .3s cubic-bezier(.2, .7, .2, 1); }
+  .deck-tabs a[aria-current] { color: var(--on-accent); }
+  .deck-tabs a[aria-current]::before { opacity: 1; transform: skewX(-14deg); }
+
+  /* "More below" cue for whichever panel is scrolling. */
+  .deck-cue { position: absolute; z-index: 3; left: 50%; bottom: 8px; display: flex; align-items: center; gap: 6px; margin: 0; padding: 5px 12px 5px 14px; background: var(--accent); color: var(--on-accent); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); pointer-events: none; opacity: 0; transform: translate(-50%, 8px); transition: opacity .25s ease, transform .25s ease; }
+  [data-deck] > .deck-cue { grid-area: 1 / 1; position: relative; left: auto; bottom: auto; align-self: end; justify-self: center; margin-bottom: 8px; transform: translateY(8px); }
+  [data-more] > .deck-cue { opacity: 1; transform: translate(-50%, 0); }
+  [data-deck][data-more] > .deck-cue { transform: none; }
+  .deck-cue span { animation: cue-bob 1.2s ease-in-out infinite; }
+
+  .deck-wipe { display: block; grid-area: 1 / 1; z-index: 4; justify-self: center; width: 46%; background: linear-gradient(to right, transparent, var(--accent) 18% 82%, transparent); opacity: 0; pointer-events: none; transform: translateX(-260%) skewX(-16deg); }
+
+  /* Home screens sized for a 9:16 phone. */
+  [data-deck] .scroll-panel { display: flex; flex-direction: column; gap: 16px; }
+  [data-deck] .intro-panel { justify-content: center; }
+  [data-deck] .intro-visual { order: 2; width: 100% !important; max-width: none; aspect-ratio: auto; height: clamp(84px, 16svh, 190px); flex: none; }
+  [data-deck] .art-word { top: 14%; font-size: clamp(34px, 8.4svh, 64px); }
+  [data-deck] .art-word br { display: none; }
+  [data-deck] .art-star { font-size: 44px; top: 8%; }
+  [data-deck] .art-orbit, [data-deck] .art-caption { display: none; }
+  [data-deck] .art-label { font-size: 11px; inset: auto auto 12px 14px; }
+  [data-deck] .intro-copy h1 { font-size: clamp(24px, 4.6svh, 36px); }
+  [data-deck] .intro-copy h1 > span { font-size: clamp(56px, 11svh, 92px); }
+  [data-deck] .section-label { margin-bottom: 10px; font-size: 11px; }
+  [data-deck] .intro-actions { margin-top: 16px; gap: 8px; }
+  [data-deck] .intro-status { margin-top: 14px; }
+  [data-deck] .services-panel { display: block; }
+  [data-deck] .services-panel h2 { font-size: clamp(20px, 3.7svh, 34px); }
+  [data-deck] .service-cards { margin-top: 16px; gap: 10px; }
+  [data-deck] .service-card { padding: 12px 16px; gap: 4px; }
+  [data-deck] .service-card-sub { font-size: 13px; line-height: 1.4; }
+  [data-deck] .service-card-title { margin-top: 2px; font-size: 24px; }
+  [data-deck] .service-card-foot { padding-top: 8px; }
+  [data-deck] .featured-panel { padding-top: 14px; }
+  [data-deck] .featured-copy { order: -1; }
+  [data-deck] .featured-copy h2 { font-size: clamp(22px, 4svh, 30px); }
+  [data-deck] .featured-copy > p:not(.section-label) { display: none; }
+  [data-deck] .featured-copy .intro-actions { margin-top: 10px; }
+  [data-deck] .featured-visual { width: min(100%, 46svh) !important; margin-inline: auto; }
+  [data-deck] .shorts-wordmark, [data-deck] .carousel-help { display: none; }
+  [data-deck] .commission-panel { display: flex; flex-direction: column; }
+  [data-deck] .commission-cta { margin-block: auto; }
+  [data-deck] .price-tabs { position: sticky; top: -14px; z-index: 2; margin: 0 -18px 14px; padding: 8px 14px; gap: 4px; background: rgb(13 17 23 / .94); }
+  [data-deck] .price-tabs button { grid-template-columns: 1fr; min-height: 56px; padding: 8px 18px; }
+  [data-deck] .price-tab-index { display: none; }
+  [data-deck] .price-tab-name { font-size: 16px; }
+  [data-deck] .price-tab-meta { font-size: 11px; }
+
+  /* Short phones: drop the art placeholder and extra copy so the first screens still fit. */
+  @media (max-height: 600px) {
+    [data-deck] .intro-visual, [data-deck] .intro-status { display: none; }
+    [data-deck] .service-card-sub { display: none; }
+    [data-deck] .intro-actions { margin-top: 12px; }
+  }
+
+  /* Works: the header and filters stay put; results scroll in their own panel. */
+  .arcade .works { flex: 1; display: flex; flex-direction: column; padding: 12px 0 0; width: 100%; max-width: none; }
+  .arcade .works > :not(.works-results) { flex: none; margin-inline: 16px; }
+  .arcade .works-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .arcade .works .page-title { font-size: clamp(28px, 5.4svh, 40px); }
+  .arcade .works-search { margin-top: 8px; }
+  .arcade .works-search input { min-height: 44px; }
+  .arcade .works-filter-groups { margin-top: 8px; gap: 4px; }
+  .arcade .works-filter-row { display: flex; align-items: center; gap: 8px; margin-inline: 0 -16px; }
+  .arcade .works-filter-label { flex: none; width: 3.6rem; font-size: 11px; }
+  .arcade .works-filter-row .filters { flex: 1; min-width: 0; display: flex; flex-wrap: nowrap; gap: 4px; padding-right: 24px; overflow: auto hidden; scrollbar-width: none; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+  .arcade .works-filter-row .filters::-webkit-scrollbar { display: none; }
+  .arcade .filter-chip { flex: none; font-size: 11px; padding-inline: 14px; }
+  .works-results { flex: 1; min-height: 0; margin-top: 10px; border-top: 1px solid var(--panel-line); }
+  .works-scroll { position: absolute; inset: 0; padding: 12px 16px 44px; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / .3) transparent; }
+  .works-scroll .site-footer { margin: 28px -16px -44px; }
+  .arcade .narrow { margin-block: auto; padding: 20px; }
+  .arcade .lost .intro-actions { margin-top: 12px; }
+  .arcade main:has(.lost) ~ .site-footer { display: none; }
+}
+@media (max-width: 767px) and (max-aspect-ratio: 1/1) and (prefers-reduced-motion: no-preference) {
+  .deck-wipe.is-running { animation: deck-wipe 760ms cubic-bezier(.6, 0, .3, 1) both; }
+  .deck-wipe.is-running[data-dir="prev"] { animation-direction: reverse; }
+  [data-deck] > section.screen-in { animation: screen-in 520ms cubic-bezier(.2, .7, .2, 1) 160ms both; }
+  [data-deck] > section.screen-back { animation: screen-back 520ms cubic-bezier(.2, .7, .2, 1) 160ms both; }
+}
+@keyframes deck-wipe { from { transform: translateX(-260%) skewX(-16deg); opacity: .95; } to { transform: translateX(260%) skewX(-16deg); opacity: .95; } }
+@keyframes screen-in { from { opacity: 0; transform: translateX(36px); } }
+@keyframes screen-back { from { opacity: 0; transform: translateX(-36px); } }
+@keyframes cue-bob { 50% { transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .deck-cue span { animation: none; } .deck-cue, .deck-tabs a::before { transition: none; } }

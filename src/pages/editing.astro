@@ -1,8 +1,4 @@
 ---
-import ServicePage from '../components/ServicePage.astro';
-import { loadService } from '../lib/services';
-
-const service = await loadService('editing');
+import SectionRedirect from '../components/SectionRedirect.astro';
 ---
-
-<ServicePage service={service} />
+<SectionRedirect section="editing" title="Editing" />

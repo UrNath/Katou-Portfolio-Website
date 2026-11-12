@@ -24,7 +24,7 @@ const routes = getRoutes(prices);
     {
       navLinks.map((link) => (
         <a
-          class="bar-link"
+          class:list={['bar-link', link.href === '/#commission' && 'commission-link']}
           href={link.href}
           aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
         >
@@ -78,6 +78,20 @@ const routes = getRoutes(prices);
 </dialog>
 
 <script>
+  const header = document.querySelector<HTMLElement>('.site-bar');
+  if (header) {
+    let previous = 0;
+    const updateSize = () => {
+      const height = header.getBoundingClientRect().height;
+      if (Math.abs(height - previous) < .5) return;
+      previous = height;
+      document.documentElement.style.setProperty('--site-header-height', `${height}px`);
+      window.dispatchEvent(new Event('nk-layout'));
+    };
+    new ResizeObserver(updateSize).observe(header);
+    updateSize();
+  }
+
   const dialog = document.getElementById('site-menu');
   const openBtn = document.getElementById('menu-open');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -120,6 +134,7 @@ const routes = getRoutes(prices);
     });
 
     dialog.querySelector('[data-sheet-close]')?.addEventListener('click', closeSheet);
+    dialog.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeSheet));
 
     const grab = dialog.querySelector('[data-sheet-grab]');
     let startY = 0;

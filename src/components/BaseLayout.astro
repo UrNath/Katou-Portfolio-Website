@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import '../styles/scroll-portfolio.css';
+import '../styles/arcade.css';
 import SiteBar from './SiteBar.astro';
 import SiteFooter from './SiteFooter.astro';
 import { site } from '../data/site';
@@ -10,10 +12,11 @@ import serifUrl from '@fontsource/instrument-serif/files/instrument-serif-latin-
 
 interface Props {
   title?: string;
+  immersive?: boolean;
   description?: string;
 }
 
-const { title, description = site.description } = Astro.props;
+const { title, immersive = false, description = site.description } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.name;
 const { editing, web } = await loadServicePrices();
 const pathname = Astro.url.pathname;
@@ -25,7 +28,7 @@ const pathname = Astro.url.pathname;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#F6F3EC" />
+    <meta name="theme-color" content={pathname.startsWith('/admin') ? '#FCFCFA' : '#0D1117'} />
     <meta name="generator" content={Astro.generator} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -47,13 +50,13 @@ const pathname = Astro.url.pathname;
       })();
     </script>
   </head>
-  <body class={pathname === '/' ? 'is-hub' : undefined}>
+  <body class:list={['clean-portfolio', !pathname.startsWith('/admin') && 'arcade', pathname === '/' && 'is-scroll', immersive && 'immersive-clients']}>
     <a class="skip" href="#main">Skip to content</a>
     <SiteBar pathname={pathname} prices={{ editing, web }} />
     <main id="main">
       <slot />
     </main>
-    <SiteFooter />
+    {!immersive && <SiteFooter />}
     <script is:inline>
       document.addEventListener('click', function (event) {
         var target = event.target && event.target.closest ? event.target : null;

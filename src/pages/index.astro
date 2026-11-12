@@ -1,138 +1,255 @@
 ---
-import { Picture } from 'astro:assets';
 import BaseLayout from '../components/BaseLayout.astro';
+import SiteIntro from '../components/SiteIntro.astro';
 import CharacterArt from '../components/CharacterArt.astro';
-import ClipCard from '../components/ClipCard.astro';
-import Icon from '../components/Icon.astro';
+import FeaturedCarousel from '../components/FeaturedCarousel.astro';
+import ShortsWordmark from '../components/ShortsWordmark.astro';
+import CommissionCta from '../components/CommissionCta.astro';
+import ServiceSection from '../components/ServiceSection.astro';
+import TermsSection from '../components/TermsSection.astro';
 import StatusChip from '../components/StatusChip.astro';
-import Wordmark from '../components/Wordmark.astro';
 import ClipPreview from '../islands/ClipPreview';
 import ClipViewer from '../islands/ClipViewer';
-import { status } from '../data/status';
 import { site } from '../data/site';
-import { editCredit } from '../lib/clip-shared';
+import { status } from '../data/status';
 import { heroReel, hubClips, loadClips, toViewerClip } from '../lib/clips';
-import { loadService, loadServicePrices } from '../lib/services';
-
+import { loadService } from '../lib/services';
 const clips = await loadClips();
-// Hub content is featured-only by design. See hubClips() in src/lib/clips.ts.
 const featured = hubClips(clips);
-const { hero, prev, next, position, total } = heroReel(clips);
-const pager = `${String(position).padStart(2, '0')} — ${String(total).padStart(2, '0')}`;
-const editCount = `${clips.length} ${clips.length === 1 ? 'edit' : 'edits'}`;
-const prices = await loadServicePrices();
+const { hero } = heroReel(clips);
 const editing = await loadService('editing');
-const turnaround = editing.data.compare.find((row) => row.feature === 'Turnaround')?.values[0];
+const web = await loadService('web-design');
 const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
-const minis = featured.slice(0, 3);
+// The featured pool, exclusions, order and gallery data remain unchanged.
 ---
-
 <BaseLayout>
-  <div class="hub">
-    <section class:list={['stage-banner', artOn && 'has-character']} aria-label="Featured edit">
-      <CharacterArt />
-      <div class="stage-top">
-        <div>
-          <p class="stage-mark stage-line"><Wordmark /></p>
-          <p class="stage-role stage-line stage-line-2">{site.role}</p>
+  <SiteIntro />
+  <script is:inline>
+    // Reveals are opt-in: content stays visible without scripting, without
+    // IntersectionObserver, and for visitors who prefer reduced motion.
+    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('reveal-ready');
+    }
+  </script>
+  <div class="scroll-portfolio" data-deck>
+    <section class="intro-panel scroll-panel" id="home" aria-labelledby="intro-title">
+      <div class:list={['intro-visual', artOn && 'has-character']}>
+        {artOn ? <CharacterArt /> : (
+          /* PLACEHOLDER: typographic stand-in until Katou supplies human-drawn OC art
+             (enable site.characterArt). The square frame keeps its dimensions either way. */
+          <div class="type-art" data-placeholder="hero-art" aria-hidden="true">
+            <span class="art-label">PLACEHOLDER / CHARACTER ART TO COME</span>
+            <span class="art-orbit" data-parallax="-0.07"></span>
+            <span class="art-word" data-parallax="0.09">Cut.<br /><em>Create.</em></span>
+            <span class="art-star" data-parallax="-0.13">✳</span>
+            <span class="art-caption">A little timing.<br />A lot of personality.</span>
+          </div>
+        )}
+      </div>
+      <div class="intro-copy">
+        <p class="section-label" data-reveal>THE PERSON BEHIND THE TIMELINE</p>
+        <h1 id="intro-title" data-reveal style="--i:1">Meet the Editor!<br /><span>Katou</span></h1>
+        <p class="intro-role" data-reveal style="--i:2">{site.role}</p>
+        <div class="intro-actions" data-reveal style="--i:3">
+          <a class="solid-button" href="/works">View Works <span aria-hidden="true">↗</span></a>
+          <a class="outline-button" href="#commission">Commission <span aria-hidden="true">↓</span></a>
+          <button class="text-button" type="button" data-open-clip={hero.id}><span aria-hidden="true">▶</span> Play highlight reel</button>
         </div>
-        <div class="stage-corner">
-          <p class="stage-now">Now playing · {hero.title}</p>
-          <Icon name="sparkles" size={18} />
-          <span class="heart"><Icon name="heart" size={16} /></span>
-          <span class="pager">{pager}</span>
+        <div class="intro-status" data-reveal style="--i:4">
+          <span>Editing <StatusChip status={status.editing} /></span>
+          <span>Web design <StatusChip status={status.webDesign} /></span>
         </div>
       </div>
-      <div class="reel-wrap">
-        <p class="ghost-word" aria-hidden="true">shorts</p>
-        <div class="reel">
-          <ClipCard clip={prev} variant="neighbor" sizes="118px" />
-          <ClipCard
-            clip={hero}
-            variant="hero"
-            eager
-            priority
-            sizes="(min-width: 960px) 196px, 136px"
-          />
-          <ClipCard clip={next} variant="neighbor" sizes="118px" />
-        </div>
-      </div>
-      <a class="stage-cta" href="/works">Watch Works</a>
-      <ClipPreview client:visible />
+      <a class="scroll-cue" href="#services">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a>
     </section>
 
-    <div class="bento-side">
-      <section class="tile status-tile" aria-label="Service status">
-        <div class="status-tile-head">
-          <p class="kicker">Status</p>
-          <p class="kicker">updated {status.updated}</p>
-        </div>
-        <div class="status-line">
-          <span class="status-name">Editing</span>
-          <StatusChip status={status.editing} />
-        </div>
-        <div class="status-line">
-          <span class="status-name">Web design</span>
-          <StatusChip status={status.webDesign} />
-        </div>
-      </section>
-      <a class="tile works-tile" href="/works">
-        <span class="works-copy">
-          <span class="works-label">Works</span>
-          <span class="works-meta">{editCount}</span>
-        </span>
-        <span class="works-minis" aria-hidden="true">
-          {
-            minis.map((clip) => (
-              <span class="mini-clip">
-                {
-                  clip.posterImage ? (
-                    <Picture
-                      src={clip.posterImage}
-                      formats={['webp']}
-                      fallbackFormat="webp"
-                      widths={[160]}
-                      sizes="80px"
-                      alt=""
-                      quality={50}
-                    />
-                  ) : (
-                    <img src={clip.poster} alt="" />
-                  )
-                }
-                <span>{editCredit(clip.channelHandle)}</span>
-              </span>
-            ))
-          }
-        </span>
-      </a>
-    </div>
+    <section class="services-panel detail-panel" id="services" aria-labelledby="services-title" data-ghost="Services">
+      <div class="time-rule" style="--at:14" aria-hidden="true"><span></span></div>
+      <p class="section-label" data-reveal>WHAT I DO</p>
+      <h2 id="services-title" data-reveal style="--i:1">{site.role}</h2>
+      <div class="service-cards">
+        {[
+          { entry: editing, href: '#editing', state: status.editing, approx: undefined },
+          { entry: web, href: '#web-design', state: status.webDesign, approx: web.data.fromApprox },
+        ].map(({ entry, href, state, approx }, index) => (
+          <a class="service-card" href={href} data-reveal style={`--i:${index + 2}`}>
+            <span class="service-card-top"><span class="service-card-index">0{index + 1}</span><StatusChip status={state} /></span>
+            <span class="service-card-title">{entry.data.title}</span>
+            <span class="service-card-sub">{entry.data.subtitle}</span>
+            <span class="service-card-foot">
+              <span>From <strong>{entry.data.fromPrice}</strong>{approx && <small> {approx}</small>}</span>
+              <span class="service-card-arrow" aria-hidden="true">→</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
 
-    <div class="bento-nums">
-      <a class="tile num-tile" href="/editing">
-        <span class="numeral">01</span>
-        <span>
-          <span class="num-label">Editing</span>
-          <span class="num-meta">{prices.editing}{turnaround ? ` · ${turnaround}` : ''}</span>
-        </span>
-      </a>
-      <a class="tile num-tile" href="/web-design">
-        <span class="numeral">02</span>
-        <span>
-          <span class="num-label">Web design</span>
-          <span class="num-meta">from {prices.web}</span>
-          {prices.webApprox && <span class="num-approx">{prices.webApprox}</span>}
-        </span>
-      </a>
-      <a class="tile num-tile slim" href="/terms">
-        <span class="numeral">03</span>
-        <span class="num-label">Terms</span>
-      </a>
-      <a class="tile num-tile slim" href="/contact">
-        <span class="numeral">04</span>
-        <span class="num-label">Contact</span>
-      </a>
-    </div>
+    <section class="featured-panel scroll-panel" id="featured" aria-labelledby="featured-title" data-ghost="Featured">
+      <div class="time-rule" style="--at:36" aria-hidden="true"><span></span></div>
+      <div class="featured-visual" data-reveal>
+        <ShortsWordmark />
+        <FeaturedCarousel clips={featured} initialId={hero.id} />
+      </div>
+      <div class="featured-copy">
+        <p class="section-label" data-reveal>FEATURED WORKS</p>
+        <h2 id="featured-title" data-reveal style="--i:1">Engaging edits that keep viewers hooked.</h2>
+        <p data-reveal style="--i:2">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
+        <div class="intro-actions" data-reveal style="--i:3">
+          <a class="solid-button" href="/works">View Full Gallery <span aria-hidden="true">↗</span></a>
+          <a class="outline-button" href="#commission">Commission <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="detail-panel pricing-panel" id="pricing" aria-label="Pricing" data-ghost="Pricing">
+      <div class="time-rule" style="--at:60" aria-hidden="true"><span></span></div>
+      <p class="section-label" data-reveal>PRICING</p>
+      <div class="price-tabs" role="tablist" aria-label="Services" data-reveal style="--i:1">
+        {[
+          { entry: editing, state: status.editing },
+          { entry: web, state: status.webDesign },
+        ].map(({ entry, state }, index) => (
+          <button type="button" role="tab" id={`tab-${entry.id}`} aria-controls={entry.id} data-price-tab={entry.id}
+            aria-selected={index === 0 ? 'true' : 'false'} tabindex={index === 0 ? 0 : -1}>
+            <span class="price-tab-index">0{index + 1}</span>
+            <span class="price-tab-name">{entry.data.title}</span>
+            <span class="price-tab-meta">From {entry.data.fromPrice} <StatusChip status={state} /></span>
+          </button>
+        ))}
+      </div>
+      <div class="price-panel" role="tabpanel" id="editing" aria-labelledby="tab-editing">
+        <ServiceSection service={editing} />
+      </div>
+      <div class="price-panel" role="tabpanel" id="web-design" aria-labelledby="tab-web-design" hidden>
+        <ServiceSection service={web} />
+      </div>
+    </section>
+    <section class="detail-panel terms-panel" id="terms" aria-label="Commission terms" data-ghost="Terms">
+      <div class="time-rule" style="--at:82" aria-hidden="true"><span></span></div>
+      <p class="section-label">THE DETAILS, UP FRONT</p>
+      <TermsSection />
+    </section>
+    <section class="detail-panel commission-panel" id="commission" aria-label="Commission Katou" data-ghost="Commission" data-footer-slot>
+      <div class="time-rule" style="--at:97" aria-hidden="true"><span></span></div>
+      <p class="section-label">YOUR NEXT PROJECT STARTS HERE</p>
+      <CommissionCta />
+    </section>
+    <!-- Phone deck chrome (hidden on wider screens): transition band, scroll cue, tab bar. -->
+    <div class="deck-wipe" aria-hidden="true"></div>
+    <p class="deck-cue" aria-hidden="true">More <span>▾</span></p>
+    <nav class="deck-tabs" aria-label="Home sections">
+      {[
+        ['home', 'Home'], ['services', 'Services'], ['featured', 'Featured'],
+        ['pricing', 'Pricing'], ['terms', 'Terms'], ['commission', 'Commission'],
+      ].map(([id, label]) => <a href={`#${id}`} data-deck-tab={id}>{label}</a>)}
+    </nav>
   </div>
+  <ClipPreview client:idle />
   <ClipViewer client:idle clips={featured.map(toViewerClip)} />
 </BaseLayout>
+
+<script>
+  import { mountHomeScroll } from '../lib/home-scroll';
+  import { mountDeck } from '../lib/screen-deck';
+  // Pricing tabs. Links to #editing or #web-design (nav menu, service cards,
+  // the old /editing and /web-design addresses) pick the tab, then go to #pricing.
+  const priceTabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-price-tab]'));
+  function pickPrice(id: string, focus = false) {
+    const chosen = priceTabs.find((tab) => tab.dataset.priceTab === id);
+    if (!chosen) return false;
+    priceTabs.forEach((tab) => {
+      const on = tab === chosen;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+      const panel = document.getElementById(tab.dataset.priceTab!);
+      if (panel) panel.hidden = !on;
+    });
+    if (focus) chosen.focus();
+    window.dispatchEvent(new Event('nk-layout'));
+    return true;
+  }
+  priceTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => pickPrice(tab.dataset.priceTab!));
+    tab.addEventListener('keydown', (event) => {
+      const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+      if (!step) return;
+      event.preventDefault();
+      pickPrice(priceTabs[(index + step + priceTabs.length) % priceTabs.length].dataset.priceTab!, true);
+    });
+  });
+  if (pickPrice(location.hash.slice(1))) history.replaceState(null, '', '#pricing');
+  document.addEventListener('click', (event) => {
+    const link = (event.target as HTMLElement).closest?.<HTMLAnchorElement>('a[href*="#"]');
+    if (!link || link.pathname !== location.pathname || !pickPrice(link.hash.slice(1))) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (location.hash === '#pricing') window.dispatchEvent(new HashChangeEvent('hashchange'));
+    else location.hash = 'pricing';
+  }, true);
+
+  mountHomeScroll();
+  mountDeck();
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const mobile = window.matchMedia('(max-width: 767px)');
+  const layers = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));
+  let frame = 0;
+  function paint() {
+    frame = 0;
+    for (const layer of layers) {
+      if (reduced.matches || mobile.matches) {
+        layer.style.removeProperty('transform');
+        continue;
+      }
+      const section = layer.closest('section');
+      if (!section) continue;
+      const bounds = section.getBoundingClientRect();
+      if (bounds.bottom < -100 || bounds.top > innerHeight + 100) continue;
+      const offset = (innerHeight / 2 - (bounds.top + bounds.height / 2));
+      const strength = Number(layer.dataset.parallax) || 0;
+      layer.style.transform = `translate3d(0, ${Math.max(-64, Math.min(64, offset * strength))}px, 0)`;
+    }
+  }
+  function schedule() { if (!frame) frame = requestAnimationFrame(paint); }
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+  reduced.addEventListener('change', schedule);
+  mobile.addEventListener('change', schedule);
+  paint();
+
+  // Light staggered reveals, and a playhead that advances along each section's
+  // timeline rule. Transform and opacity only; each element animates once.
+  const revealed = document.querySelectorAll<HTMLElement>('[data-reveal], .time-rule');
+  if (document.documentElement.classList.contains('reveal-ready')) {
+    const reveal = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('is-in');
+        reveal.unobserve(entry.target);
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: .1 });
+    revealed.forEach((element) => reveal.observe(element));
+    reduced.addEventListener('change', () => {
+      if (!reduced.matches) return;
+      document.documentElement.classList.remove('reveal-ready');
+      reveal.disconnect();
+    });
+  }
+
+  // Keep section links readable and useful for keyboard and browser history navigation.
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.desk-nav a[href^="/#"]'));
+  const sections = Array.from(document.querySelectorAll<HTMLElement>('.scroll-portfolio > section[id]'));
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const id = entry.target.id === 'featured' ? 'home' : entry.target.id;
+        links.forEach((link) => {
+          if (link.hash === `#${id}`) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+      }
+    }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+    sections.forEach((section) => observer.observe(section));
+  }
+</script>

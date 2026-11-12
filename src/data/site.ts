@@ -39,12 +39,12 @@ export const socials: SocialLink[] = settings.socials.map((item) => ({
 }));
 
 export const navLinks = [
-  { href: '/', label: 'Home' },
+  { href: '/#home', label: 'Home' },
   { href: '/works', label: 'Works' },
-  { href: '/editing', label: 'Editing' },
-  { href: '/web-design', label: 'Web design' },
-  { href: '/terms', label: 'Terms' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/clients', label: 'Clients' },
+  { href: '/#pricing', label: 'Pricing' },
+  { href: '/#terms', label: 'Terms' },
+  { href: '/#commission', label: 'Commission' },
 ] as const;
 
 export function isCurrent(pathname: string, href: string): boolean {

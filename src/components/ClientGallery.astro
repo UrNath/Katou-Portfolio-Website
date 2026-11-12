@@ -1,0 +1,844 @@
+---
+import BrandIcon from './BrandIcon.astro';
+import Icon from './Icon.astro';
+import type { ClientProfile } from '../data/clients';
+
+interface Reel { title: string; poster: string; preview: string; youtube: string }
+interface Props {
+  clients: { id: string; label: string; profile: ClientProfile; reels: (Reel | null)[] }[];
+}
+const { clients } = Astro.props;
+const PLACEHOLDER = 'placeholder';
+const socialOrder = ['youtube', 'discord', 'tiktok'] as const;
+const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' };
+---
+
+<section class="roster" data-roster aria-label="Meet the Clients">
+  <h1 class="sr">Meet the Clients</h1>
+
+  <nav class="roster-nav" aria-label="Choose a client">
+    <button class="roster-switch" type="button" data-step="1">
+      <span aria-hidden="true">⇄</span> <span class="switch-text">Switch client</span>
+    </button>
+    <div class="roster-names">
+      {clients.map((client, index) => (
+        <button type="button" data-goto={index} aria-pressed={index === 0}>{client.label}</button>
+      ))}
+    </div>
+  </nav>
+
+  {clients.map((client, index) => {
+    const { profile } = client;
+    const chips = [
+      { name: 'Type', value: profile.type },
+      { name: 'Class', value: profile.role },
+      { name: 'Element', value: profile.element },
+    ];
+    return (
+      <article class="client" data-client={client.id} hidden={index !== 0} aria-label={client.label}
+        style={`--panel:${profile.palette.panel};--deep:${profile.palette.deep};--accent:${profile.palette.accent};--rim:${profile.palette.rim}`}>
+        <div class="stage" aria-hidden="true">
+          <div class="stage-bg art-depth">
+            {profile.skins.filter((skin) => skin.background).map((skin) => (
+              <img class="bg-paint" data-skin-bg={skin.id} src={skin.background} alt="" loading="lazy" decoding="async" />
+            ))}
+            <span class="bg-band">{`${client.label} `.repeat(6)}</span>
+          </div>
+          {profile.skins.map((skin, skinIndex) => (
+            <div class:list={['char', skin.art?.framed && 'is-framed']} data-skin={skin.id} hidden={skinIndex !== 0}
+              style={skin.art ? `--h:${skin.art.height_pct}%;--b:${skin.art.bottom_pct}%;--r:${skin.art.right_pct}%;--ratio:${skin.art.framed ? '4/3' : `${skin.art.width}/${skin.art.height}`};--focus:${skin.art.focus ?? '50% 50%'}` : undefined}>
+              <div class="char-move character-depth">
+                {skin.art ? (
+                  <>
+                    <span class="char-echo" style={`--art:url(${skin.art.src})`}></span>
+                    <img class="char-art" src={skin.art.src} width={skin.art.width} height={skin.art.height} alt=""
+                      loading={index === 0 && skinIndex === 0 ? 'eager' : 'lazy'} decoding="async" draggable="false" />
+                  </>
+                ) : (
+                  /* PLACEHOLDER: no character art has been supplied for this client yet. */
+                  <div class="art-placeholder" data-placeholder="client-art">
+                    <span>Character art</span>
+                    <strong>Placeholder</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="info">
+          <h2 class="name" data-seq style="--i:0">{client.label}</h2>
+          <ul class="chips" data-seq style="--i:1" aria-label="Character details">
+            {chips.map((chip) => (
+              <li class:list={[!chip.value && 'is-placeholder']}>
+                <span>{chip.name}</span> {chip.value ?? PLACEHOLDER}
+              </li>
+            ))}
+          </ul>
+          <p class:list={['desc', !profile.description && 'is-placeholder']} data-seq style="--i:2">
+            {profile.description ?? 'Description placeholder. To be supplied.'}
+          </p>
+
+          <div class="tabs" role="tablist" aria-label={`${client.label} views`} data-seq style="--i:3">
+            <button type="button" role="tab" id={`tab-${client.id}-profile`} aria-controls={`panel-${client.id}-profile`} aria-selected="true"><span class="tab-wide">Highlights</span><span class="tab-narrow">Info</span></button>
+            <button type="button" role="tab" id={`tab-${client.id}-skins`} aria-controls={`panel-${client.id}-skins`} aria-selected="false" tabindex="-1">Skins</button>
+            <button class="tab-socials" type="button" role="tab" id={`tab-${client.id}-socials`} aria-controls={`panel-${client.id}-socials`} aria-selected="false" tabindex="-1">Socials</button>
+          </div>
+
+          <div class="panel" role="tabpanel" id={`panel-${client.id}-profile`} aria-labelledby={`tab-${client.id}-profile`}>
+            <ul class="gems">
+              {client.reels.map((reel, reelIndex) => (
+                <li style={`--n:${reelIndex}`}>
+                  <button class:list={['gem', !reel && 'is-placeholder']} type="button"
+                    data-title={reel?.title} data-youtube={reel?.youtube} data-preview={reel?.preview} data-poster={reel?.poster}
+                    aria-label={reel ? `Highlight reel ${reelIndex + 1}: ${reel.title}` : `Highlight reel ${reelIndex + 1}: placeholder`}>
+                    <span class="gem-face">
+                      {reel && (
+                        <span class="gem-media">
+                          <img src={reel.poster} alt="" loading="lazy" decoding="async" width="108" height="108" />
+                          <video muted loop playsinline preload="none" data-src={reel.preview} width="108" height="108" tabindex="-1"></video>
+                        </span>
+                      )}
+                      <span class="gem-icon">{reel ? <Icon name="play" size={18} /> : '?'}</span>
+                    </span>
+                    <span class="gem-label">{reel ? `Reel 0${reelIndex + 1}` : 'Placeholder'}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p class:list={['strip', !profile.weapon && 'is-placeholder']} data-seq style="--i:5">
+              <span>Main weapon</span> {profile.weapon ?? PLACEHOLDER}
+            </p>
+          </div>
+
+          <div class="panel" role="tabpanel" id={`panel-${client.id}-skins`} aria-labelledby={`tab-${client.id}-skins`} hidden>
+            <ul class="skins">
+              {profile.skins.map((skin, skinIndex) => (
+                <li>
+                  <button type="button" data-skin-pick={skin.id} aria-pressed={skinIndex === 0}>
+                    <span class="skin-thumb">
+                      {skin.art
+                        ? <img src={skin.art.src} alt="" loading="lazy" decoding="async" width="72" height="72" />
+                        : <span aria-hidden="true">?</span>}
+                    </span>
+                    <span class="skin-text"><strong>{skin.label}</strong><small>{skin.note}</small></span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {profile.skins.length < 2 && <p class="strip is-placeholder">No other skins yet.</p>}
+          </div>
+
+          <!-- Phones show the links in their own tab; wider screens keep the row below. -->
+          <div class="panel panel-socials" role="tabpanel" id={`panel-${client.id}-socials`} aria-labelledby={`tab-${client.id}-socials`} hidden>
+            <ul class="social-list">
+              {socialOrder.map((key) => (
+                <li>
+                  {profile.socials[key] ? (
+                    <a href={profile.socials[key]} target="_blank" rel="noopener noreferrer">
+                      <BrandIcon name={key} size={20} /> <span>{socialLabel[key]}</span> <span class="social-go" aria-hidden="true">↗</span>
+                    </a>
+                  ) : (
+                    <span class="is-placeholder"><BrandIcon name={key} size={20} /> <span>{socialLabel[key]}</span> <span class="social-go">{PLACEHOLDER}</span></span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <ul class="socials" data-seq style="--i:6" aria-label={`${client.label} links`}>
+            {socialOrder.map((key) => (
+              <li>
+                {profile.socials[key] ? (
+                  <a href={profile.socials[key]} target="_blank" rel="noopener noreferrer">
+                    <BrandIcon name={key} size={16} /> <span class="social-name">{socialLabel[key]}</span>
+                  </a>
+                ) : (
+                  <span class="is-placeholder"><BrandIcon name={key} size={16} /> {socialLabel[key]} {PLACEHOLDER}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </article>
+    );
+  })}
+
+  <div class="wipe" aria-hidden="true"></div>
+  <output class="sr" aria-live="polite"></output>
+
+  <dialog class="reel-dialog" aria-labelledby="reel-title">
+    <div class="reel-card">
+      <button class="reel-close" type="button" data-reel-close aria-label="Close highlight reel"><Icon name="x" size={20} /></button>
+      <div class="reel-frame">
+        <video muted loop playsinline preload="none" width="540" height="960"></video>
+        <div class="reel-empty" hidden><span>Highlight reel</span><strong>Placeholder</strong></div>
+      </div>
+      <p class="reel-title" id="reel-title"></p>
+      <a class="reel-link" target="_blank" rel="noopener noreferrer" hidden>Watch the full video <span aria-hidden="true">↗</span></a>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-roster]');
+  if (root) {
+    const stage = root;
+    const clients = Array.from(stage.querySelectorAll<HTMLElement>('.client'));
+    const picks = Array.from(stage.querySelectorAll<HTMLButtonElement>('[data-goto]'));
+    const status = stage.querySelector('output')!;
+    const wipe = stage.querySelector<HTMLElement>('.wipe')!;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const posterOnly = () => document.documentElement.classList.contains('poster-only');
+    // Timing and gesture tuning (documented in docs/FEATURES.md).
+    const SWITCH = { leave: 340, enter: 900, reducedLeave: 160, reducedEnter: 200 };
+    const SWIPE = { start: 10, travel: .8, distance: .3, velocity: .45 };
+    let current = 0;
+    let busy = false;
+    let pending: number | undefined;
+
+    function paint(index = current) {
+      const active = clients[index];
+      document.body.style.setProperty('--scene-panel', active.style.getPropertyValue('--deep'));
+      document.body.style.setProperty('--scene-accent', active.style.getPropertyValue('--accent'));
+      picks.forEach((pick, position) => pick.setAttribute('aria-pressed', String(position === index)));
+      status.textContent = active.getAttribute('aria-label') ?? '';
+    }
+    paint();
+
+    // ---- Client switch: info leaves, a slanted band crosses the stage, and the
+    // next client arrives behind it with its diamonds dealt back in order. ----
+    function go(index: number) {
+      const target = (index + clients.length) % clients.length;
+      if (target === current) return;
+      if (scrub) return;
+      if (busy) { pending = target; return; }
+      busy = true;
+      const from = clients[current];
+      const to = clients[target];
+      const forward = target > current !== (Math.abs(target - current) === clients.length - 1 && clients.length > 2);
+      stage.dataset.dir = forward ? 'next' : 'prev';
+      disarm();
+      if (from.contains(document.activeElement)) picks[target]?.focus({ preventScroll: true });
+      const simple = reduced.matches;
+      const leave = simple ? SWITCH.reducedLeave : SWITCH.leave;
+      const enter = simple ? SWITCH.reducedEnter : SWITCH.enter;
+      from.classList.add('is-leaving');
+      if (!simple) {
+        wipe.style.setProperty('--wipe', to.style.getPropertyValue('--accent'));
+        wipe.classList.remove('is-running');
+        void wipe.offsetWidth;
+        wipe.classList.add('is-running');
+      }
+      setTimeout(() => {
+        from.hidden = true;
+        from.classList.remove('is-leaving');
+        to.hidden = false;
+        to.classList.add('is-entering');
+        current = target;
+        paint();
+        setTimeout(() => {
+          to.classList.remove('is-entering');
+          wipe.classList.remove('is-running');
+          busy = false;
+          if (pending !== undefined && pending !== current) {
+            const next = pending;
+            pending = undefined;
+            go(next);
+          } else pending = undefined;
+        }, enter);
+      }, leave);
+    }
+    stage.querySelector('[data-step]')?.addEventListener('click', () => go((pending ?? current) + 1));
+    picks.forEach((pick, index) => pick.addEventListener('click', () => go(index)));
+
+    document.addEventListener('keydown', (event) => {
+      const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+      const target = event.target as HTMLElement | null;
+      if (!step || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (target?.closest('input, textarea, select, [contenteditable], dialog, [role="tablist"], [role="menu"], video')) return;
+      event.preventDefault();
+      go((pending ?? current) + step);
+    });
+
+    // ---- Touch swipe: the finger scrubs the same switch animation the button
+    // plays. Dragging moves the timeline forward (old client leaves, band
+    // crosses, new client arrives); dragging back rewinds it. Release finishes
+    // it past a distance or speed threshold, otherwise it plays backwards. ----
+    const TOTAL = SWITCH.leave + SWITCH.enter;
+    let drag: { id: number; x: number; y: number; lastX: number; time: number; velocity: number; locked: boolean } | undefined;
+    let scrub: { side: number; target: number; from: HTMLElement; to: HTMLElement; entering: boolean; time: number; parts: Animation[]; band: Animation[] } | undefined;
+    let swiped = false;
+    function hold() {
+      if (!scrub) return;
+      scrub.parts = (scrub.entering ? scrub.to : scrub.from).getAnimations({ subtree: true });
+      scrub.band = wipe.getAnimations();
+      [...scrub.parts, ...scrub.band].forEach((animation) => animation.pause());
+    }
+    function scrubStart(side: number) {
+      const target = (current + side + clients.length) % clients.length;
+      stage.dataset.dir = side > 0 ? 'next' : 'prev';
+      stage.classList.add('is-scrubbing');
+      wipe.style.setProperty('--wipe', clients[target].style.getPropertyValue('--accent'));
+      wipe.classList.remove('is-running');
+      void wipe.offsetWidth;
+      wipe.classList.add('is-running');
+      clients[current].classList.add('is-leaving');
+      scrub = { side, target, from: clients[current], to: clients[target], entering: false, time: 0, parts: [], band: [] };
+      hold();
+    }
+    function scrubTo(time: number) {
+      if (!scrub) return;
+      const entering = time >= SWITCH.leave;
+      if (entering !== scrub.entering) {
+        // Crossing the midpoint swaps which client is on stage, exactly as the button does.
+        scrub.entering = entering;
+        scrub.from.hidden = entering;
+        scrub.from.classList.toggle('is-leaving', !entering);
+        scrub.to.hidden = !entering;
+        scrub.to.classList.toggle('is-entering', entering);
+        paint(entering ? scrub.target : current);
+        hold();
+      }
+      const local = entering ? time - SWITCH.leave : time;
+      scrub.parts.forEach((animation) => { animation.currentTime = local; });
+      scrub.band.forEach((animation) => { animation.currentTime = time; });
+      scrub.time = time;
+    }
+    function scrubEnd(commit: boolean) {
+      if (!scrub) return;
+      const done = scrub;
+      scrub = undefined;
+      done.from.classList.remove('is-leaving');
+      done.to.classList.remove('is-entering');
+      done.from.hidden = commit;
+      done.to.hidden = !commit;
+      wipe.classList.remove('is-running');
+      stage.classList.remove('is-scrubbing');
+      if (commit) current = done.target;
+      paint();
+      busy = false;
+    }
+    function scrubFinish(commit: boolean) {
+      if (!scrub) return;
+      busy = true;
+      const start = scrub.time;
+      const end = commit ? TOTAL : 0;
+      // Forward runs at the button's own speed; a cancelled swipe rewinds faster.
+      const duration = Math.max(120, Math.abs(end - start) / (commit ? 1 : 1.8));
+      const began = performance.now();
+      const step = (now: number) => {
+        if (!scrub) return;
+        const amount = Math.min(1, (now - began) / duration);
+        scrubTo(start + (end - start) * amount);
+        if (amount < 1) requestAnimationFrame(step);
+        else scrubEnd(commit);
+      };
+      requestAnimationFrame(step);
+    }
+    stage.addEventListener('pointerdown', (event) => {
+      swiped = false;
+      if (event.pointerType !== 'touch' || !event.isPrimary || busy || scrub || clients.length < 2) return;
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, lastX: event.clientX, time: event.timeStamp, velocity: 0, locked: false };
+    });
+    stage.addEventListener('pointermove', (event) => {
+      if (!drag || drag.id !== event.pointerId) return;
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+      if (!drag.locked) {
+        // Below the threshold this is still a tap; a mostly vertical move is not a swipe.
+        if (Math.abs(dy) > SWIPE.start && Math.abs(dy) >= Math.abs(dx)) { drag = undefined; return; }
+        if (Math.abs(dx) < SWIPE.start) return;
+        drag.locked = true;
+        swiped = true;
+        disarm();
+        stage.setPointerCapture(event.pointerId);
+      }
+      drag.velocity = (event.clientX - drag.lastX) / Math.max(1, event.timeStamp - drag.time);
+      drag.lastX = event.clientX;
+      drag.time = event.timeStamp;
+      if (reduced.matches) return;
+      const side = dx < 0 ? 1 : -1;
+      if (scrub && scrub.side !== side) { scrubTo(0); scrubEnd(false); }
+      if (!scrub) scrubStart(side);
+      scrubTo(Math.min(1, Math.abs(dx) / (stage.clientWidth * SWIPE.travel)) * TOTAL);
+    });
+    function endDrag(event: PointerEvent) {
+      if (!drag || drag.id !== event.pointerId) return;
+      const gesture = drag;
+      drag = undefined;
+      if (!gesture.locked) return;
+      const dx = gesture.lastX - gesture.x;
+      const side = dx < 0 ? 1 : -1;
+      const speed = event.timeStamp - gesture.time < 100 ? gesture.velocity * -side : 0;
+      const amount = Math.abs(dx) / (stage.clientWidth * SWIPE.travel);
+      const commit = event.type === 'pointerup' && speed > -SWIPE.velocity &&
+        (amount >= SWIPE.distance || (Math.abs(dx) >= 24 && speed > SWIPE.velocity));
+      // Reduced motion: nothing tracked the finger, so a committed swipe uses the plain fade.
+      if (reduced.matches) { if (commit) go(current + side); return; }
+      scrubFinish(commit);
+    }
+    stage.addEventListener('pointerup', endDrag);
+    stage.addEventListener('pointercancel', endDrag);
+    // A finished swipe must not also count as a tap on whatever it started on.
+    stage.addEventListener('click', (event) => {
+      if (!swiped) return;
+      swiped = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+
+    // ---- Tabs and skins ----
+    stage.querySelectorAll<HTMLElement>('[role="tablist"]').forEach((list) => {
+      const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+      const select = (tab: HTMLButtonElement, focus = false) => {
+        tabs.forEach((other) => {
+          const on = other === tab;
+          other.setAttribute('aria-selected', String(on));
+          other.tabIndex = on ? 0 : -1;
+          const panel = document.getElementById(other.getAttribute('aria-controls')!);
+          if (panel) panel.hidden = !on;
+        });
+        disarm();
+        if (focus) tab.focus();
+      };
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => select(tab));
+        tab.addEventListener('keydown', (event) => {
+          const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+          if (!step) return;
+          event.preventDefault();
+          select(tabs[(index + step + tabs.length) % tabs.length], true);
+        });
+      });
+    });
+    // The Socials tab only exists on upright screens; fall back to the first tab elsewhere.
+    const upright = matchMedia('(max-aspect-ratio: 1/1)');
+    upright.addEventListener('change', () => {
+      if (upright.matches) return;
+      stage.querySelectorAll<HTMLButtonElement>('.tab-socials[aria-selected="true"]').forEach((tab) =>
+        tab.parentElement?.querySelector<HTMLButtonElement>('[role="tab"]')?.click());
+    });
+    stage.querySelectorAll<HTMLButtonElement>('[data-skin-pick]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const client = button.closest<HTMLElement>('.client')!;
+        const id = button.dataset.skinPick!;
+        client.querySelectorAll<HTMLButtonElement>('[data-skin-pick]').forEach((other) =>
+          other.setAttribute('aria-pressed', String(other === button)));
+        client.querySelectorAll<HTMLElement>('.char').forEach((char) => {
+          const on = char.dataset.skin === id;
+          if (on && char.hidden) {
+            char.classList.add('is-swapping');
+            char.addEventListener('animationend', () => char.classList.remove('is-swapping'), { once: true });
+          }
+          char.hidden = !on;
+        });
+        client.querySelectorAll<HTMLElement>('[data-skin-bg]').forEach((bg) =>
+          bg.toggleAttribute('data-on', bg.dataset.skinBg === id));
+      });
+    });
+
+    // ---- Highlight diamonds ----
+    const gems = Array.from(stage.querySelectorAll<HTMLButtonElement>('.gem'));
+    function wake(gem: HTMLButtonElement) {
+      if (gem.hasAttribute('data-live')) return;
+      gem.setAttribute('data-live', '');
+      const video = gem.querySelector('video');
+      if (!video || posterOnly()) return;
+      if (!video.src) video.src = video.dataset.src!;
+      video.play().catch(() => {});
+    }
+    function rest(gem: HTMLButtonElement) {
+      gem.removeAttribute('data-live');
+      gem.removeAttribute('data-armed');
+      gem.querySelector('video')?.pause();
+    }
+    function disarm(except?: HTMLButtonElement) {
+      gems.forEach((gem) => { if (gem !== except) rest(gem); });
+    }
+    gems.forEach((gem) => {
+      let touch = false;
+      let wasArmed = false;
+      gem.addEventListener('pointerdown', (event) => {
+        touch = event.pointerType === 'touch';
+        wasArmed = gem.hasAttribute('data-armed');
+      });
+      gem.addEventListener('pointerenter', (event) => { if (event.pointerType === 'mouse') wake(gem); });
+      gem.addEventListener('pointerleave', (event) => { if (event.pointerType === 'mouse' && document.activeElement !== gem) rest(gem); });
+      gem.addEventListener('focus', () => { if (!restoring && gem.matches(':focus-visible')) wake(gem); });
+      gem.addEventListener('blur', () => { if (!gem.matches(':hover')) rest(gem); });
+      gem.addEventListener('click', () => {
+        // On touch the first tap previews in place; the second opens the reel.
+        if (touch && !wasArmed) {
+          disarm(gem);
+          gem.setAttribute('data-armed', '');
+          wake(gem);
+          touch = false;
+          return;
+        }
+        touch = false;
+        openReel(gem);
+      });
+    });
+    document.addEventListener('pointerdown', (event) => {
+      if (!(event.target as HTMLElement).closest?.('.gem')) gems.forEach((gem) => { if (gem.hasAttribute('data-armed')) rest(gem); });
+    });
+
+    // ---- Enlarged reel ----
+    const dialog = stage.querySelector<HTMLDialogElement>('.reel-dialog')!;
+    const card = dialog.querySelector<HTMLElement>('.reel-card')!;
+    const player = dialog.querySelector('video')!;
+    const empty = dialog.querySelector<HTMLElement>('.reel-empty')!;
+    const title = dialog.querySelector<HTMLElement>('.reel-title')!;
+    const link = dialog.querySelector<HTMLAnchorElement>('.reel-link')!;
+    let opener: HTMLButtonElement | undefined;
+    // Returning focus after the dialog closes must not restart a preview.
+    let restoring = false;
+    function openReel(gem: HTMLButtonElement) {
+      opener = gem;
+      const face = gem.querySelector('.gem-face')!.getBoundingClientRect();
+      rest(gem);
+      const has = Boolean(gem.dataset.preview);
+      player.hidden = !has;
+      empty.hidden = has;
+      title.textContent = has ? gem.dataset.title ?? '' : 'This highlight reel has not been added yet.';
+      link.hidden = !gem.dataset.youtube;
+      if (gem.dataset.youtube) link.href = gem.dataset.youtube;
+      if (has) {
+        player.poster = gem.dataset.poster ?? '';
+        player.src = gem.dataset.preview!;
+        player.controls = true;
+      }
+      dialog.showModal();
+      if (has && !posterOnly()) player.play().catch(() => {});
+      if (!reduced.matches) {
+        // Grow from the diamond it came from.
+        const box = card.getBoundingClientRect();
+        const dx = face.left + face.width / 2 - (box.left + box.width / 2);
+        const dy = face.top + face.height / 2 - (box.top + box.height / 2);
+        const scale = Math.max(.08, face.width / box.width);
+        card.animate(
+          [{ transform: `translate(${dx}px, ${dy}px) scale(${scale}) rotate(45deg)`, opacity: .2 }, { transform: 'none', opacity: 1 }],
+          { duration: 460, easing: 'cubic-bezier(.2, .8, .2, 1)' },
+        );
+      }
+    }
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog || (event.target as HTMLElement).closest('[data-reel-close]')) dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+      player.pause();
+      player.removeAttribute('src');
+      player.load();
+      restoring = true;
+      opener?.focus({ preventScroll: true });
+      restoring = false;
+    });
+
+    // ---- Depth: one clock and one pointer for every layer ----
+    const origin = performance.now();
+    let frame = 0;
+    let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0, last = origin;
+    stage.addEventListener('pointermove', (event) => {
+      if (event.pointerType !== 'mouse') return;
+      const bounds = stage.getBoundingClientRect();
+      pointerX = ((event.clientX - bounds.left) / bounds.width - .5) * 2;
+      pointerY = ((event.clientY - bounds.top) / bounds.height - .5) * 2;
+    });
+    const neutral = () => { pointerX = pointerY = 0; };
+    stage.addEventListener('pointerleave', neutral);
+    window.addEventListener('blur', neutral);
+    function drift(now: number) {
+      const blend = 1 - Math.exp(-(now - last) / 130);
+      last = now;
+      smoothX += (pointerX - smoothX) * blend;
+      smoothY += (pointerY - smoothY) * blend;
+      const seconds = (now - origin) / 1000;
+      stage.style.setProperty('--pointer-x', `${(smoothX * 18).toFixed(2)}px`);
+      stage.style.setProperty('--pointer-y', `${(smoothY * 12).toFixed(2)}px`);
+      stage.style.setProperty('--float', `${(Math.sin(seconds * Math.PI / 3) * 7).toFixed(2)}px`);
+      frame = requestAnimationFrame(drift);
+    }
+    function motion() {
+      cancelAnimationFrame(frame);
+      ['--pointer-x', '--pointer-y', '--float'].forEach((name) => stage.style.removeProperty(name));
+      if (!reduced.matches) frame = requestAnimationFrame(drift);
+    }
+    reduced.addEventListener('change', motion);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) cancelAnimationFrame(frame); else motion(); });
+    motion();
+
+    // ---- Opening curtain handshake (SiteIntro) ----
+    const bar = document.querySelector<HTMLElement>('.site-bar');
+    const opening = document.getElementById('site-opening');
+    document.addEventListener('nk-intro-complete', () => { if (bar) bar.inert = false; }, { once: true });
+    const first = clients[0].querySelector<HTMLImageElement>('.char:not([hidden]) .char-art');
+    Promise.all([first ? first.decode().catch(() => {}) : null, new Promise((done) => setTimeout(done, 900))]).then(() => {
+      if (opening && !opening.hidden) {
+        clients[0].classList.add('is-entering');
+        setTimeout(() => clients[0].classList.remove('is-entering'), 1400);
+        document.dispatchEvent(new Event('nk-gallery-ready'));
+      } else if (bar) bar.inert = false;
+    });
+  }
+</script>
+
+<style>
+  :global(.immersive-clients) { background: var(--scene-panel, #131d3a); }
+  :global(.immersive-clients .site-bar) {
+    position: fixed;
+    inset: 0 0 auto;
+    background: rgb(8 12 20 / .62);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    backdrop-filter: blur(14px) saturate(115%);
+    color: white;
+    border: 0;
+    border-bottom: 1px solid rgb(255 255 255 / .12);
+  }
+  :global(.immersive-clients .bar-link),
+  :global(.immersive-clients .brand),
+  :global(.immersive-clients .menu-btn),
+  :global(.immersive-clients .site-bar .wordmark .nassu) { color: white; }
+  :global(.immersive-clients .site-bar .wordmark .katou) { color: var(--scene-accent, #8fc8ff); }
+  :global(.immersive-clients) { --nav-accent: var(--scene-accent, #8fc8ff); --nav-on: #0d1320; --nav-line: rgb(255 255 255 / .4); }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .roster {
+    --bar: var(--site-header-height, 72px);
+    --pad: max(clamp(1.1rem, 4vw, 4.5rem), env(safe-area-inset-left));
+    position: relative;
+    display: grid;
+    min-height: 100svh;
+    min-height: 100dvh;
+    overflow: clip;
+    color: white;
+    isolation: isolate;
+    touch-action: pan-y pinch-zoom;
+  }
+  .roster > * { grid-area: 1 / 1; min-width: 0; }
+  .is-placeholder { opacity: .72; font-style: italic; }
+
+  /* ---- Roster switch ---- */
+  .roster-nav { z-index: 5; align-self: start; justify-self: start; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: calc(var(--bar) + 14px) var(--pad) 0; }
+  .roster-switch, .roster-names button { min-height: 44px; border: 0; color: white; font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .roster-switch { display: inline-flex; align-items: center; gap: 10px; padding: 0 18px 0 14px; background: rgb(0 0 0 / .42); clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+  .roster-switch span { font-size: 16px; }
+  .roster-names { display: flex; gap: 2px; }
+  .roster-names button { position: relative; padding: 0 14px; background: none; opacity: .68; transition: opacity .2s ease; }
+  .roster-names button::before { content: ""; position: absolute; inset: 7px 0; z-index: -1; background: var(--scene-accent, white); opacity: 0; transform: skewX(-14deg) scaleX(.6); transition: opacity .25s ease, transform .3s cubic-bezier(.2, .7, .2, 1); }
+  .roster-names button:hover { opacity: 1; }
+  .roster-names button[aria-pressed="true"] { opacity: 1; color: #0d1320; }
+  .roster-names button[aria-pressed="true"]::before { opacity: 1; transform: skewX(-14deg); }
+  .roster :is(button, a):focus-visible { outline: 2px solid white; outline-offset: 3px; }
+
+  /* ---- Stage: backdrop and character are separate layers ---- */
+  .client { position: relative; display: grid; align-items: end; }
+  .client[hidden] { display: none; }
+  .stage { position: absolute; inset: 0; overflow: clip; background: linear-gradient(105deg, var(--panel) 0 46%, var(--deep) 46.1%); }
+  .stage-bg { position: absolute; inset: -4%; background-image: radial-gradient(rgb(255 255 255 / .09) 1.2px, transparent 1.6px); background-size: 18px 18px; }
+  .bg-band { position: absolute; top: 50%; left: 30%; width: 180%; padding: .1em 0; background: rgb(255 255 255 / .06); color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / .16); font-size: clamp(5rem, 15vw, 15rem); font-weight: 800; letter-spacing: -.04em; line-height: 1; text-transform: uppercase; white-space: nowrap; transform: translate(-30%, -50%) rotate(-74deg); user-select: none; }
+  .bg-paint { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s ease; }
+  .bg-paint[data-on] { opacity: 1; }
+  .bg-paint[data-on] ~ .bg-band { opacity: .35; }
+  .stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to right, color-mix(in srgb, var(--deep) 82%, transparent), transparent 58%), linear-gradient(to top, color-mix(in srgb, var(--deep) 70%, transparent), transparent 30%); pointer-events: none; }
+
+  .char { position: absolute; inset: auto var(--r, 6%) var(--b, 7%) auto; height: var(--h, 74%); aspect-ratio: var(--ratio, 3 / 4); max-width: 62%; }
+  .char[hidden] { display: none; }
+  .char-move { position: relative; width: 100%; height: 100%; }
+  .char-art { position: relative; display: block; width: 100%; max-width: none; height: 100%; object-fit: contain; object-position: bottom;
+    /* Rim light, coloured glow, then a soft cast shadow. Static, so it rasterises once. */
+    filter: drop-shadow(0 0 1.5px var(--rim)) drop-shadow(0 0 1.5px var(--rim)) drop-shadow(0 0 26px color-mix(in srgb, var(--accent) 60%, transparent)) drop-shadow(16px 22px 20px rgb(0 0 0 / .42));
+    -webkit-user-drag: none; user-select: none; }
+  /* A flat tinted echo of the silhouette, offset behind the figure. */
+  .char-echo { position: absolute; inset: 0; background: var(--accent); opacity: .5; -webkit-mask: var(--art) bottom / contain no-repeat; mask: var(--art) bottom / contain no-repeat; transform: translate(-7%, 1.5%) scale(1.03); transform-origin: bottom; }
+  /* Rectangular art without a cutout: the whole illustration in a lit frame. */
+  .is-framed .char-art { object-fit: cover; object-position: var(--focus, 50% 50%); border: 3px solid var(--rim); border-radius: 14px; rotate: -2.5deg; filter: none; box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 55%, transparent), 16px 24px 30px rgb(0 0 0 / .42); }
+  .is-framed .char-echo { -webkit-mask: none; mask: none; border-radius: 14px; rotate: -2.5deg; transform: translate(-4.5%, 5%); opacity: .55; }
+  .art-placeholder { display: grid; place-content: center; gap: .35rem; width: 100%; height: 100%; border: 2px dashed var(--accent); border-radius: 18px; background: repeating-linear-gradient(-45deg, rgb(255 255 255 / .05) 0 14px, transparent 14px 28px), rgb(0 0 0 / .22); color: var(--rim); text-align: center; text-transform: uppercase; letter-spacing: .14em; font-size: clamp(.7rem, 1vw, .85rem); box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 35%, transparent), 16px 22px 30px rgb(0 0 0 / .35); }
+  .art-placeholder strong { font-size: 1.6em; letter-spacing: .08em; }
+  @media (prefers-reduced-motion: no-preference) {
+    .character-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + var(--float, 0px))); will-change: transform; }
+    .art-depth { transform: translate(calc(var(--pointer-x, 0px) * -.4), calc(var(--pointer-y, 0px) * -.4 + var(--float, 0px) * -.35)); will-change: transform; }
+  }
+
+  /* ---- Info block ---- */
+  .info { position: relative; z-index: 1; display: flex; flex-direction: column; gap: clamp(.7rem, 1.6dvh, 1.1rem); width: min(100%, 39rem); padding: calc(var(--bar) + 78px) var(--pad) max(clamp(1.2rem, 4dvh, 2.6rem), env(safe-area-inset-bottom)); align-self: center; }
+  .name { margin: 0; font-size: clamp(3.2rem, min(9vw, 17dvh), 8.5rem); font-weight: 800; line-height: .88; letter-spacing: -.05em; text-transform: uppercase; text-shadow: 0 3px 30px rgb(0 0 0 / .3); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .chips li { padding: 5px 12px 5px 10px; background: rgb(0 0 0 / .4); border-left: 3px solid var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+  .chips span { color: var(--accent); margin-right: 4px; font-weight: 600; }
+  .chips .is-placeholder { border-left-style: dashed; }
+  .desc { max-width: 46ch; margin: 0; font-size: clamp(.9rem, 1.05vw, 1rem); line-height: 1.55; color: rgb(255 255 255 / .88); }
+  .tabs { display: flex; gap: 4px; margin-top: .3rem; border-bottom: 1px solid rgb(255 255 255 / .2); }
+  .tabs button { position: relative; min-height: 44px; padding: 0 16px; border: 0; background: none; color: rgb(255 255 255 / .7); font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .tabs button::after { content: ""; position: absolute; inset: auto 0 -1px; height: 3px; background: var(--accent); transform: scaleX(0); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+  .tabs button[aria-selected="true"] { color: white; }
+  .tabs button[aria-selected="true"]::after { transform: scaleX(1); }
+  .panel { display: flex; flex-direction: column; gap: clamp(.7rem, 1.6dvh, 1.1rem); min-height: 178px; }
+  .panel[hidden] { display: none; }
+  .tab-narrow, .tab-socials, .panel-socials { display: none; }
+
+  /* ---- Highlight diamonds ---- */
+  .gems { display: flex; gap: clamp(22px, 3vw, 38px); margin: 0; padding: 22px 16px 0; list-style: none; }
+  .gem { display: grid; justify-items: center; gap: 22px; padding: 0; border: 0; background: none; color: white; font: inherit; }
+  .gem-face { position: relative; display: block; width: 76px; height: 76px; border: 2px solid var(--accent); background: rgb(0 0 0 / .5); overflow: hidden; transform: rotate(45deg); transition: transform .45s cubic-bezier(.2, .8, .2, 1); box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .gem-media, .gem-icon { position: absolute; inset: 0; transform: rotate(-45deg); transition: transform .45s cubic-bezier(.2, .8, .2, 1), opacity .3s ease; }
+  .gem-media { transform: rotate(-45deg) scale(1.45); opacity: 0; }
+  .gem-media :is(img, video) { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; }
+  .gem-icon { display: grid; place-items: center; color: var(--accent); font-weight: 800; }
+  .gem-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgb(255 255 255 / .82); }
+  /* Diamond turns square and grows into the reel, in place. */
+  .gem[data-live] .gem-face { transform: rotate(0deg) scale(1.42); }
+  .gem[data-live] .gem-media { transform: none; opacity: 1; }
+  .gem[data-live] .gem-icon { transform: none; opacity: 0; }
+  .gem.is-placeholder .gem-face { border-style: dashed; box-shadow: none; }
+  .gem.is-placeholder[data-live] .gem-face { transform: rotate(45deg) scale(1.12); }
+  .gem.is-placeholder[data-live] .gem-icon { transform: rotate(-45deg); opacity: 1; }
+  .gem[data-live] { position: relative; z-index: 2; }
+
+  .strip { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; padding: 10px 14px; background: rgb(0 0 0 / .38); border-left: 3px solid var(--accent); font-size: 13px; line-height: 1.4; }
+  .strip span { color: var(--accent); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 11px; align-self: center; }
+
+  /* ---- Skins ---- */
+  .skins { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 14px 0 0; list-style: none; }
+  .skins button { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 6px 18px 6px 6px; border: 2px solid rgb(255 255 255 / .22); background: rgb(0 0 0 / .38); color: white; font: inherit; text-align: left; transition: border-color .2s ease; }
+  .skins button:hover { border-color: rgb(255 255 255 / .6); }
+  .skins button[aria-pressed="true"] { border-color: var(--accent); }
+  .skin-thumb { display: grid; place-items: center; width: 60px; height: 60px; overflow: hidden; background: var(--panel); font-weight: 800; color: var(--accent); }
+  .skin-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; }
+  .skin-text { display: grid; gap: 2px; }
+  .skin-text strong { font-size: 14px; letter-spacing: .04em; text-transform: uppercase; }
+  .skin-text small { font-size: 12px; color: rgb(255 255 255 / .74); }
+
+  .socials { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 0; padding: 0; list-style: none; }
+  .socials :is(a, span) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid rgb(255 255 255 / .3); color: white; font-size: 13px; font-weight: 600; }
+  .socials a { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+  .socials a:hover { background: var(--accent); border-color: var(--accent); color: #0d1320; }
+  .socials span { border-style: dashed; }
+
+  /* ---- Switch choreography (transform and opacity only) ---- */
+  .wipe { z-index: 4; justify-self: center; width: 44%; background: linear-gradient(to right, transparent, var(--wipe, white) 18% 82%, transparent); opacity: 0; pointer-events: none; transform: translateX(-260%) skewX(-16deg); }
+  .is-scrubbing :is(.client, .client *, .wipe) { animation-play-state: paused !important; }
+  @media (prefers-reduced-motion: no-preference) {
+    .wipe.is-running { animation: wipe-pass 820ms cubic-bezier(.6, 0, .3, 1) both; }
+    [data-dir="prev"] .wipe.is-running { animation-direction: reverse; }
+    .is-leaving .char { animation: char-out 320ms cubic-bezier(.5, 0, .9, .4) both; }
+    .is-leaving [data-seq] { animation: seq-out 240ms ease-in both; animation-delay: calc((6 - var(--i)) * 14ms); }
+    .is-leaving .gems li { animation: gem-out 240ms ease-in both; animation-delay: calc((2 - var(--n)) * 30ms); }
+    .is-entering .stage-bg { animation: bg-in 900ms cubic-bezier(.2, .7, .2, 1) both; }
+    .is-entering .char, .char.is-swapping { animation: char-in 760ms cubic-bezier(.16, .8, .2, 1) both; }
+    .is-entering .char-echo, .is-swapping .char-echo { animation: echo-in 760ms cubic-bezier(.16, .8, .2, 1) 160ms both; }
+    .is-entering [data-seq] { animation: seq-in 560ms cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(80ms + var(--i) * 55ms); }
+    .is-entering .gems li { animation: gem-in 620ms cubic-bezier(.2, 1.3, .3, 1) both; animation-delay: calc(300ms + var(--n) * 110ms); }
+    [data-dir="prev"] .is-entering .gems li { animation-delay: calc(300ms + (2 - var(--n)) * 110ms); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .is-leaving { animation: fade-out 160ms linear both; }
+    .is-entering { animation: fade-in 200ms linear both; }
+    .gem-face, .gem-media, .gem-icon, .bg-paint, .tabs button::after, .roster-names button::before { transition: none; }
+  }
+  @keyframes wipe-pass { 0% { transform: translateX(-260%) skewX(-16deg); opacity: .95; } 100% { transform: translateX(260%) skewX(-16deg); opacity: .95; } }
+  @keyframes char-out { to { transform: translateX(7%) scale(.98); opacity: 0; } }
+  @keyframes char-in { from { transform: translateX(-9%) scale(1.05); opacity: 0; } }
+  @keyframes echo-in { from { transform: translate(-22%, 1.5%) scale(1.03); opacity: 0; } }
+  @keyframes bg-in { from { transform: scale(1.08); opacity: .4; } }
+  @keyframes seq-out { to { transform: translateX(-26px); opacity: 0; } }
+  @keyframes seq-in { from { transform: translateY(22px); opacity: 0; } }
+  @keyframes gem-out { to { transform: scale(.3) rotate(-60deg); opacity: 0; } }
+  @keyframes gem-in { from { transform: translateY(18px) scale(.2) rotate(120deg); opacity: 0; } }
+  @keyframes fade-out { to { opacity: 0; } }
+  @keyframes fade-in { from { opacity: 0; } }
+
+  /* ---- Enlarged reel ---- */
+  .reel-dialog { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); border: 0; background: transparent; color: white; }
+  .reel-dialog[open] { display: grid; place-items: center; }
+  .reel-dialog::backdrop { background: rgb(5 8 14 / .82); }
+  .reel-card { position: relative; display: grid; gap: 10px; justify-items: start; width: min(100%, calc((100dvh - 190px) * 9 / 16), 420px); }
+  .reel-frame { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; border: 2px solid var(--scene-accent, white); background: #05080e; box-shadow: 0 0 40px color-mix(in srgb, var(--scene-accent, white) 40%, transparent); }
+  .reel-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  .reel-frame [hidden] { display: none; }
+  .reel-empty { position: absolute; inset: 0; display: grid; place-content: center; gap: .3rem; text-align: center; text-transform: uppercase; letter-spacing: .14em; font-size: .8rem; background: repeating-linear-gradient(-45deg, rgb(255 255 255 / .05) 0 14px, transparent 14px 28px); }
+  .reel-empty strong { font-size: 1.5em; }
+  .reel-title { margin: 0; font-size: 14px; line-height: 1.4; }
+  .reel-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--scene-accent, white); font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: .3em; }
+  .reel-link[hidden] { display: none; }
+  .reel-close { position: absolute; top: -6px; right: -6px; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: white; color: #0d1320; transform: translate(40%, -40%); }
+  .reel-dialog :is(button, a):focus-visible { outline: 2px solid var(--scene-accent, white); outline-offset: 3px; }
+
+  /* ---- Portrait screens (phones, upright tablets): the whole page is one
+     screen tall, sized to fit a 9:16 display under the navbar. The art fills
+     the space above the details and runs on behind them; nothing scrolls. ---- */
+  @media (max-aspect-ratio: 1/1) {
+    .roster { height: 100svh; min-height: 0; }
+    .client { display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); align-items: end; height: 100%; min-height: 0; }
+    .stage { background: linear-gradient(165deg, var(--panel) 0 50%, var(--deep) 50.1%); }
+    .stage::after { background: linear-gradient(to top, var(--deep) 26%, color-mix(in srgb, var(--deep) 78%, transparent) 44%, transparent 62%); }
+    .bg-band { left: 50%; transform: translate(-50%, -50%) rotate(-74deg); }
+    /* --zone is the clear space between the roster switch and the details.
+       The figure is as large as the width allows, and may run behind the
+       details by the --under factor so its face always stays in the clear. */
+    .char {
+      --zone: calc(100svh - var(--bar) - 50px - 17.5rem);
+      --art-h: min(calc(118vw / (var(--ratio, 3 / 4))), calc(var(--zone) * var(--under, 1.5)));
+      inset: calc(var(--bar) + 50px) auto auto calc(50% - var(--art-h) * (var(--ratio, 3 / 4)) / 2);
+      width: calc(var(--art-h) * (var(--ratio, 3 / 4)));
+      height: var(--art-h);
+      max-width: none;
+      aspect-ratio: auto;
+    }
+    .char.is-framed { --under: 1.08; --art-h: min(69vw, calc(var(--zone) * var(--under))); }
+    .char:has(.art-placeholder) { --under: .92; }
+    .info { align-self: end; gap: clamp(5px, 1.1svh, 12px); width: 100%; padding: 0 max(16px, env(safe-area-inset-right)) max(clamp(10px, 2svh, 22px), env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+    .name { font-size: clamp(2.3rem, min(15vw, 7.4svh), 5.4rem); }
+    .chips { gap: 4px; }
+    .chips li { padding: 3px 9px 3px 7px; font-size: 11px; }
+    .desc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 13px; line-height: 1.4; }
+    .tabs { margin-top: 0; }
+    .tabs button { flex: 1; padding-inline: 8px; }
+    .tab-wide { display: none; }
+    .tab-narrow { display: inline; }
+    .tab-socials { display: block; }
+    .panel-socials:not([hidden]) { display: flex; }
+    .socials { display: none; }
+    .panel { justify-content: center; gap: clamp(5px, 1.1svh, 12px); min-height: calc(clamp(44px, 7.6svh, 68px) * 1.42 + 76px); }
+    .gems { justify-content: space-around; gap: 8px; padding: calc(clamp(44px, 7.6svh, 68px) * .21 + 2px) 8px 0; }
+    .gem { gap: calc(clamp(44px, 7.6svh, 68px) * .21 + 3px); min-width: 64px; }
+    .gem-face { width: clamp(44px, 7.6svh, 68px); height: clamp(44px, 7.6svh, 68px); }
+    .gem[data-live] .gem-face { transform: rotate(0deg) scale(1.34); }
+    .gem-label { font-size: 11px; }
+    .strip { padding: 6px 12px; font-size: 12px; }
+    .skins { padding-top: 0; gap: 8px; }
+    .skins li { flex: 1 1 140px; }
+    .skins button { width: 100%; min-height: 56px; padding-right: 12px; }
+    .skin-thumb { width: 44px; height: 44px; }
+    .social-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .social-list :is(a, span.is-placeholder) { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; border: 1px solid rgb(255 255 255 / .3); background: rgb(0 0 0 / .38); color: white; font-size: 14px; font-weight: 600; }
+    .social-list span.is-placeholder { border-style: dashed; }
+    .social-go { margin-left: auto; color: var(--accent); font-size: 12px; }
+    .roster-nav { margin: calc(var(--bar) + 6px) max(12px, env(safe-area-inset-left)) 0; gap: 4px 6px; }
+    .roster-switch { padding: 0 14px 0 10px; }
+    .roster-names button { padding: 0 10px; }
+    .reel-close { transform: none; top: 8px; right: 8px; }
+  }
+  /* Very narrow phones: confirmed links show as icons so the row still fits. */
+  @media (max-aspect-ratio: 1/1) and (max-width: 379px) {
+    .roster-switch { min-width: 44px; padding: 0 16px 0 12px; }
+    .switch-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  }
+  /* Shorter phones give the art its room back by trimming the copy. */
+  @media (max-aspect-ratio: 1/1) and (max-height: 700px) {
+    .desc { -webkit-line-clamp: 1; }
+    .gem-label { display: none; }
+    .gem { gap: 0; padding-bottom: calc(clamp(44px, 7.6svh, 68px) * .21); }
+    .panel { min-height: calc(clamp(44px, 7.6svh, 68px) * 1.42 + 40px); }
+    .social-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .social-list :is(a, span.is-placeholder) { flex-direction: column; justify-content: center; gap: 3px; min-height: 76px; padding: 6px 4px; font-size: 12px; text-align: center; }
+    .social-go { margin: 0; font-size: 11px; }
+  }
+  /* Narrow landscape windows keep the side-by-side layout and may scroll. */
+  @media (min-aspect-ratio: 1/1) and (max-width: 899px) {
+    .info { width: min(100%, 52%); }
+    .name { font-size: clamp(2.4rem, 8vw, 4rem); }
+    .char { max-width: 46%; }
+  }
+</style>

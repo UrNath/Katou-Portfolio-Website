@@ -1,5 +1,4 @@
 ---
-import BaseLayout from './BaseLayout.astro';
 import Icon from './Icon.astro';
 import StatusChip from './StatusChip.astro';
 import { status, type ServiceStatus, type StatusKey } from '../data/status';
@@ -26,10 +25,9 @@ function addonLabel(price: string) {
 }
 ---
 
-<BaseLayout title={data.title} description={`${data.subtitle} From ${data.fromPrice}.`}>
+
   <article class="service" data-track={data.track}>
-    <a class="back" href="/">← Home</a>
-    <h1 class="page-title reveal">{data.title}</h1>
+    <h2 class="page-title">{data.title}</h2>
     <p class="page-sub">{data.subtitle}</p>
 
     <div class="status-row">
@@ -247,10 +245,10 @@ function addonLabel(price: string) {
     </section>
 
     <section class="block">
-      <a class="cta" href={`/contact?service=${data.contactService}`}>{ctaLabel}</a>
+      <a class="cta" href={`/?service=${data.contactService}#commission`}>{ctaLabel}</a>
       <p class="terms-nudge">
-        <a href="/terms">Before you commission: read the Terms</a>
+        <a href="/#terms">Before you commission: read the Terms</a>
       </p>
     </section>
   </article>
-</BaseLayout>
+

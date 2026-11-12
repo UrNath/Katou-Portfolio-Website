@@ -84,6 +84,8 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
     </div>
     <WorksFilters client:visible />
     <ClipPreview client:visible />
+    <div class="works-results">
+    <div class="works-scroll" data-footer-slot>
     {
       blocks.map((block) => (
         <div class="works-block" data-block={block.section.id} data-section-kind={block.section.kind}>
@@ -147,6 +149,9 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
       ))
     }
     <p class="works-empty" data-empty hidden>No edits match.</p>
+    </div>
+    <p class="deck-cue" aria-hidden="true">More <span>▾</span></p>
+    </div>
     <ClipViewer client:idle clips={clips.map(toViewerClip)} />
     <ThumbnailViewer client:idle items={thumbnails} />
   </section>
@@ -222,3 +227,15 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
     })();
   </script>
 </BaseLayout>
+
+<script>
+  import { DECK_QUERY, dockFooter, watchScrollCue } from '../lib/screen-deck';
+  // On phones the results scroll inside their own panel; show a cue while more is below.
+  const panel = document.querySelector<HTMLElement>('.works-scroll');
+  const host = document.querySelector<HTMLElement>('.works-results');
+  if (panel && host) {
+    const update = watchScrollCue(panel, host);
+    new MutationObserver(update).observe(panel, { subtree: true, attributes: true, attributeFilter: ['hidden'] });
+    dockFooter(matchMedia(DECK_QUERY));
+  }
+</script>
