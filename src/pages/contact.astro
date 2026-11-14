@@ -1,4 +1,16 @@
 ---
-import SectionRedirect from '../components/SectionRedirect.astro';
+import BaseLayout from '../components/BaseLayout.astro';
+import ContactSection from '../components/ContactSection.astro';
 ---
-<SectionRedirect section="commission" title="Commission" />
+<BaseLayout title="Contact" description="Send Katou a commission request.">
+  <div class="pc-page">
+    <header class="pc-page-head">
+      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
+      <p class="pc-eyebrow">Your next project starts here</p>
+      <h1>Contact</h1>
+    </header>
+    <section class="pc-page-body" id="commission" aria-label="Commission Katou">
+      <ContactSection />
+    </section>
+  </div>
+</BaseLayout>

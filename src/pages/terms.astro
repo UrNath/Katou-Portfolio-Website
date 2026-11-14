@@ -1,4 +1,24 @@
 ---
-import SectionRedirect from '../components/SectionRedirect.astro';
+import BaseLayout from '../components/BaseLayout.astro';
+import TermsSection from '../components/TermsSection.astro';
 ---
-<SectionRedirect section="terms" title="Terms" />
+<BaseLayout title="Terms" description="How an edit or a site is commissioned, revised, and delivered.">
+  <div class="pc-page">
+    <header class="pc-page-head">
+      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
+      <p class="pc-eyebrow">The details, up front</p>
+      <h1>Terms</h1>
+    </header>
+    <section class="pc-page-body" id="terms" aria-label="Commission terms">
+      <TermsSection />
+    </section>
+  </div>
+</BaseLayout>
+<script is:inline>
+  // Old links such as /terms#revisions open the matching term.
+  (function () {
+    var id = location.hash.slice(1).replace(/^term-/, '');
+    var item = id ? document.getElementById('term-' + id) : null;
+    if (item) { item.open = true; item.scrollIntoView(); }
+  })();
+</script>

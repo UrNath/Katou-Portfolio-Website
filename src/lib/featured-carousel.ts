@@ -79,7 +79,7 @@ export function mountCarousel(root: HTMLElement) {
     if (reduced.matches) { position = target; settle(); return; }
     const began = performance.now();
     function tick(now: number) {
-      const progress = Math.min(1, (now - began) / 560);
+      const progress = Math.min(1, (now - began) / 450);
       const eased = 1 - Math.pow(1 - progress, 3);
       position = start + (target - start) * eased;
       draw();

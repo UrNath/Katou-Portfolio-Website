@@ -1,4 +1,5 @@
 ---
+import { Picture } from 'astro:assets';
 import BaseLayout from '../components/BaseLayout.astro';
 import ClipCard from '../components/ClipCard.astro';
 import ClipPreview from '../islands/ClipPreview';
@@ -24,6 +25,7 @@ const names = creators.map((creator) => creator.label).join(', ');
 const sectionNames = blocks.map((block) => block.section.label).join(', ');
 const cardSizes = '(min-width: 1280px) 220px, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 46vw';
 const wideSizes = '(min-width: 768px) 46vw, 100vw';
+const stackClips = clips.filter((clip) => !clip.wide).slice(0, 3);
 ---
 
 <BaseLayout
@@ -32,18 +34,33 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
 >
   <style slot="head" is:inline set:html={filterCss()} />
   <script slot="head" is:inline set:html={filterBoot()} />
-  <section class="works">
-    <header class="works-head">
-      <h1 class="page-title reveal">Works</h1>
-      <p class="clip-count" data-clip-count aria-live="polite">{editLabel}</p>
+  <section class="works pc-works">
+    <header class="works-head pc-works-head">
+      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
+      <span class="pc-blob pc-blob-gold" aria-hidden="true"></span>
+      <div class="pc-works-title">
+        <p class="pc-eyebrow">Portfolio</p>
+        <h1 class="page-title reveal">Works</h1>
+        <p class="clip-count" data-clip-count aria-live="polite">{editLabel}</p>
+        <form class="works-search" role="search">
+          <label>
+            <span class="sr-only">Search edits</span>
+            <input id="works-search" type="search" name="q" placeholder="Search titles or clients" autocomplete="off" enterkeyhint="search" />
+          </label>
+        </form>
+      </div>
+      {/* Decoration: the three newest short posters, fanned out. Desktop only. */}
+      <div class="pc-stack" aria-hidden="true">
+        {stackClips.map((clip, index) => (
+          <span class="pc-stack-card" style={`--n:${index}`}>
+            {clip.posterImage
+              ? <Picture src={clip.posterImage} formats={['avif', 'webp']} fallbackFormat="webp" widths={[270]} sizes="200px" alt="" quality={55} loading="eager" />
+              : <img src={clip.poster} alt="" />}
+          </span>
+        ))}
+      </div>
     </header>
-    <form class="works-search" role="search">
-      <label>
-        <span class="sr-only">Search edits</span>
-        <input id="works-search" type="search" name="q" placeholder="Search titles or clients" autocomplete="off" enterkeyhint="search" />
-      </label>
-    </form>
-    <div class="works-filter-groups" aria-label="Filter works">
+    <div class="works-filter-groups pc-filterbar" aria-label="Filter works" data-works-bar>
       <div class="works-filter-row">
         <span class="works-filter-label" id="filter-type-heading">Content</span>
         <div class="filters" role="group" aria-labelledby="filter-type-heading">
@@ -81,39 +98,57 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
           </div>
         )
       }
+      <a class="pc-clear" href="/works" data-clear hidden>Clear filters</a>
     </div>
-    <WorksFilters client:visible />
+    <WorksFilters client:load />
     <ClipPreview client:visible />
     {
       blocks.map((block) => (
-        <div class="works-block" data-block={block.section.id} data-section-kind={block.section.kind}>
-          <h2 class="works-kicker">{block.section.label}</h2>
+        <div class="works-block pc-wsec" data-block={block.section.id} data-section-kind={block.section.kind} data-rows-section>
+          <div class="pc-wsec-head">
+            <h2 class="works-kicker">{block.section.label}</h2>
+            <span class="pc-count" data-block-count></span>
+            {block.section.kind === 'landscape' && (
+              <div class="pc-tabs pc-tabs-sm" role="tablist" aria-label="Long form group" data-lf-tabs>
+                {longFormCategories.map((category) => (
+                  <button role="tab" type="button" data-lf-tab={category.id} aria-selected="false">{category.label}</button>
+                ))}
+              </div>
+            )}
+            <div class="pc-pager pc-pager-head">
+              <button class="pc-arrow" type="button" data-rows-prev aria-label={`Previous ${block.section.label}`}>←</button>
+              <span class="pc-page" data-rows-page aria-live="polite"></span>
+              <button class="pc-arrow" type="button" data-rows-next aria-label={`Next ${block.section.label}`}>→</button>
+            </div>
+          </div>
           {block.section.kind === 'thumbnail' && (
             <p class="works-thumbnails-note">A gallery of thumbnails used for these videos. Design credit may vary.</p>
           )}
           {
             block.section.kind === 'thumbnail' ? (
-              <div class="works-grid works-grid-wide thumb-grid">
-                {block.thumbs.map((thumb) => (
-                  <article
-                    class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
-                    data-creator={creatorIdOf(thumb.creator)}
-                    data-content-type="thumbnail"
-                    data-tags=""
-                    data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
-                  >
-                    <button
-                      class="thumb-open"
-                      type="button"
-                      data-open-thumb={thumb.id}
-                      aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
+              <div class="pc-rowwrap">
+                <div class="works-grid works-grid-wide thumb-grid pc-rows pc-rows-wide" data-rows>
+                  {block.thumbs.map((thumb) => (
+                    <article
+                      class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
+                      data-creator={creatorIdOf(thumb.creator)}
+                      data-content-type="thumbnail"
+                      data-tags=""
+                      data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
                     >
-                      <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
-                        <img src={thumb.image} alt="" loading="lazy" decoding="async" />
-                      </span>
-                    </button>
-                  </article>
-                ))}
+                      <button
+                        class="thumb-open"
+                        type="button"
+                        data-open-thumb={thumb.id}
+                        aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
+                      >
+                        <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
+                          <img src={thumb.image} alt="" loading="lazy" decoding="async" />
+                        </span>
+                      </button>
+                    </article>
+                  ))}
+                </div>
               </div>
             ) : block.section.kind === 'landscape' ? (
               <div class="works-long-form">
@@ -122,31 +157,38 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
                   if (group.length === 0) return null;
                   return (
                     <section class="works-subgroup" data-long-form-category={category.id}>
-                      <h3 class="works-subtitle">{category.label}</h3>
-                      <div class="works-grid works-grid-wide">
-                        {group.map((clip) => <ClipCard clip={clip} sizes={wideSizes} />)}
+                      <h3 class="works-subtitle sr-only">{category.label}</h3>
+                      <div class="pc-rowwrap">
+                        <div class="works-grid works-grid-wide pc-rows pc-rows-wide" data-rows>
+                          {group.map((clip) => <ClipCard clip={clip} sizes={wideSizes} />)}
+                        </div>
                       </div>
                     </section>
                   );
                 })}
               </div>
             ) : (
-              <div class="works-grid">
-                {block.clips.map((clip, index) => (
-                  <ClipCard
-                    clip={clip}
-                    sizes={cardSizes}
-                    eager={index < 2 && block.section.kind === 'vertical'}
-                    priority={index === 0 && block.section.kind === 'vertical'}
-                  />
-                ))}
+              <div class="pc-rowwrap">
+                <div class="works-grid pc-rows pc-rows-tall" data-rows>
+                  {block.clips.map((clip, index) => (
+                    <ClipCard
+                      clip={clip}
+                      sizes={cardSizes}
+                      eager={index < 2 && block.section.kind === 'vertical'}
+                      priority={index === 0 && block.section.kind === 'vertical'}
+                    />
+                  ))}
+                </div>
               </div>
             )
           }
         </div>
       ))
     }
-    <p class="works-empty" data-empty hidden>No edits match.</p>
+    <div class="pc-empty" data-empty-wrap hidden>
+      <p class="works-empty" data-empty>No edits match.</p>
+      <a class="pc-btn pc-btn-blue" href="/works">Clear filters</a>
+    </div>
     <ClipViewer client:idle clips={clips.map(toViewerClip)} />
     <ThumbnailViewer client:idle items={thumbnails} />
   </section>
@@ -190,13 +232,58 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
         var count = document.querySelector('[data-clip-count]');
         if (count) count.textContent = shown + (shown === 1 ? ' work shown' : ' works shown');
         var empty = document.querySelector('[data-empty]');
+        var emptyWrap = document.querySelector('[data-empty-wrap]');
+        if (emptyWrap) emptyWrap.hidden = shown !== 0;
         if (empty) {
-          empty.hidden = shown !== 0;
           empty.textContent = query.length
             ? 'No works match that search and filter combination.'
             : 'No works match these filters.';
         }
+        // Long Form tabs: one group shows at a time; a group with no matches loses its tab.
+        var tabs = Array.from(document.querySelectorAll('[data-lf-tab]'));
+        var groups = Array.from(document.querySelectorAll('.works-subgroup'));
+        var live = groups.filter(function (group) { return !group.hidden; }).map(function (group) { return group.getAttribute('data-long-form-category'); });
+        if (live.indexOf(window.__nkLongTab) === -1) window.__nkLongTab = live[0] || '';
+        groups.forEach(function (group) {
+          group.setAttribute('data-active', String(group.getAttribute('data-long-form-category') === window.__nkLongTab));
+        });
+        tabs.forEach(function (tab) {
+          var id = tab.getAttribute('data-lf-tab');
+          tab.hidden = live.indexOf(id) === -1;
+          tab.setAttribute('aria-selected', String(id === window.__nkLongTab));
+          tab.tabIndex = id === window.__nkLongTab ? 0 : -1;
+        });
+        // Per-section counts and the Clear filters link.
+        document.querySelectorAll('.works-block').forEach(function (block) {
+          var n = 0;
+          block.querySelectorAll('.clip-card').forEach(function (card) {
+            if (getComputedStyle(card).display !== 'none') n += 1;
+          });
+          var out = block.querySelector('[data-block-count]');
+          if (out) out.textContent = String(n);
+        });
+        var clear = document.querySelector('[data-clear]');
+        if (clear) clear.hidden = location.search.length < 2;
+        window.dispatchEvent(new Event('nk-rows'));
       }
+
+      document.addEventListener('click', function (event) {
+        var tab = event.target && event.target.closest ? event.target.closest('[data-lf-tab]') : null;
+        if (!tab) return;
+        window.__nkLongTab = tab.getAttribute('data-lf-tab');
+        sync();
+      });
+      document.addEventListener('keydown', function (event) {
+        var tab = event.target && event.target.closest ? event.target.closest('[data-lf-tab]') : null;
+        if (!tab || (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft')) return;
+        var open = Array.from(document.querySelectorAll('[data-lf-tab]')).filter(function (item) { return !item.hidden; });
+        var next = open[(open.indexOf(tab) + (event.key === 'ArrowRight' ? 1 : open.length - 1)) % open.length];
+        if (!next) return;
+        event.preventDefault();
+        window.__nkLongTab = next.getAttribute('data-lf-tab');
+        sync();
+        next.focus();
+      });
 
       window.__nkWorksSync = sync;
       if (input) {
@@ -222,3 +309,15 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
     })();
   </script>
 </BaseLayout>
+
+<script>
+  import { mountRows } from '../lib/poster-rows';
+  mountRows();
+  // The filter bar sticks under the nav; sections size themselves to the space left below it.
+  const bar = document.querySelector<HTMLElement>('[data-works-bar]');
+  if (bar) {
+    const set = () => document.documentElement.style.setProperty('--works-bar-height', `${bar.getBoundingClientRect().height}px`);
+    new ResizeObserver(set).observe(bar);
+    set();
+  }
+</script>
