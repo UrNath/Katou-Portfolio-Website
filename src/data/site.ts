@@ -41,8 +41,9 @@ export const socials: SocialLink[] = settings.socials.map((item) => ({
 export const navLinks = [
   { href: '/#home', label: 'Home' },
   { href: '/works', label: 'Works' },
-  { href: '/clients', label: 'Clients' },
-  { href: '/#pricing', label: 'Pricing' },
+  { href: '/#editing', label: 'Editing' },
+  { href: '/#web-design', label: 'Web design' },
+  { href: '/clients', label: 'Meet the Clients!' },
   { href: '/#terms', label: 'Terms' },
   { href: '/#commission', label: 'Commission' },
 ] as const;

@@ -43,7 +43,7 @@ export function getRoutes(prices: { editing: string; web: string }): RouteItem[]
     {
       href: '/#commission',
       label: 'Commission',
-      meta: 'Message on Discord',
+      meta: 'Email or form',
       icon: 'mail',
     },
   ];
