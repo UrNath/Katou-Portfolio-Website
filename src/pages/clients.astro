@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import SiteIntro from '../components/SiteIntro.astro';
+import ClientGallery from '../components/ClientGallery.astro';
+import { creators } from '../data/tags';
+import { hasProfile, profileFor } from '../data/clients';
+import { loadClips } from '../lib/clips';
+
+const clips = await loadClips();
+const clients = creators
+  // A creator chip appears here once it has videos or a profile in src/data/clients.ts.
+  .filter((creator) => hasProfile(creator.id) || clips.some((clip) => clip.creatorId === creator.id))
+  .map((creator) => {
+    // Highlight reels are this client's real edits that have a preview loop,
+    // featured ones first. Missing slots stay empty and render as placeholders.
+    const own = clips.filter((clip) => clip.creatorId === creator.id && clip.previewSrc && !clip.wide);
+    const profile = profileFor(creator.id);
+    const chosen = (profile.reels ?? []).map((id) => clips.find((clip) => clip.id === id && clip.previewSrc)).filter((clip) => clip !== undefined);
+    const picked = (profile.reels ? chosen : [...own.filter((clip) => clip.featured), ...own.filter((clip) => !clip.featured)]).slice(0, 3);
+    const reels = Array.from({ length: 3 }, (_, index) => {
+      const clip = picked[index];
+      return clip
+        ? { title: clip.title, poster: clip.posterImage?.src ?? clip.poster, preview: clip.previewSrc!, youtube: clip.youtube }
+        : null;
+    });
+    return { ...creator, profile, reels };
+  });
+---
+<BaseLayout title="Meet the Clients" immersive>
+  <SiteIntro gallery />
+  <ClientGallery clients={clients} />
+</BaseLayout>
