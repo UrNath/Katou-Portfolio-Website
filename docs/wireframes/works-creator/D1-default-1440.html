@@ -1,0 +1,135 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Desktop 1440: default (All)</title><style>body{margin:0;background:#fff}
+.wf{font-family:Inter,Arial,Helvetica,sans-serif;color:#1a1a1a;background:#fff;box-sizing:border-box;position:relative;font-size:15px;line-height:1.35}
+.wf *{box-sizing:border-box}
+.wf.d{width:1440px}.wf.m{width:390px}
+.wf button,.wf input{font:inherit;color:inherit}
+.wf h1,.wf h2,.wf p{margin:0}
+.wf :focus-visible{outline:3px solid #1a1a1a;outline-offset:2px}
+.wf .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wf .nav{height:56px;border-bottom:2px solid #1a1a1a;display:flex;align-items:center;justify-content:space-between;padding:0 80px;background:#f0f0f0}
+.wf.m .nav{padding:0 16px}
+.wf .logo{font-weight:800;font-size:18px;border:2px dashed #777;padding:5px 12px}
+.wf .links{display:flex;gap:6px}
+.wf .links span{min-height:44px;display:flex;align-items:center;padding:0 14px;font-weight:600}
+.wf .links .on{border-bottom:3px solid #1a1a1a}
+.wf .menu{min-height:44px;min-width:44px;border:2px solid #1a1a1a;background:#fff;font-weight:700;padding:0 12px;border-radius:6px}
+.wf .page{padding:28px 80px 56px}
+.wf.m .page{padding:20px 16px 40px}
+.wf .a{position:relative}
+.wf .pin.in{position:static;display:inline-flex;margin-left:8px;vertical-align:middle;border:0;flex:none}
+.wf .pin{position:absolute;top:-12px;left:-12px;width:24px;height:24px;border-radius:50%;background:#1a1a1a;color:#fff;font-size:12px;font-weight:700;font-style:normal;display:flex;align-items:center;justify-content:center;z-index:6;border:2px solid #fff}
+.wf .eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#555}
+.wf h1{font-size:44px;line-height:1.05;font-weight:800;margin:4px 0 6px}
+.wf.m h1{font-size:34px}
+.wf .count{color:#444;font-size:15px}
+.wf .head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.wf.m .head{display:block}
+.wf .tools{display:flex;gap:12px;align-items:center}
+.wf.m .tools{margin-top:14px}
+.wf .srch{display:flex;align-items:center;gap:8px;min-height:44px;border:2px solid #1a1a1a;border-radius:8px;padding:0 12px;background:#fff;width:320px;color:#555}
+.wf.m .srch{flex:1;width:auto;min-width:0}
+.wf .srch input{border:0;outline:0;background:transparent;width:100%;min-width:0;font-size:15px}
+.wf .srch input::placeholder{color:#555}
+.wf .srch:focus-within{outline:3px solid #1a1a1a;outline-offset:2px}
+.wf .sort{min-height:44px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;font-weight:700;padding:0 14px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.wf .jump{display:flex;gap:4px;margin-top:20px;border-bottom:2px solid #bbb}
+.wf .jump a{min-height:44px;display:flex;align-items:center;gap:6px;padding:0 14px;color:#1a1a1a;font-weight:700;text-decoration:none;font-size:15px}
+.wf.m .jump{margin-top:14px;gap:0}
+.wf.m .jump a{padding:0 8px;font-size:13.5px;flex:1;justify-content:center}
+.wf .lbl{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#555}
+.wf .chiprow{margin-top:20px;display:flex;align-items:center;gap:14px}
+.wf.m .chiprow{margin-top:14px;display:block}
+.wf.m .chiprow .lbl{display:block;margin-bottom:6px}
+.wf .chips{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.wf.m .chips{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 6px;-webkit-mask-image:linear-gradient(to right,#000 88%,transparent);mask-image:linear-gradient(to right,#000 88%,transparent)}
+.wf .chip{min-height:44px;border:2px solid #1a1a1a;border-radius:999px;background:#fff;font-weight:700;padding:0 16px 0 8px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex:none;scroll-snap-align:start}
+.wf .chip.on{background:#1a1a1a;color:#fff}
+.wf .chip.all{padding-left:14px}
+.wf .av{width:26px;height:26px;border-radius:50%;background:#c4c4c4;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#1a1a1a}
+.wf .chip.on .av{background:#fff}
+.wf .sec{margin-top:36px}
+.wf.m .sec{margin-top:28px}
+.wf .sh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.wf .sh h2{font-size:24px;font-weight:800}
+.wf.m .sh h2{font-size:20px}
+.wf .num{border:2px solid #1a1a1a;border-radius:999px;padding:1px 10px;font-weight:700;font-size:13px;background:#e4e4e4}
+.wf .stabs{display:flex;gap:6px;margin-left:12px;flex-wrap:wrap}
+.wf.m .stabs{margin-left:0;width:100%;overflow-x:auto}
+.wf .stab{min-height:44px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;font-weight:700;padding:0 14px;white-space:nowrap}
+.wf .stab.on{background:#1a1a1a;color:#fff}
+.wf .grid{display:grid;gap:16px}
+.wf.m .grid{gap:12px 8px}
+.wf .c6{grid-template-columns:repeat(6,1fr)}.wf .c4{grid-template-columns:repeat(4,1fr)}.wf .c3{grid-template-columns:repeat(3,1fr)}.wf .c2{grid-template-columns:repeat(2,1fr)}.wf .c1{grid-template-columns:1fr}
+.wf .card{min-width:0}
+.wf .pw{position:relative}
+.wf .poster{display:block;width:100%;position:relative;padding:0;border:2px solid #777;border-radius:6px;background:#e4e4e4;cursor:pointer;overflow:hidden}
+.wf .ps{aspect-ratio:9/16}.wf .pl{aspect-ratio:16/9}
+.wf .x{position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),#9a9a9a calc(50% - 1px),#9a9a9a calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(to top left,transparent calc(50% - 1px),#9a9a9a calc(50% - 1px),#9a9a9a calc(50% + 1px),transparent calc(50% + 1px)),#e4e4e4}
+.wf .dur{position:absolute;right:6px;top:6px;background:#1a1a1a;color:#fff;font-size:12px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:1}
+.wf .sel .poster{border:4px solid #1a1a1a}
+.wf .ov{position:absolute;left:4px;right:4px;bottom:4px;background:rgba(26,26,26,.88);color:#fff;border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:6px;pointer-events:none;font-size:13px}
+.wf .ov .tag{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.wf .ov .ttl{font-weight:700}
+.wf .bar{display:block;height:4px;background:#777;border-radius:2px}
+.wf .bar i{display:block;height:4px;background:#fff;border-radius:2px}
+.wf .ovt{position:absolute;left:4px;right:4px;bottom:6px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.wf .ovt .bar{width:100%}
+.wf .open{min-height:44px;min-width:72px;border:2px solid #1a1a1a;background:#fff;font-weight:800;border-radius:8px;padding:0 12px}
+.wf .cap{margin-top:8px;display:flex;flex-direction:column;gap:2px;font-size:13px}
+.wf .cap b{font-size:14px}
+.wf .cap span{color:#444}
+.wf .more{margin-top:16px;min-height:44px;border:2px dashed #777;background:#fff;border-radius:8px;font-weight:700;padding:0 18px;color:#444}
+.wf.m .more{width:100%}
+.wf .back{margin-bottom:14px}
+.wf .backbtn{min-height:44px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;font-weight:700;padding:0 16px 0 12px;display:inline-flex;align-items:center;gap:8px}
+.wf .prof{display:flex;gap:32px;align-items:center}
+.wf.m .prof{display:block}
+.wf .avatar{border-radius:50%;background:#cfcfcf;border:3px solid #777;display:flex;align-items:center;justify-content:center;font-weight:800;color:#444;flex:none}
+.wf .pinfo{flex:1;min-width:0}
+.wf .handle{color:#444;font-weight:600;margin-top:2px}
+.wf .bio{margin-top:10px;max-width:640px;color:#333}
+.wf .bio i{font-style:normal;border:1px dashed #888;padding:0 4px}
+.wf .stats{margin-top:10px;font-weight:700;display:inline-block}
+.wf .cta{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 28px;background:#1a1a1a;color:#fff;font-weight:800;border-radius:8px;text-decoration:none;font-size:16px;border:2px solid #1a1a1a}
+.wf.m .cta{width:100%;margin-top:14px}
+.wf .pmob{display:flex;gap:14px;align-items:center}
+.wf .trow{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid #1a1a1a;margin-top:28px}
+.wf.m .trow{display:block;margin-top:18px;border-bottom:0}
+.wf .tabs{display:flex;gap:4px}
+.wf.m .tabs{border-bottom:2px solid #1a1a1a}
+.wf.m .tabs .tab{flex:1;padding:4px;font-size:14px;min-height:56px;display:flex;flex-direction:column;justify-content:center;align-items:center;line-height:1.15}
+.wf.m .tabs .tab .n{margin:2px 0 0;font-size:13px}
+.wf.m .cta{margin-bottom:20px}
+.wf .tab{min-height:48px;border:0;border-bottom:5px solid transparent;background:transparent;font-weight:700;padding:0 18px;font-size:16px}
+.wf .tab.on{border-bottom-color:#1a1a1a;font-weight:800}
+.wf .tab .n{color:#444;font-weight:600;margin-left:4px}
+.wf .trow .tools{padding-bottom:6px}
+.wf.m .trow .tools{margin-top:12px}
+.wf .gridwrap{margin-top:22px}
+.wf.m .gridwrap{margin-top:14px}
+.wf .empty{margin-top:22px;border:2px dashed #777;border-radius:12px;padding:56px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;background:#fafafa}
+.wf.m .empty{padding:36px 16px;margin-top:14px}
+.wf .empty h2{font-size:22px;font-weight:800}
+.wf .empty p{color:#444;max-width:460px}
+.wf .ico{width:72px;height:72px;border-radius:12px;border:2px solid #9a9a9a;background:#e4e4e4}
+.wf .acts{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.wf.m .acts{flex-direction:column;width:100%}
+.wf .btn2{min-height:48px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;font-weight:800;padding:0 22px}
+.wf .foot{margin-top:48px;border-top:2px solid #bbb;padding-top:16px;color:#555;font-size:13px}
+.wf.cmp .back{margin-bottom:8px}
+.wf.cmp .bio{margin-top:4px}
+.wf.cmp .stats{margin-top:6px}
+.wf.cmp .cta{margin-top:10px;margin-bottom:12px}
+.wf.cmp .tabs{margin-top:0}
+.wf.cmp .trow{margin-top:10px}
+.wf .sticky{font-size:12px;font-weight:700;color:#555;margin-top:4px}
+.wf .spec{padding:56px 80px 72px;font-size:15px}
+.wf .spec h1{font-size:36px;margin-bottom:6px}
+.wf .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:28px}
+.wf .sg h2{font-size:20px;margin-bottom:10px;border-bottom:2px solid #1a1a1a;padding-bottom:6px}
+.wf .sg ol,.wf .sg ul{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.wf .sg li{display:flex;gap:10px;align-items:flex-start;line-height:1.4}
+.wf .sg li .pin{position:static;flex:none;margin-top:1px}
+.wf .sg ul li:before{content:"\2022";font-weight:800}
+.wf .sg code{background:#eee;padding:1px 5px;border-radius:4px;font-size:13px}
+</style></head><body><div class="wf d"><div class="nav a"><span style="display:flex;align-items:center"><span class="logo">NassuKatou</span><i class="pin in">1</i></span><div class="links"><span>Home</span><span class="on">Works</span><span>Clients</span><span>Pricing</span><span>Terms</span><span>Contact</span></div></div><div class="page"><div class="head"><div><p class="eyebrow">Portfolio</p><h1>Works</h1><p class="count">[N] video edits · [M] thumbnails<i class="pin in">2</i></p></div><div class="tools"><label class="srch a"><i class="pin">3</i><span class="sr">Search works</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" placeholder="Search titles or clients"></label><button type="button" class="sort a" aria-label="Sort works, currently Newest first"><i class="pin">4</i>Sort: Newest <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><path d="M6 9l6 6 6-6"/></svg></button></div></div><nav class="jump" aria-label="Jump to section"><a href="#">Short-form videos <span class="num">[N]</span></a><a href="#">Long-form videos <span class="num">[N]</span></a><a href="#">Thumbnails <span class="num">[N]</span></a></nav><div class="chiprow"><span class="lbl" id="cr">Creator<i class="pin in">5</i></span><div class="chips" role="group" aria-labelledby="cr"><button type="button" class="chip on all" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><path d="M5 12l5 5 9-10"/></svg>All</button><button type="button" class="chip" aria-pressed="false"><span class="av" aria-hidden="true">P</span>Pidge</button><button type="button" class="chip" aria-pressed="false"><span class="av" aria-hidden="true">M</span>Miuoni</button><button type="button" class="chip" aria-pressed="false"><span class="av" aria-hidden="true">C</span>chiseyi</button><button type="button" class="chip" aria-pressed="false"><span class="av" aria-hidden="true">L</span>Lomi</button></div></div><section class="sec"><div class="sh"><h2>Short-form videos</h2><span class="num">[N]</span><i class="pin in">6</i></div><div class="grid c6"><div class="card"><div class="pw a"><i class="pin">7</i><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div></div><button type="button" class="more">Load more (paging model TBD)</button></section><section class="sec"><div class="sh"><h2>Long-form videos</h2><span class="num">[N]</span><div class="stabs" role="tablist" aria-label="Long-form group"><button type="button" role="tab" aria-selected="true" class="stab on">Vlogs</button><button type="button" role="tab" aria-selected="false" class="stab">MVs</button><button type="button" role="tab" aria-selected="false" class="stab">Normal Videos</button></div></div><div class="grid c3"><div class="card"><div class="pw a"><button type="button" class="poster pl" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div><div class="card"><div class="pw a"><button type="button" class="poster pl" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div><div class="card"><div class="pw a"><button type="button" class="poster pl" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div><div class="cap"><b>Title placeholder</b><span>Edit for @[handle]</span></div></div></div><button type="button" class="more">Load more (paging model TBD)</button></section><section class="sec"><div class="sh"><h2>Thumbnails</h2><span class="num">[M]</span></div><div class="grid c4"><div class="card"><div class="pw a"><button type="button" class="poster pl" aria-label="Work title placeholder, preview"><span class="x"></span></button></div><div class="cap"><b>Title placeholder</b></div></div><div class="card"><div class="pw a"><button type="button" class="poster pl" aria-label="Work title placeholder, preview"><span class="x"></span></button></div><div class="cap"><b>Title placeholder</b></div></div><div class="card"><div class="pw a"><button type="button" class="poster pl" aria-label="Work title placeholder, preview"><span class="x"></span></button></div><div class="cap"><b>Title placeholder</b></div></div><div class="card"><div class="pw a"><button type="button" class="poster pl" aria-label="Work title placeholder, preview"><span class="x"></span></button></div><div class="cap"><b>Title placeholder</b></div></div></div><button type="button" class="more">Load more (paging model TBD)</button></section><div class="foot">Footer placeholder (unchanged from the site)</div></div></div></body></html>
