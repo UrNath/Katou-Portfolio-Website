@@ -51,9 +51,9 @@ export function mountCarousel(root: HTMLElement) {
     // Height left for the cards once the caption and dots are placed; cards are 9:16 with 18px spare for the tilt.
     const below = Array.from(root.children).filter((child) => child !== stage).reduce((sum, child) => sum + (child as HTMLElement).offsetHeight, 0) + 16;
     const room = root.clientHeight - below;
-    const widthCap = Math.min((W / 2 - 12) / 0.796, W * 0.5);
+    const widthCap = (W / 2 - 12) / 0.796;
     const cw = Math.max(80, Math.min(widthCap, (room - 18) * 9 / 16));
-    const offset = Math.min(W / 2 - 12 - cw * 0.425, cw * 0.55);
+    const offset = Math.min(W / 2 - 12 - cw * 0.425, cw * 0.371);
     stage!.style.setProperty('--cw', `${cw}px`);
     stage!.style.setProperty('--sh', `${cw * 16 / 9 + 18}px`);
     return { offset };

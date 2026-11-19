@@ -543,63 +543,69 @@ html[data-creator-filter] .pc-works .pc-rows { touch-action: auto; }
    Everything flows from tokens: outline width (--pc-bw), radius/shadow scale (--pc-k), page padding (--pc-pad).
    Text stays readable (body 15, meta 12-13); bars, buttons, art, cards, strokes and gaps shrink. */
 @media (max-width: 768px) {
-  .poster, .clean-portfolio.poster { --pc-bw: 2px; --pc-k: .62; --pc-pad: 16px; --site-bar-h: 52px; }
+  body:not(:has(.pc-hero)) { --pc-bw: 2px; --pc-k: .62; --pc-pad: 16px; --site-bar-h: 52px; }
   /* Bar */
   .clean-portfolio .site-bar { height: calc(var(--site-bar-h) + env(safe-area-inset-top)); padding-inline: 16px 8px; }
   .clean-portfolio .wordmark { font-size: 17px; }
   .clean-portfolio .menu-btn { width: 40px; height: 40px; }
   .clean-portfolio .menu-btn svg { width: 20px; height: 20px; }
   /* Type */
-  .poster p, .poster li { font-size: 15px; line-height: 1.45; }
-  .pc-eyebrow { font-size: 11.5px; gap: 8px; }
-  .pc-eyebrow::before { width: 9px; height: 9px; }
-  .pc-hero h1 { font-size: clamp(22px, 6.4vw, 26px); }
-  .pc-tagline { font-size: 15px; }
-  .pc-meta { font-size: 12px; }
-  .pc-page-head h1, .poster .pw-head h1, .poster h1 { font-size: clamp(22px, 6.4vw, 26px); }
-  .poster h2 { font-size: clamp(17px, 5vw, 20px); }
-  .pc-feat h2 { font-size: clamp(17px, 5vw, 20px); }
-  .poster .pc-wsec .works-kicker { font-size: 18px; }
+  body.poster:not(:has(.pc-hero)) p, body.poster:not(:has(.pc-hero)) li { font-size: 15px; line-height: 1.45; }
+  body:not(:has(.pc-hero)) .pc-eyebrow { font-size: 11.5px; gap: 8px; }
+  body:not(:has(.pc-hero)) .pc-eyebrow::before { width: 9px; height: 9px; }
+  body:not(:has(.pc-hero)) .pc-hero h1 { font-size: clamp(22px, 6.4vw, 26px); }
+  body:not(:has(.pc-hero)) .pc-tagline { font-size: 15px; }
+  body:not(:has(.pc-hero)) .pc-meta { font-size: 12px; }
+  body:not(:has(.pc-hero)) .pc-page-head h1, body.poster:not(:has(.pc-hero)) .pw-head h1, body.poster:not(:has(.pc-hero)) h1 { font-size: clamp(22px, 6.4vw, 26px); }
+  body.poster:not(:has(.pc-hero)) h2 { font-size: clamp(17px, 5vw, 20px); }
+  body:not(:has(.pc-hero)) .pc-feat h2 { font-size: clamp(17px, 5vw, 20px); }
+  body.poster:not(:has(.pc-hero)) .pc-wsec .works-kicker { font-size: 18px; }
   /* Buttons, chips, inputs */
-  .pc-btn { min-height: 42px; padding: 0 18px; font-size: 13.5px; }
-  .pc-btn-lg { min-height: 42px; }
-  .pc-chip, .poster .filter-chip { min-height: 40px; padding: 0 13px; font-size: 13px; }
-  .pc-tabs button { min-height: 42px; min-width: 0; font-size: 13px; }
-  .pc-tabs-sm button { min-height: 40px; font-size: 12px; }
-  .pw-search, .pw-search input, .poster input, .poster select { min-height: 42px; font-size: 15px; }
-  .pw-search { height: 42px; }
-  .pw-tab { min-height: 42px; }
-  .pw-tab svg { width: 20px; height: 20px; }
-  .pc-arrow { width: 40px; height: 40px; }
+  body:not(:has(.pc-hero)) .pc-btn { min-height: 42px; padding: 0 18px; font-size: 13.5px; }
+  body:not(:has(.pc-hero)) .pc-btn-lg { min-height: 42px; }
+  body:not(:has(.pc-hero)) .pc-chip, body.poster:not(:has(.pc-hero)) .filter-chip { min-height: 40px; padding: 0 13px; font-size: 13px; }
+  body:not(:has(.pc-hero)) .pc-tabs button { min-height: 42px; min-width: 0; font-size: 13px; }
+  body:not(:has(.pc-hero)) .pc-tabs-sm button { min-height: 40px; font-size: 12px; }
+  body:not(:has(.pc-hero)) .pw-search, body:not(:has(.pc-hero)) .pw-search input, body.poster:not(:has(.pc-hero)) input, body.poster:not(:has(.pc-hero)) select { min-height: 42px; font-size: 15px; }
+  body:not(:has(.pc-hero)) .pw-search { height: 42px; }
+  body:not(:has(.pc-hero)) .pw-tab { min-height: 42px; }
+  body:not(:has(.pc-hero)) .pw-tab svg { width: 20px; height: 20px; }
+  body:not(:has(.pc-hero)) .pc-arrow { width: 40px; height: 40px; }
   /* Spacing */
-  .pc-screen { padding-block: clamp(12px, 3svh, 28px); }
-  .pc-hero { gap: 8px; --card: clamp(104px, min(calc(var(--pc-view) * .22), 44vw), 190px); }
-  .pc-credit { font-size: 10.5px; padding: 2px 9px; }
-  .pc-actions { gap: 8px; }
-  .pc-page-head { padding-block: 22px 14px; }
-  .pc-wsec { padding-block: 18px 4px; }
-  .pc-wsec-head { min-height: 40px; }
-  .pc-feat { gap: 6px; }
-  .pc-feat .pc-feat-cta .pc-btn { min-height: 42px; min-width: 170px; font-size: 13.5px; }
-  .pw-top { padding-block: 6px; }
-  .pw-avatar { width: 56px; height: 56px; }
+  body:not(:has(.pc-hero)) .pc-screen { padding-block: clamp(12px, 3svh, 28px); }
+  body:not(:has(.pc-hero)) .pc-hero { gap: 8px; --card: clamp(104px, min(calc(var(--pc-view) * .22), 44vw), 190px); }
+  body:not(:has(.pc-hero)) .pc-credit { font-size: 10.5px; padding: 2px 9px; }
+  body:not(:has(.pc-hero)) .pc-actions { gap: 8px; }
+  body:not(:has(.pc-hero)) .pc-page-head { padding-block: 22px 14px; }
+  body:not(:has(.pc-hero)) .pc-wsec { padding-block: 18px 4px; }
+  body:not(:has(.pc-hero)) .pc-wsec-head { min-height: 40px; }
+  body:not(:has(.pc-hero)) .pc-feat { gap: 6px; }
+  body:not(:has(.pc-hero)) .pc-feat .pc-feat-cta .pc-btn { min-height: 42px; min-width: 170px; font-size: 13.5px; }
+  body:not(:has(.pc-hero)) .pw-top { padding-block: 6px; }
+  body:not(:has(.pc-hero)) .pw-avatar { width: 56px; height: 56px; }
   /* Contact / forms / cards (shared classes from the global sheet) */
-  .dc-card { padding: 16px 16px 14px; }
-  .poster label { font-size: 12px; }
-  .poster textarea { font-size: 15px; }
-  .poster .pw-head .page-title { font-size: clamp(22px, 6.4vw, 26px); }
-  .poster .pc-works .pw-search input { height: 42px; padding-left: 38px; }
-  .dc-actions .pc-btn { min-height: 42px; }
-  .poster .dc-title { font-size: clamp(17px, 5vw, 20px); }
-  .poster .carousel-arrow, .poster .thumb-viewer .icon-btn { width: 40px; height: 40px; }
-  .pc-feat .carousel-card[data-active="true"] .clip-pause { width: 40px; height: 40px; margin: -20px 0 0 -20px; }
-  .poster h2.kicker { font-size: 12px; letter-spacing: .12em; }
-  .clean-portfolio.poster h2.page-title { font-size: clamp(18px, 5.2vw, 22px); }
-  .poster .term-title { font-size: 15px; }
-  .poster h3 { font-size: clamp(17px, 5vw, 20px); }
-  .poster .tier-price, .poster .tier-usd { font-size: 20px; }
-  .poster .tier-num { font-size: 16px; }
-  .poster .dc-tag { font-size: 22px; }
-  .poster .dc-at { font-size: 20px; }
-  .pc-tabs-sm button { white-space: nowrap; padding: 0 4px; font-size: 11.5px; }
+  body:not(:has(.pc-hero)) .dc-card { padding: 16px 16px 14px; }
+  body.poster:not(:has(.pc-hero)) label { font-size: 12px; }
+  body.poster:not(:has(.pc-hero)) textarea { font-size: 15px; }
+  body.poster:not(:has(.pc-hero)) .pw-head .page-title { font-size: clamp(22px, 6.4vw, 26px); }
+  body.poster:not(:has(.pc-hero)) .pc-works .pw-search input { height: 42px; padding-left: 38px; }
+  body:not(:has(.pc-hero)) .dc-actions .pc-btn { min-height: 42px; }
+  body.poster:not(:has(.pc-hero)) .dc-title { font-size: clamp(17px, 5vw, 20px); }
+  body.poster:not(:has(.pc-hero)) .carousel-arrow, body.poster:not(:has(.pc-hero)) .thumb-viewer .icon-btn { width: 40px; height: 40px; }
+  body:not(:has(.pc-hero)) .pc-feat .carousel-card[data-active="true"] .clip-pause { width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+  body.poster:not(:has(.pc-hero)) h2.kicker { font-size: 12px; letter-spacing: .12em; }
+  body.clean-portfolio.poster:not(:has(.pc-hero)) h2.page-title { font-size: clamp(18px, 5.2vw, 22px); }
+  body.poster:not(:has(.pc-hero)) .term-title { font-size: 15px; }
+  body.poster:not(:has(.pc-hero)) h3 { font-size: clamp(17px, 5vw, 20px); }
+  body.poster:not(:has(.pc-hero)) .tier-price, body.poster:not(:has(.pc-hero)) .tier-usd { font-size: 20px; }
+  body.poster:not(:has(.pc-hero)) .tier-num { font-size: 16px; }
+  body.poster:not(:has(.pc-hero)) .dc-tag { font-size: 22px; }
+  body.poster:not(:has(.pc-hero)) .dc-at { font-size: 20px; }
+  body:not(:has(.pc-hero)) .pc-tabs-sm button { white-space: nowrap; padding: 0 4px; font-size: 11.5px; }
+}
+
+/* Home hero: buttons centred on phones */
+@media (max-width: 899px) {
+  .pc-hero .pc-actions { width: 100%; justify-content: center; }
+  .pc-hero .pc-actions .pc-btn { max-width: 100%; }
 }
