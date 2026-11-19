@@ -18,13 +18,13 @@ export const site = {
     alt: 'Chibi illustration of Katou: brown hair, cat ears, blue eyes, grey jacket and yellow tie',
     artist: 'MINGMING.IX',
   },
-  /** Shown as a tag on the home page. */
-  location: 'Cavite, Philippines',
   /**
    * Preview loops are served from /media/previews/ until this is a CDN origin
    * (no trailing slash), for example a Vercel Blob base URL. See CONTENT.md.
    */
   previewBase: settings.previewBase,
+  /** About video on the home page. Leave src empty to show the placeholder; fill in once the video is edited. */
+  aboutVideo: { src: '', poster: '' },
 };
 
 export type SocialId = 'discord' | 'youtube' | 'tiktok' | 'x';

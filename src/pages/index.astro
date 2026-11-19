@@ -2,43 +2,21 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '../components/BaseLayout.astro';
 import SiteIntro from '../components/SiteIntro.astro';
-import ClipCard from '../components/ClipCard.astro';
 import FeaturedCarousel from '../components/FeaturedCarousel.astro';
 import StatusChip from '../components/StatusChip.astro';
 import ClipPreview from '../islands/ClipPreview';
 import ClipViewer from '../islands/ClipViewer';
-import ThumbnailViewer from '../islands/ThumbnailViewer';
 import chibi from '../assets/character/katou-chibi.webp';
 import { site } from '../data/site';
 import { status } from '../data/status';
 import { heroReel, hubClips, loadClips, toViewerClip } from '../lib/clips';
-import { loadService } from '../lib/services';
-import { loadThumbnails } from '../lib/works-layout';
 
 const clips = await loadClips();
 const featured = hubClips(clips);
 const { hero } = heroReel(clips);
-const editing = await loadService('editing');
-const web = await loadService('web-design');
-const thumbnails = loadThumbnails(clips);
 const art = site.characterArt;
 
-// Home "Works" tab: a small mixed wall of real work. Change the three numbers to show more or fewer.
-const wallShorts = featured.filter((clip) => !clip.wide).slice(0, 4);
-const wallLong = clips.filter((clip) => clip.wide).slice(0, 4);
-const wallThumbs = thumbnails.slice(0, 4);
-const wall: ({ kind: 'short' | 'long'; clip: (typeof clips)[number] } | { kind: 'thumbnail'; thumb: (typeof thumbnails)[number] })[] = [];
-// Items go in same-kind pairs so each two-row column holds cards of one shape.
-for (let i = 0; i < 4; i += 2) {
-  wallShorts.slice(i, i + 2).forEach((clip) => wall.push({ kind: 'short', clip }));
-  wallLong.slice(i, i + 2).forEach((clip) => wall.push({ kind: 'long', clip }));
-  wallThumbs.slice(i, i + 2).forEach((thumb) => wall.push({ kind: 'thumbnail', thumb }));
-}
-const viewerClips = [...new Map([...featured, ...wallLong].map((clip) => [clip.id, clip])).values()];
-const services = [
-  { entry: editing, state: status.editing, href: '/pricing#editing' },
-  { entry: web, state: status.webDesign, href: '/pricing#web-design' },
-];
+const viewerClips = featured;
 ---
 <BaseLayout>
   <SiteIntro />
@@ -70,23 +48,25 @@ const services = [
         <div class="pc-actions" data-reveal style="--i:3">
           <a class="pc-btn pc-btn-white" href="/works">View Works</a>
           <a class="pc-btn pc-btn-peach" href="/contact">Contact</a>
-          <button class="pc-link" type="button" data-open-clip={hero.id}><span aria-hidden="true">▶</span> Play highlight reel</button>
         </div>
         <div class="pc-meta" data-reveal style="--i:4">
-          <span class="pc-loc">{site.location}</span>
           <span>Editing <StatusChip status={status.editing} /></span>
           <span>Web design <StatusChip status={status.webDesign} /></span>
         </div>
+        <a class="pc-scroll" href="#featured" data-reveal style="--i:5" aria-label="Scroll down to see featured works">
+          <span class="pc-scroll-text">Scroll to see my edits</span>
+          <span class="pc-scroll-arrows" aria-hidden="true"><i></i><i></i></span>
+        </a>
       </div>
     </section>
 
     <section class="pc-screen pc-fit pc-feat" id="featured" aria-labelledby="featured-title">
       <div class="pc-feat-copy">
         <p class="pc-eyebrow pc-eyebrow-ink" data-reveal>Featured works</p>
-        <h2 id="featured-title" data-reveal style="--i:1">Engaging edits that keep viewers hooked.</h2>
+        <h2 id="featured-title" data-reveal style="--i:1">Funny, cute, and totally watchable.</h2>
         <p class="pc-feat-sub" data-reveal style="--i:2">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
         <div class="pc-actions" data-reveal style="--i:3">
-          <a class="pc-btn pc-btn-blue" href="/works">View Full Gallery</a>
+          <a class="pc-btn pc-btn-blue" href="/works">See all works</a>
         </div>
       </div>
       <div class="pc-feat-visual" data-reveal>
@@ -94,65 +74,19 @@ const services = [
       </div>
     </section>
 
-    <section class="pc-screen pc-fit pc-switch" id="works" aria-labelledby="switch-title">
-      <div class="pc-switch-head">
-        <h2 id="switch-title">Works and pricing</h2>
-        <div class="pc-tabs" role="tablist" aria-label="Works or pricing" data-tabs>
-          <button role="tab" type="button" id="tab-works" aria-controls="panel-works" aria-selected="true" data-tab="works">Works</button>
-          <button role="tab" type="button" id="tab-pricing" aria-controls="panel-pricing" aria-selected="false" tabindex="-1" data-tab="pricing">Pricing</button>
-        </div>
-      </div>
-      <div class="pc-panel" id="panel-works" role="tabpanel" aria-labelledby="tab-works" data-panel="works" data-rows-section>
-        <div class="pc-chiprow" role="group" aria-label="Filter the samples">
-          <button class="pc-chip" type="button" data-wall-filter="" aria-pressed="true">All</button>
-          <button class="pc-chip" type="button" data-wall-filter="short" aria-pressed="false">Short-form</button>
-          <button class="pc-chip" type="button" data-wall-filter="long" aria-pressed="false">Long form videos</button>
-          <button class="pc-chip" type="button" data-wall-filter="thumbnail" aria-pressed="false">Thumbnails</button>
-        </div>
-        <div class="pc-rowwrap">
-          <div class="pc-rows pc-rows-2" data-rows tabindex="-1">
-            {wall.map((item) => item.kind === 'thumbnail' ? (
-              <article class:list={['clip-card', 'thumb-card', 'is-wide', item.thumb.orientation === 'vertical' && 'is-portrait']} data-wall-kind="thumbnail">
-                <button class="thumb-open" type="button" data-open-thumb={item.thumb.id} aria-label={`View thumbnail for ${item.thumb.title}, ${item.thumb.creator}`}>
-                  <span class="clip-frame is-wide"><img src={item.thumb.image} alt="" loading="lazy" decoding="async" /></span>
-                </button>
-              </article>
-            ) : (
-              <div class="pc-wallitem" data-wall-kind={item.kind}>
-                <ClipCard clip={item.clip} sizes={item.clip.wide ? '(min-width: 768px) 460px, 86vw' : '(min-width: 768px) 180px, 40vw'} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div class="pc-pager">
-          <button class="pc-arrow" type="button" data-rows-prev aria-label="Previous samples">←</button>
-          <span class="pc-page" data-rows-page aria-live="polite"></span>
-          <button class="pc-arrow" type="button" data-rows-next aria-label="Next samples">→</button>
-          <a class="pc-btn pc-btn-blue pc-btn-sm" href="/works">All works</a>
-        </div>
-      </div>
-      <div class="pc-panel" id="panel-pricing" role="tabpanel" aria-labelledby="tab-pricing" data-panel="pricing" hidden>
-        <div class="pc-services">
-          {services.map(({ entry, state, href }) => (
-            <a class="pc-service" href={href}>
-              <span class="pc-service-top"><StatusChip status={state} /></span>
-              <span class="pc-service-title">{entry.data.title}</span>
-              <span class="pc-service-sub">{entry.data.subtitle}</span>
-              <span class="pc-service-go">See pricing <span aria-hidden="true">→</span></span>
-            </a>
-          ))}
-        </div>
-        <div class="pc-pager">
-          <a class="pc-btn pc-btn-blue" href="/pricing">See Pricing</a>
-        </div>
-      </div>
-    </section>
-
     <section class="pc-screen pc-fit pc-about" id="about" aria-labelledby="about-title">
-      {/* PLACEHOLDER: photo or illustration for the About teaser. Replace this div with an image when Katou supplies one. */}
-      <div class="pc-photo" data-placeholder="about-photo" data-reveal><span>Photo placeholder</span></div>
+      {/* PLACEHOLDER VIDEO: set site.aboutVideo.src (and .poster) in src/data/site.ts once the About video is edited. */}
+      <div class="pc-photo" data-reveal>
+        {site.aboutVideo.src ? (
+          <video src={site.aboutVideo.src} poster={site.aboutVideo.poster || undefined} muted loop playsinline controls preload="metadata" aria-label="About Katou video"></video>
+        ) : (
+          <div class="pc-vid-ph" role="img" aria-label="Placeholder: About video coming soon">
+            <span class="pc-vid-play" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
+            <span class="pc-vid-cap">About video coming soon</span>
+          </div>
+        )}
+      </div>
       <div class="pc-about-copy">
-        <span class="pc-tag" data-reveal>{site.location}</span>
         <h2 id="about-title" data-reveal style="--i:1">About Katou</h2>
         <p data-reveal style="--i:2">{site.description}</p>
         <a class="pc-btn pc-btn-blue" href="/about" data-reveal style="--i:3">About me</a>
@@ -168,50 +102,9 @@ const services = [
   </div>
   <ClipPreview client:idle />
   <ClipViewer client:idle clips={viewerClips.map(toViewerClip)} />
-  <ThumbnailViewer client:idle items={wallThumbs} />
 </BaseLayout>
 
 <script>
-  import { mountRows } from '../lib/poster-rows';
-
-  // Works / Pricing tabs. Left and Right arrow keys move between the two tabs.
-  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((list) => {
-    const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[data-tab]'));
-    const pick = (name: string, focus = false) => {
-      tabs.forEach((tab) => {
-        const on = tab.dataset.tab === name;
-        tab.setAttribute('aria-selected', String(on));
-        tab.tabIndex = on ? 0 : -1;
-        if (on && focus) tab.focus();
-      });
-      document.querySelectorAll<HTMLElement>('[data-panel]').forEach((panel) => {
-        panel.hidden = panel.dataset.panel !== name;
-      });
-      window.dispatchEvent(new Event('nk-rows'));
-    };
-    tabs.forEach((tab) => tab.addEventListener('click', () => pick(tab.dataset.tab ?? 'works')));
-    list.addEventListener('keydown', (event) => {
-      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
-      event.preventDefault();
-      const current = tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
-      const next = tabs[(current + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
-      pick(next.dataset.tab ?? 'works', true);
-    });
-  });
-
-  // Sample filter chips on the home Works tab.
-  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-wall-filter]'));
-  chips.forEach((chip) => chip.addEventListener('click', () => {
-    const kind = chip.dataset.wallFilter ?? '';
-    chips.forEach((other) => other.setAttribute('aria-pressed', String(other === chip)));
-    document.querySelectorAll<HTMLElement>('[data-wall-kind]').forEach((item) => {
-      item.hidden = Boolean(kind) && item.dataset.wallKind !== kind;
-    });
-    window.dispatchEvent(new Event('nk-rows'));
-  }));
-
-  mountRows();
-
   // Light staggered reveals. Transform and opacity only; each element animates once.
   if (document.documentElement.classList.contains('reveal-ready')) {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');

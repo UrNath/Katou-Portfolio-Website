@@ -3,12 +3,13 @@ import { filterFromSearch, filterHref, type WorkFilters } from '../data/tags';
 
 type FilterDimension = keyof WorkFilters;
 
-type NkWindow = Window & { __nkWorksSync?: () => void; __nkTabs?: Record<string, string> };
+type NkWindow = Window & { __nkWorksSync?: () => void; __nkTabs?: Record<string, string>; __nkTypes?: Record<string, string[]> };
 
 /** In a creator's page one format tab is always selected: the one in the address, else their first format with work. */
 function effectiveType(filters: WorkFilters): string {
-  if (filters.type) return filters.type;
-  if (!filters.creator) return '';
+  const has = filters.creator ? (window as NkWindow).__nkTypes?.[filters.creator] : undefined;
+  if (filters.type && (!has || has.includes(filters.type))) return filters.type;
+  if (!filters.creator) return filters.type;
   return (window as NkWindow).__nkTabs?.[filters.creator] ?? '';
 }
 
@@ -74,22 +75,15 @@ export default function WorksFilters() {
       const entering = kind === 'creator' && !!next.creator && !prev.creator;
       const leaving = kind === 'creator' && !next.creator && !!prev.creator;
       const html = document.documentElement;
-      const nameAvatar = (element: Element | null | undefined) => (element as HTMLElement | null | undefined)?.style.setProperty('view-transition-name', 'pw-avatar');
-      const chipAvatar = (id: string) => document.querySelector<HTMLElement>(`.pw-chip[data-filter-value="${id}"] .pw-av`);
       const change = () => {
         if (location.pathname + location.search !== href) history.pushState(null, '', href);
         apply(next);
         if (entering || leaving) {
           window.scrollTo(0, 0);
-          if (leaving) {
-            window.dispatchEvent(new CustomEvent('nk-chips-reveal', { detail: prev.creator }));
-            nameAvatar(chipAvatar(prev.creator));
-          }
+          if (leaving) window.dispatchEvent(new CustomEvent('nk-chips-reveal', { detail: prev.creator }));
         }
       };
       const settle = () => {
-        document.querySelectorAll<HTMLElement>('.pw-av').forEach((avatar) => avatar.style.removeProperty('view-transition-name'));
-        delete html.dataset.vt;
         if (entering) {
           document.querySelector<HTMLElement>(`[data-profile="${next.creator}"] [data-profile-name]`)?.focus({ preventScroll: true });
         } else if (leaving) {
@@ -97,33 +91,31 @@ export default function WorksFilters() {
         }
       };
 
-      // The clicked chip's initial circle becomes the profile picture; the search bar eases to its new place.
+      // Same motion for every change (format tab, creator, Back): current cards drop away, then the new ones rise in one after another. Nothing flies between views.
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!reduce && (entering || leaving) && 'startViewTransition' in document) {
-        if (entering) nameAvatar(chipAvatar(next.creator));
-        html.dataset.vt = 'view';
-        const transition = document.startViewTransition(() => change());
-        transition.finished.then(settle, settle);
-      } else if (!reduce && !entering && !leaving) {
-        // Same look as the wireframe: current cards drop away, then the new ones rise in one after another.
-        if (busy) return;
-        busy = true;
-        const shown = () => Array.from(document.querySelectorAll<HTMLElement>('.pw-secs .clip-card')).filter((card) => card.offsetParent !== null).slice(0, 24);
-        const old = shown();
-        const out = old.map((card) => card.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px)' }], { duration: 160, easing: 'ease-in', fill: 'forwards' }));
-        Promise.all(out.map((animation) => animation.finished.catch(() => undefined))).then(() => {
-          change();
-          out.forEach((animation) => animation.cancel());
-          requestAnimationFrame(() => {
-            shown().forEach((card, index) => card.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 460, delay: Math.min(index, 8) * 30, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' }));
-            settle();
-            window.setTimeout(() => { busy = false; }, 200);
-          });
-        });
-      } else {
+      if (reduce) {
         change();
         settle();
+        return;
       }
+      if (busy) return;
+      busy = true;
+      const shown = () => Array.from(document.querySelectorAll<HTMLElement>('.pw-secs .clip-card')).filter((card) => card.offsetParent !== null).slice(0, 24);
+      const out = shown().map((card) => card.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px)' }], { duration: 160, easing: 'ease-in', fill: 'forwards' }));
+      Promise.all(out.map((animation) => animation.finished.catch(() => undefined))).then(() => {
+        change();
+        out.forEach((animation) => animation.cancel());
+        requestAnimationFrame(() => {
+          shown().forEach((card, index) => card.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 460, delay: Math.min(index, 8) * 30, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' }));
+          if (entering || leaving) {
+            document.querySelectorAll<HTMLElement>('.pw-profile, .pw-tabs, .pw-head').forEach((block) => {
+              if (block.offsetParent !== null) block.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' });
+            });
+          }
+          settle();
+          window.setTimeout(() => { busy = false; }, 200);
+        });
+      });
     };
 
     const onPop = () => apply(current());

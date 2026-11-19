@@ -105,15 +105,15 @@ export function filterCss(): string {
 }
 
 /** Set each selected dimension before first paint, including combined URL filters. */
-export function filterBoot(defaultTabs: Record<string, string> = {}): string {
+export function filterBoot(defaultTabs: Record<string, string> = {}, typesBy: Record<string, string[]> = {}): string {
   const creatorIds = creators.map((creator) => creator.id);
   const tagIds = clipTags.map((tag) => tag.id);
   return `(()=>{var p=new URLSearchParams(location.search);
     var c=p.get("creator")||"",t=p.get("tag")||"",y=p.get("type")||"";
     if(${JSON.stringify(creatorIds)}.includes(c))document.documentElement.setAttribute("data-creator-filter",c);
     if(${JSON.stringify(tagIds)}.includes(t))document.documentElement.setAttribute("data-tag-filter",t);
-    var d=${JSON.stringify(defaultTabs)};window.__nkTabs=d;
-    if(["short","long","thumbnail"].includes(y))document.documentElement.setAttribute("data-type-filter",y);
+    var d=${JSON.stringify(defaultTabs)};window.__nkTabs=d;var h=${JSON.stringify(typesBy)};window.__nkTypes=h;
+    if(["short","long","thumbnail"].includes(y)&&(!h[c]||h[c].includes(y)))document.documentElement.setAttribute("data-type-filter",y);
     else if(${JSON.stringify(creatorIds)}.includes(c)&&d[c])document.documentElement.setAttribute("data-type-filter",d[c]);
   })();`;
 }

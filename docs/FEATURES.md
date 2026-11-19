@@ -323,3 +323,9 @@ Pricing, Terms and Contact used to be sections of the home page. They are pages 
 About page: the dashed box is a placeholder (`data-placeholder="about-copy"`). Replace that paragraph with real text. Do not invent experience or achievements. The About page is linked from the home About teaser but is not in the nav bar; add `{ href: '/about', label: 'About' }` to `navLinks` in `src/data/site.ts` if it should be.
 
 Known limits: Pricing, Terms and Contact hold long content and scroll; they are not one-screen pages. The About photo and About text are placeholders. The Discord link in `site-settings.json` should be confirmed.
+
+## Update: Works, Home, Contact (Nov 20)
+- Works creator view scrolls down as a feed (no sideways rows); format tabs only for formats that creator has, with names beside icons on desktop; no "works shown" chip or jump icons; Back/search animate without clipping; no shared-element avatar flight; thumbnails split by aspect ratio (16:9 / 9:16); Pidge and Chi avatars in `public/avatars/`.
+- Home: location removed everywhere; hero scroll cue replaces the highlight-reel button; avatar slide-up; carousel without arrows, larger on phones; Works/Pricing section removed ("See all works" in Featured); About shows a placeholder video (set `site.aboutVideo` in `src/data/site.ts`).
+- Contact leads with the Discord tag `nassukatou` (open + copy); email form kept below.
+- Meet the Clients no longer plays the opening curtain.

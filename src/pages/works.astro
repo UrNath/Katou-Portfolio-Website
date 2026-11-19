@@ -21,6 +21,8 @@ const blocks = workSections
     return { section, clips: clipsInSection(section, clips), thumbs: [] };
   })
   .filter((block) => block.clips.length > 0 || block.thumbs.length > 0);
+const landscapeThumbs = thumbnails.filter((thumb) => thumb.orientation !== 'vertical');
+const verticalThumbs = thumbnails.filter((thumb) => thumb.orientation === 'vertical');
 const editLabel = `${clips.length} video edits · ${thumbnails.length} thumbnails`;
 const names = creators.map((creator) => creator.label).join(', ');
 const sectionNames = blocks.map((block) => block.section.label).join(', ');
@@ -33,6 +35,8 @@ const typeLabel: Record<WorkType, string> = { short: 'Short-form videos', long: 
 const presentTypes = (['short', 'long', 'thumbnail'] as WorkType[]).filter((type) =>
   blocks.some((block) => block.section.kind in typeOfKind && typeOfKind[block.section.kind as keyof typeof typeOfKind] === type),
 );
+const tabLabel: Record<WorkType, string> = { short: 'Shorts', long: 'Long form', thumbnail: 'Thumbnails' };
+const avatars: Record<string, string> = { pidge: '/avatars/pidge.webp', chi: '/avatars/chi.webp' };
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 // Everything the profile view shows is computed from the portfolio data. No bio or avatar exists yet, so none is shown.
 const profiles = creators.map((creator) => {
@@ -47,8 +51,11 @@ const profiles = creators.map((creator) => {
     count.long ? `${count.long} long-form` : '',
     count.thumbnail ? plural(count.thumbnail, 'thumbnail', 'thumbnails') : '',
   ].filter(Boolean);
-  const firstTab = presentTypes.find((type) => count[type] > 0) ?? presentTypes[0] ?? 'short';
+  const types = presentTypes.filter((type) => count[type] > 0);
+  const firstTab = types[0] ?? presentTypes[0] ?? 'short';
   return {
+    types,
+    avatar: avatars[creator.id] ?? '',
     id: creator.id,
     label: creator.label,
     initial: creator.label.trim().charAt(0).toUpperCase(),
@@ -58,8 +65,9 @@ const profiles = creators.map((creator) => {
   };
 });
 const defaultTabs = Object.fromEntries(profiles.map((profile) => [profile.id, profile.firstTab]));
+const typesBy = Object.fromEntries(profiles.map((profile) => [profile.id, profile.types]));
 const profileCss = profiles
-  .map((profile) => `html[data-creator-filter="${profile.id}"] [data-profile="${profile.id}"]{display:flex}`)
+  .map((profile) => `html[data-creator-filter="${profile.id}"] [data-profile="${profile.id}"]{display:flex}\nhtml[data-creator-filter="${profile.id}"] [data-tabs-for="${profile.id}"]{display:flex}`)
   .join('\n');
 ---
 
@@ -68,7 +76,7 @@ const profileCss = profiles
   description={`${editLabel} for ${names}. ${sectionNames}, with content type, creator, and tag filters.`}
 >
   <style slot="head" is:inline set:html={filterCss() + '\n' + profileCss} />
-  <script slot="head" is:inline set:html={filterBoot(defaultTabs)} />
+  <script slot="head" is:inline set:html={filterBoot(defaultTabs, typesBy)} />
   <section class="works pc-works" data-works>
     <div class="pw-blobs pw-all-only" aria-hidden="true">
       <span class="pc-blob pc-blob-peach"></span>
@@ -90,12 +98,11 @@ const profileCss = profiles
       <header class="pw-head pw-all-only">
         <p class="pc-eyebrow pc-eyebrow-ink">Portfolio</p>
         <h1 class="page-title">Works</h1>
-        <p class="clip-count" data-clip-count>{editLabel}</p>
       </header>
       {
         profiles.map((profile) => (
           <div class="pw-profile" data-profile={profile.id}>
-            <span class="pw-avatar" aria-hidden="true">{profile.initial}</span>
+            <span class="pw-avatar" aria-hidden="true">{profile.avatar ? <img src={profile.avatar} alt="" width="192" height="192" decoding="async" /> : profile.initial}</span>
             <div class="pw-profile-info">
               <h1 class="pw-name" tabindex="-1" data-profile-name>{profile.label}</h1>
               {profile.handle && <p class="pw-handle">{profile.handle}</p>}
@@ -104,26 +111,22 @@ const profileCss = profiles
           </div>
         ))
       }
-      <div class="pw-tabs pw-creator-only" role="tablist" aria-label="Works by format" data-tabs>
-        {
-          presentTypes.map((type) => (
-            <button class="pw-tab" role="tab" type="button" data-filter-kind="type" data-filter-value={type} data-filter-keep aria-selected="false" aria-label={typeLabel[type]} title={typeLabel[type]}>
-              <WorkTypeIcon type={type} />
-            </button>
-          ))
-        }
-      </div>
+      {
+        profiles.map((profile) => (
+          <div class="pw-tabs" role="tablist" aria-label={`${profile.label}: works by format`} data-tabs data-tabs-for={profile.id}>
+            {
+              profile.types.map((type) => (
+                <button class="pw-tab" role="tab" type="button" data-filter-kind="type" data-filter-value={type} data-filter-keep aria-selected="false" aria-label={typeLabel[type]} title={typeLabel[type]}>
+                  <WorkTypeIcon type={type} />
+                  <span class="pw-tab-label">{tabLabel[type]}</span>
+                </button>
+              ))
+            }
+          </div>
+        ))
+      }
     </div>
     <div class="pw-lane pw-all-only" data-works-bar>
-      <nav class="pw-jump" aria-label="Jump to a section">
-        {
-          blocks.map((block) => (
-            <a href={`#sec-${block.section.id}`} aria-label={block.section.label} title={block.section.label}>
-              <WorkTypeIcon type={typeOfKind[block.section.kind as keyof typeof typeOfKind] ?? 'short'} />
-            </a>
-          ))
-        }
-      </nav>
       <div class="pw-cf" data-chips>
         <button class="pw-carr" type="button" data-chips-prev hidden aria-label="Show previous creators">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
@@ -136,7 +139,7 @@ const profileCss = profiles
             {
               profiles.map((profile) => (
                 <button class="filter-chip pw-chip" type="button" data-filter-kind="creator" data-filter-value={profile.id} aria-pressed="false">
-                  <span class="pw-av" aria-hidden="true">{profile.initial}</span>{profile.label}
+                  <span class="pw-av" aria-hidden="true">{profile.avatar ? <img src={profile.avatar} alt="" width="48" height="48" loading="lazy" decoding="async" /> : profile.initial}</span>{profile.label}
                 </button>
               ))
             }
@@ -169,7 +172,7 @@ const profileCss = profiles
     <div class="pw-secs">
     {
       blocks.map((block) => (
-        <div class="works-block pc-wsec" id={`sec-${block.section.id}`} data-block={block.section.id} data-section-kind={block.section.kind} data-rows-section>
+        <div class="works-block pc-wsec" id={`sec-${block.section.id}`} data-block={block.section.id} data-section-kind={block.section.kind} data-rows-section={block.section.kind === 'thumbnail' ? undefined : ''}>
           <div class="pc-wsec-head">
             <h2 class="works-kicker">{block.section.label}</h2>
             <span class="pc-count" data-block-count></span>
@@ -180,19 +183,26 @@ const profileCss = profiles
                 ))}
               </div>
             )}
-            <div class="pc-pager pc-pager-head">
+            {block.section.kind !== 'thumbnail' && <div class="pc-pager pc-pager-head">
               <button class="pc-arrow" type="button" data-rows-prev aria-label={`Previous ${block.section.label}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
               <button class="pc-arrow" type="button" data-rows-next aria-label={`Next ${block.section.label}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
-            </div>
+            </div>}
           </div>
           {block.section.kind === 'thumbnail' && (
             <p class="works-thumbnails-note">A gallery of thumbnails used for these videos. Design credit may vary.</p>
           )}
           {
             block.section.kind === 'thumbnail' ? (
-              <div class="pc-rowwrap">
-                <div class="works-grid works-grid-wide thumb-grid pc-rows pc-rows-wide" data-rows>
-                  {block.thumbs.map((thumb) => (
+              <div class="pc-thumbs">
+                {landscapeThumbs.length > 0 && (
+                <div class="pc-thumbgroup" data-rows-section>
+                  <div class="pc-pager pc-pager-head">
+                    <button class="pc-arrow" type="button" data-rows-prev aria-label="Previous thumbnails"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+                    <button class="pc-arrow" type="button" data-rows-next aria-label="Next thumbnails"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+                  </div>
+                  <div class="pc-rowwrap">
+                    <div class="works-grid thumb-grid pc-rows pc-rows-wide" data-rows>
+                  {landscapeThumbs.map((thumb) => (
                     <article
                       class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
                       data-creator={creatorIdOf(thumb.creator)}
@@ -213,8 +223,45 @@ const profileCss = profiles
                       <p class="clip-caption"><b>{thumb.title}</b></p>
                     </article>
                   ))}
+                    </div>
+                    <div class="pc-prog" aria-hidden="true"><i></i></div>
+                  </div>
                 </div>
-                <div class="pc-prog" aria-hidden="true"><i></i></div>
+                )}
+                {verticalThumbs.length > 0 && (
+                <div class="pc-thumbgroup" data-rows-section>
+                  <div class="pc-pager pc-pager-head">
+                    <button class="pc-arrow" type="button" data-rows-prev aria-label="Previous thumbnails"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+                    <button class="pc-arrow" type="button" data-rows-next aria-label="Next thumbnails"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+                  </div>
+                  <div class="pc-rowwrap">
+                    <div class="works-grid thumb-grid pc-rows pc-rows-tall thumb-vert" data-rows>
+                  {verticalThumbs.map((thumb) => (
+                    <article
+                      class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
+                      data-creator={creatorIdOf(thumb.creator)}
+                      data-content-type="thumbnail"
+                      data-tags=""
+                      data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
+                    >
+                      <button
+                        class="thumb-open"
+                        type="button"
+                        data-open-thumb={thumb.id}
+                        aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
+                      >
+                        <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
+                          <img src={thumb.image} alt="" loading="lazy" decoding="async" />
+                        </span>
+                      </button>
+                      <p class="clip-caption"><b>{thumb.title}</b></p>
+                    </article>
+                  ))}
+                    </div>
+                    <div class="pc-prog" aria-hidden="true"><i></i></div>
+                  </div>
+                </div>
+                )}
               </div>
             ) : block.section.kind === 'landscape' ? (
               <div class="works-long-form">
@@ -301,8 +348,6 @@ const profileCss = profiles
         document.querySelectorAll('.clip-card').forEach(function (card) {
           if (getComputedStyle(card).display !== 'none') shown += 1;
         });
-        var count = document.querySelector('[data-clip-count]');
-        if (count) count.textContent = shown + (shown === 1 ? ' work shown' : ' works shown');
         var empty = document.querySelector('[data-empty]');
         var emptyWrap = document.querySelector('[data-empty-wrap]');
         if (emptyWrap) emptyWrap.hidden = shown !== 0;
