@@ -394,6 +394,12 @@ const profileCss = profiles
           tab.tabIndex = id === window.__nkLongTab ? 0 : -1;
         });
         if (window.__nkSlide) window.__nkSlide();
+        // A thumbnail group with nothing to show (e.g. no landscape thumbnails for this client) leaves no gap.
+        document.querySelectorAll('.pc-thumbgroup').forEach(function (group) {
+          var any = false;
+          group.querySelectorAll('.clip-card').forEach(function (card) { if (getComputedStyle(card).display !== 'none') any = true; });
+          group.hidden = !any;
+        });
         // Per-section counts and the Clear filters link.
         document.querySelectorAll('.works-block').forEach(function (block) {
           var n = 0;

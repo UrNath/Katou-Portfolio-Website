@@ -18,12 +18,12 @@ function offset(index: number) {
       </div>
     ))}
   </div>
+  <p class="carousel-current" data-carousel-current aria-live="polite" aria-atomic="true">{samples[initial]?.creator}’s Short Video</p>
   <div class="carousel-controls">
     <div class="carousel-indicators" role="group" aria-label="Choose a sample">
       {samples.map((clip, index) => <button class="carousel-dot" type="button" data-carousel-dot={index} aria-label={`Show sample ${index + 1}: ${clip.title}`} aria-pressed={index === initial}><span></span></button>)}
     </div>
   </div>
-  <p class="carousel-current" data-carousel-current aria-live="polite" aria-atomic="true">{samples[initial]?.creator}’s Short Video</p>
 </div>
 <script>
   import { mountCarousel } from '../lib/featured-carousel';

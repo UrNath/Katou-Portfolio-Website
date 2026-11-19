@@ -11,6 +11,16 @@ export function circularPose(index: number, position: number, count: number) {
     depth,
   };
 }
+/** Phone layout from the wireframe: centre card on top, two smaller tilted cards peeking out behind it. */
+export function phonePose(d: number, offset: number) {
+  const a = Math.abs(d);
+  const s = d < 0 ? -1 : 1;
+  if (a <= 1) {
+    return { x: s * offset * Math.sin(a * Math.PI / 2), y: 22 * a, scale: 1 - 0.15 * a, rot: s * 4 * a, opacity: 1 - 0.08 * a, z: 300 - 100 * a };
+  }
+  const u = Math.min(1, a - 1);
+  return { x: s * offset * (1 + 0.3 * u), y: 22 + 8 * u, scale: 0.85 - 0.1 * u, rot: s * (4 + 2 * u), opacity: 0.92 * (1 - u), z: 200 - 100 * u };
+}
 export function shortestStep(current: number, target: number, count: number) {
   const half = Math.floor(count / 2);
   return ((target - current + count + half) % count) - half;
@@ -35,7 +45,34 @@ export function mountCarousel(root: HTMLElement) {
   function notify() {
     root.dispatchEvent(new CustomEvent('nk:carousel', { bubbles: true, detail: { moving } }));
   }
+  const phone = window.matchMedia('(max-width: 899px)');
+  function layout() {
+    const W = stage!.clientWidth;
+    // Height left for the cards once the caption and dots are placed; cards are 9:16 with 18px spare for the tilt.
+    const below = Array.from(root.children).filter((child) => child !== stage).reduce((sum, child) => sum + (child as HTMLElement).offsetHeight, 0) + 16;
+    const room = root.clientHeight - below;
+    const widthCap = (W / 2 - 12) / 0.796;
+    const cw = Math.max(80, Math.min(widthCap, (room - 18) * 9 / 16));
+    const offset = Math.min(W / 2 - 12 - cw * 0.425, cw * 0.371);
+    stage!.style.setProperty('--cw', `${cw}px`);
+    stage!.style.setProperty('--sh', `${cw * 16 / 9 + 18}px`);
+    return { offset };
+  }
+  const pitch = () => (phone.matches ? layout().offset : stage!.clientWidth * 0.30 * 2 * Math.PI / count) || 1;
   function draw() {
+    if (phone.matches) {
+      const { offset } = layout();
+      cards.forEach((card, index) => {
+        let d = (((index - position) % count) + count) % count;
+        if (d > count / 2) d -= count;
+        const pose = phonePose(d, offset);
+        card.style.transform = `translate3d(${pose.x}px, ${pose.y}px, 0) rotate(${pose.rot}deg) scale(${pose.scale})`;
+        card.style.opacity = String(pose.opacity);
+        card.style.zIndex = String(Math.round(pose.z));
+        card.style.pointerEvents = pose.opacity > 0.7 ? 'auto' : 'none';
+      });
+      return;
+    }
     const radius = stage!.clientWidth * 0.30;
     cards.forEach((card, index) => {
       const pose = circularPose(index, position, count);
@@ -66,11 +103,11 @@ export function mountCarousel(root: HTMLElement) {
     draw();
     notify();
   }
-  function move(step: number) {
-    if (!step) return;
+  function goTo(next: number) {
     cancelAnimationFrame(animation);
     const start = position;
-    target += step;
+    target = next;
+    if (start === target) { settle(); return; }
     moving = true;
     root.dataset.moving = 'true';
     notify();
@@ -78,8 +115,10 @@ export function mountCarousel(root: HTMLElement) {
     if (cards.some((card) => card.contains(document.activeElement))) root.focus({ preventScroll: true });
     if (reduced.matches) { position = target; settle(); return; }
     const began = performance.now();
+    // Longer flicks travel further and take a little longer to coast to a stop.
+    const duration = Math.min(950, 380 + Math.abs(target - start) * 150);
     function tick(now: number) {
-      const progress = Math.min(1, (now - began) / 450);
+      const progress = Math.min(1, (now - began) / duration);
       const eased = 1 - Math.pow(1 - progress, 3);
       position = start + (target - start) * eased;
       draw();
@@ -87,6 +126,9 @@ export function mountCarousel(root: HTMLElement) {
       else settle();
     }
     animation = requestAnimationFrame(tick);
+  }
+  function move(step: number) {
+    if (step) goTo(target + step);
   }
   root.querySelector('[data-carousel-prev]')?.addEventListener('click', () => move(-1));
   root.querySelector('[data-carousel-next]')?.addEventListener('click', () => move(1));
@@ -108,31 +150,50 @@ export function mountCarousel(root: HTMLElement) {
       suppressClick = false;
     }
   }, true);
+  type Drag = { id: number; x: number; y: number; start: number; active: boolean; samples: { x: number; t: number }[] };
+  let drag: Drag | null = null;
   stage.addEventListener('pointerdown', (event) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0 || !event.isPrimary) return;
     suppressClick = false;
-    gesture = { id: event.pointerId, x: event.clientX, y: event.clientY, dragged: false };
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, start: position, active: false, samples: [{ x: event.clientX, t: event.timeStamp }] };
   });
   stage.addEventListener('pointermove', (event) => {
-    if (!gesture || gesture.id !== event.pointerId) return;
-    const dx = event.clientX - gesture.x;
-    const dy = event.clientY - gesture.y;
-    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.15) {
-      gesture.dragged = true;
+    if (!drag || drag.id !== event.pointerId) return;
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (!drag.active) {
+      if (Math.abs(dx) <= 8 || Math.abs(dx) <= Math.abs(dy) * 1.15) return;
+      drag.active = true;
+      cancelAnimationFrame(animation);
+      drag.start = position;
       stage.setPointerCapture(event.pointerId);
+      moving = true;
+      root.dataset.moving = 'true';
     }
+    drag.samples.push({ x: event.clientX, t: event.timeStamp });
+    if (drag.samples.length > 8) drag.samples.shift();
+    // The cards follow the finger one to one.
+    position = drag.start - dx / pitch();
+    draw();
   });
-  stage.addEventListener('pointerup', (event) => {
-    if (!gesture || gesture.id !== event.pointerId) return;
-    const dx = event.clientX - gesture.x;
-    if (gesture.dragged) {
-      suppressClick = true;
-      if (Math.abs(dx) > 32) move(dx < 0 ? 1 : -1);
-    }
-    gesture = null;
-    if (stage.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId);
-  });
-  stage.addEventListener('pointercancel', () => { gesture = null; suppressClick = false; });
+  function release(event: PointerEvent) {
+    if (!drag || drag.id !== event.pointerId) return;
+    const finished = drag;
+    drag = null;
+    if (stage!.hasPointerCapture(event.pointerId)) stage!.releasePointerCapture(event.pointerId);
+    if (!finished.active) return;
+    suppressClick = true;
+    // Velocity from the last ~100ms of the gesture, then coast: farther and faster flicks pass more cards.
+    const last = finished.samples[finished.samples.length - 1];
+    const first = finished.samples.find((sample) => last.t - sample.t <= 100) ?? last;
+    const velocity = last.t > first.t ? (last.x - first.x) / (last.t - first.t) : 0;
+    const projected = position - (velocity * 260) / pitch();
+    const base = Math.round(finished.start);
+    const next = Math.max(base - 3, Math.min(base + 3, Math.round(projected)));
+    goTo(next);
+  }
+  stage.addEventListener('pointerup', release);
+  stage.addEventListener('pointercancel', (event) => { if (drag?.active) release(event); else { drag = null; suppressClick = false; } });
   stage.addEventListener('wheel', (event) => {
     const delta = event.shiftKey && !event.deltaX ? event.deltaY : event.deltaX;
     if (!delta || (!event.shiftKey && Math.abs(delta) <= Math.abs(event.deltaY))) return;
@@ -148,7 +209,10 @@ export function mountCarousel(root: HTMLElement) {
       wheelLockedUntil = now + 600;
     }
   }, { passive: false });
-  new ResizeObserver(draw).observe(stage);
+  const observer = new ResizeObserver(draw);
+  observer.observe(stage);
+  observer.observe(root);
+  phone.addEventListener('change', draw);
   reduced.addEventListener('change', () => { if (reduced.matches && moving) { cancelAnimationFrame(animation); position = target; settle(); } });
   root.dataset.ready = 'true';
   settle();

@@ -186,13 +186,33 @@ html:has(.poster) { background: #fff; scroll-padding-top: var(--site-header-heig
 .pc-feat .carousel-controls { margin-top: 8px; }
 .pc-feat-cta { flex: none; display: flex; justify-content: center; }
 .pc-btn-lg { min-height: 56px; padding: 0 34px; font-size: 17px; }
-@media (prefers-reduced-motion: no-preference) { .pc-feat-cta .pc-btn { animation: pc-ring 2.4s ease-out 1.2s infinite; } }
-@keyframes pc-ring { 0% { outline: 0 solid rgb(244 197 66 / .7); outline-offset: 0; } 70%, 100% { outline: 12px solid rgb(244 197 66 / 0); outline-offset: 6px; } }
-@media (max-width: 899px) {
-  .pc-feat-visual { overflow: visible; }
-  .pc-feat-visual { position: relative; }
-  .pc-feat .sample-carousel { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: min(190vw, (100cqh - 84px) * 1.18); max-width: none; }
+.pc-feat-cta .pc-btn { position: relative; }
+@media (prefers-reduced-motion: no-preference) {
+  .pc-feat-cta .pc-btn::after { content: ""; position: absolute; inset: -3px; border: 3px solid var(--pc-blue); border-radius: inherit; pointer-events: none; animation: pc-ring 2.2s ease-out 1s infinite; }
 }
+@keyframes pc-ring { 0% { transform: scale(1); opacity: .8; } 70%, 100% { transform: scale(1.22, 1.55); opacity: 0; } }
+@media (max-width: 899px) {
+  .pc-feat { padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+  .pc-feat h2 { font-size: clamp(18px, 6.2vw, 26px); max-width: none; }
+  .pc-feat-visual { position: relative; overflow: visible; display: block; }
+  .pc-feat .sample-carousel { position: absolute; inset: 0; width: auto; display: flex; flex-direction: column; justify-content: center; }
+  .pc-feat .carousel-stage { flex: none; height: var(--sh, 340px); aspect-ratio: auto; width: 100%; perspective: none; }
+  .pc-feat .carousel-card { top: 9px; left: calc(50% - var(--cw, 186px) / 2); width: var(--cw, 186px); }
+  .pc-feat .carousel-card .clip-duration, .pc-feat .carousel-card .clip-progress { display: none; }
+  .pc-feat .carousel-current { flex: none; min-height: 0; margin: 6px 0 0; font-size: clamp(13px, 4.2vw, 16px); font-weight: 600; color: var(--pc-ink); max-width: none; }
+  .pc-feat .carousel-controls { flex: none; margin-top: 10px; gap: 0; }
+  .pc-feat-cta { margin-top: 10px; }
+  .pc-feat-cta .pc-btn-lg { min-height: 44px; padding: 0 26px; font-size: 15px; border-radius: 14px; min-width: 200px; }
+}
+/* Dots: 8px circles, the active one a 22x8 pill. Touch targets stay 44px tall. */
+.pc-feat .carousel-dot { width: auto; height: 44px; padding: 18px 4px; }
+.pc-feat .carousel-dot span { width: 8px; height: 8px; border: 0; border-radius: 999px; background: var(--pc-ink); opacity: .45; transition: width .35s cubic-bezier(.22, 1, .36, 1), background-color .25s ease, opacity .25s ease; }
+.pc-feat .carousel-dot[aria-pressed="true"] span { width: 22px; background: var(--pc-blue); opacity: 1; }
+.pc-feat .carousel-indicators { gap: 0; }
+/* The centre card shows one 48px play icon; its other overlays stay off. */
+.pc-feat .carousel-card[data-active="true"] .clip-pause { position: absolute; top: 50%; left: 50%; right: auto; bottom: auto; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%; transition: opacity .25s ease; }
+.pc-feat .carousel-card .clip-card.is-playing .clip-pause { opacity: 0; }
+.pc-feat .carousel-card .clip-duration { display: none; }
 @media (min-width: 900px) {
   .pc-feat { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); grid-template-rows: minmax(0, 1fr) auto; align-items: center; column-gap: clamp(24px, 4vw, 64px); }
   .pc-feat-cta { grid-column: 1 / -1; }
@@ -309,7 +329,7 @@ html[data-creator-filter] .pw-top:has(.pw-search:focus-within) .pw-search { marg
 
 /* Rows: cards keep a fixed ratio, scroll sideways and snap to whole cards; a bar shows position. Caption sits under each card. */
 .pc-works .pc-rowwrap { margin-inline: calc(var(--pc-pad) * -1); container-type: inline-size; }
-.pc-works .pc-rows { --rows: 1; --cols: 3; --gap: 10px; display: grid; grid-template-columns: none; columns: auto; column-gap: normal; height: auto; grid-template-rows: repeat(var(--rows), auto); grid-auto-columns: calc((100cqw - 2 * var(--pc-pad) - (var(--cols) - 1) * var(--gap)) / var(--cols)); align-content: start; gap: 16px var(--gap); scroll-snap-type: x mandatory; padding: 8px var(--pc-pad) 14px; scrollbar-width: none; }
+.pc-works .pc-rows { --rows: 1; --cols: 3; --gap: 10px; display: grid; grid-template-columns: none; columns: auto; column-gap: normal; height: auto; grid-template-rows: repeat(var(--rows), auto); grid-auto-columns: calc((100cqw - 2 * var(--pc-pad) - (var(--cols) - 1) * var(--gap)) / var(--cols)); align-content: start; gap: 16px var(--gap); scroll-snap-type: x proximity; padding: 8px var(--pc-pad) 14px; scrollbar-width: none; }
 .pc-works .pc-rows::-webkit-scrollbar { display: none; }
 .pc-works .pc-rows > * { height: auto; width: auto; scroll-snap-align: start; margin: 0 !important; }
 .pc-works .pc-rows .thumb-card { overflow: visible; box-shadow: none; }
@@ -489,3 +509,9 @@ html[data-creator-filter] .pc-works .pc-rows.pc-rows-tall.pc-rows-tall { --cols:
 .poster .pw-tags .filter-chip { position: relative; z-index: 1; background: transparent; transition: color .25s ease; }
 .poster .pw-tags .filter-chip[aria-pressed="true"] { background: transparent; color: #fff; }
 @media (prefers-reduced-motion: reduce) { .nk-ind { transition: none; } }
+
+/* Sideways scrollers: soft snapping so a flick coasts, grab cursor and no text selection while dragging with a mouse */
+.pc-rows, .pw-tags .filters { scroll-snap-type: x proximity; }
+.pc-rows > * { scroll-snap-stop: normal; }
+@media (hover: hover) and (pointer: fine) { .pc-rows { cursor: grab; } }
+.is-flicking, .is-flicking * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }

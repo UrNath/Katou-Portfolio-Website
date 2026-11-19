@@ -336,3 +336,8 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 - Contact: socials row removed (footer has them), Discord card slimmed.
 - Menu: Editing and Web design merged into one Pricing button. Pricing: "Prices updated" removed; editing page notes long-form and normal videos (no new prices).
 - Pidge clips carry `youtubePrivate: true` in clips.json: the viewer uses TikTok only. Clips without a `tiktokUrl` show the fallback until a link is added.
+
+## Round 4
+- Home Featured Works on phones (≤899px) follows the mobile wireframe: 58%-width centre card, tilted side cards, caption under cards, 5 dots, gold "See all works" button with a blue pulse ring. Finger-following swipe with flick momentum.
+- Works: empty thumbnail groups are hidden so Thumbnails starts at the same offset as Shorts.
+- `src/lib/flick.ts`: mouse/pen flick-and-glide for every sideways scroller; touch coasts natively (soft snapping `x proximity`).
