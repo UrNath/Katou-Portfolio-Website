@@ -347,3 +347,7 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 - Works rows get the carousel's depth motion on phones (cards shrink/tilt/drop toward the edges); skipped for reduced motion.
 - Works tab highlights are rounded sliding pills (content tabs and Vlogs/MVs/Normal).
 - New NK logo: `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`.
+
+## Round 6
+- Works rows: depth motion reverted; only the flick/momentum remains.
+- Navbar on every page now uses the clients-page frosted-glass bar (translucent + blur + hairline), in the light Poster palette.

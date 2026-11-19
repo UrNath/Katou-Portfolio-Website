@@ -522,3 +522,12 @@ html[data-creator-filter] .pc-works .pc-rows.pc-rows-tall.pc-rows-tall { --cols:
 /* Featured works: keep the cards under the sticky header and inside the section */
 .pc-feat { position: relative; isolation: isolate; overflow: clip; }
 .pc-feat .carousel-card { will-change: transform, opacity; backface-visibility: hidden; }
+
+/* Navbar: same frosted-glass bar as the clients page, in the light Poster palette */
+.clean-portfolio.poster .site-bar {
+  background: rgb(246 241 238 / .66);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  backdrop-filter: blur(14px) saturate(115%);
+  border-bottom: 1px solid rgb(58 35 28 / .14);
+}
+.clean-portfolio.poster { --nav-accent: var(--pc-blue); --nav-on: #fff; --nav-line: rgb(58 35 28 / .55); }
