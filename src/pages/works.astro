@@ -2,6 +2,7 @@
 import { Picture } from 'astro:assets';
 import BaseLayout from '../components/BaseLayout.astro';
 import ClipCard from '../components/ClipCard.astro';
+import WorkTypeIcon from '../components/WorkTypeIcon.astro';
 import ClipPreview from '../islands/ClipPreview';
 import ClipViewer from '../islands/ClipViewer';
 import ThumbnailViewer from '../islands/ThumbnailViewer';
@@ -25,67 +26,129 @@ const names = creators.map((creator) => creator.label).join(', ');
 const sectionNames = blocks.map((block) => block.section.label).join(', ');
 const cardSizes = '(min-width: 1280px) 220px, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 46vw';
 const wideSizes = '(min-width: 768px) 46vw, 100vw';
-const stackClips = clips.filter((clip) => !clip.wide).slice(0, 3);
+
+type WorkType = 'short' | 'long' | 'thumbnail';
+const typeOfKind = { vertical: 'short', landscape: 'long', thumbnail: 'thumbnail' } as const;
+const typeLabel: Record<WorkType, string> = { short: 'Short-form videos', long: 'Long-form videos', thumbnail: 'Thumbnails' };
+const presentTypes = (['short', 'long', 'thumbnail'] as WorkType[]).filter((type) =>
+  blocks.some((block) => block.section.kind in typeOfKind && typeOfKind[block.section.kind as keyof typeof typeOfKind] === type),
+);
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+// Everything the profile view shows is computed from the portfolio data. No bio or avatar exists yet, so none is shown.
+const profiles = creators.map((creator) => {
+  const count: Record<WorkType, number> = {
+    short: clips.filter((clip) => clip.creatorId === creator.id && !clip.wide).length,
+    long: clips.filter((clip) => clip.creatorId === creator.id && clip.wide).length,
+    thumbnail: thumbnails.filter((thumb) => creatorIdOf(thumb.creator) === creator.id).length,
+  };
+  const handle = clips.find((clip) => clip.creatorId === creator.id && clip.channelHandle && clip.channelHandle !== '@unknown')?.channelHandle ?? '';
+  const parts = [
+    count.short ? plural(count.short, 'short', 'shorts') : '',
+    count.long ? `${count.long} long-form` : '',
+    count.thumbnail ? plural(count.thumbnail, 'thumbnail', 'thumbnails') : '',
+  ].filter(Boolean);
+  const firstTab = presentTypes.find((type) => count[type] > 0) ?? presentTypes[0] ?? 'short';
+  return {
+    id: creator.id,
+    label: creator.label,
+    initial: creator.label.trim().charAt(0).toUpperCase(),
+    handle,
+    stats: parts.length ? parts.join(' · ') : 'No works yet',
+    firstTab,
+  };
+});
+const defaultTabs = Object.fromEntries(profiles.map((profile) => [profile.id, profile.firstTab]));
+const profileCss = profiles
+  .map((profile) => `html[data-creator-filter="${profile.id}"] [data-profile="${profile.id}"]{display:flex}`)
+  .join('\n');
 ---
 
 <BaseLayout
   title="Works"
   description={`${editLabel} for ${names}. ${sectionNames}, with content type, creator, and tag filters.`}
 >
-  <style slot="head" is:inline set:html={filterCss()} />
-  <script slot="head" is:inline set:html={filterBoot()} />
-  <section class="works pc-works">
-    <header class="works-head pc-works-head">
-      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
-      <span class="pc-blob pc-blob-gold" aria-hidden="true"></span>
-      <div class="pc-works-title">
-        <p class="pc-eyebrow">Portfolio</p>
-        <h1 class="page-title reveal">Works</h1>
-        <p class="clip-count" data-clip-count aria-live="polite">{editLabel}</p>
-        <form class="works-search" role="search">
+  <style slot="head" is:inline set:html={filterCss() + '\n' + profileCss} />
+  <script slot="head" is:inline set:html={filterBoot(defaultTabs)} />
+  <section class="works pc-works" data-works>
+    <div class="pw-blobs pw-all-only" aria-hidden="true">
+      <span class="pc-blob pc-blob-peach"></span>
+      <span class="pc-blob pc-blob-gold"></span>
+    </div>
+    <div class="pw-frame">
+      <div class="pw-top">
+        <button class="pw-back pc-arrow" type="button" data-filter-kind="creator" data-filter-value="" data-filter-clear="type" aria-label="Back to all works" title="Back to all works">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <form class="pw-search" role="search">
           <label>
             <span class="sr-only">Search edits</span>
+            <svg class="pw-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
             <input id="works-search" type="search" name="q" placeholder="Search titles or clients" autocomplete="off" enterkeyhint="search" />
           </label>
         </form>
       </div>
-      {/* Decoration: the three newest short posters, fanned out. Desktop only. */}
-      <div class="pc-stack" aria-hidden="true">
-        {stackClips.map((clip, index) => (
-          <span class="pc-stack-card" style={`--n:${index}`}>
-            {clip.posterImage
-              ? <Picture src={clip.posterImage} formats={['avif', 'webp']} fallbackFormat="webp" widths={[270]} sizes="200px" alt="" quality={55} loading="eager" />
-              : <img src={clip.poster} alt="" />}
-          </span>
-        ))}
+      <header class="pw-head pw-all-only">
+        <p class="pc-eyebrow pc-eyebrow-ink">Portfolio</p>
+        <h1 class="page-title">Works</h1>
+        <p class="clip-count" data-clip-count>{editLabel}</p>
+      </header>
+      {
+        profiles.map((profile) => (
+          <div class="pw-profile" data-profile={profile.id}>
+            <span class="pw-avatar" aria-hidden="true">{profile.initial}</span>
+            <div class="pw-profile-info">
+              <h1 class="pw-name" tabindex="-1" data-profile-name>{profile.label}</h1>
+              {profile.handle && <p class="pw-handle">{profile.handle}</p>}
+              <p class="pw-stats">{profile.stats}</p>
+            </div>
+          </div>
+        ))
+      }
+      <div class="pw-tabs pw-creator-only" role="tablist" aria-label="Works by format" data-tabs>
+        {
+          presentTypes.map((type) => (
+            <button class="pw-tab" role="tab" type="button" data-filter-kind="type" data-filter-value={type} data-filter-keep aria-selected="false" aria-label={typeLabel[type]} title={typeLabel[type]}>
+              <WorkTypeIcon type={type} />
+            </button>
+          ))
+        }
       </div>
-    </header>
-    <div class="works-filter-groups pc-filterbar" aria-label="Filter works" data-works-bar>
-      <div class="works-filter-row">
-        <span class="works-filter-label" id="filter-type-heading">Content</span>
-        <div class="filters" role="group" aria-labelledby="filter-type-heading">
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="" aria-pressed="true">All types</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="short" aria-pressed="false">Short Form</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="long" aria-pressed="false">Long Form</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="thumbnail" aria-pressed="false">Thumbnails</button>
+    </div>
+    <div class="pw-lane pw-all-only" data-works-bar>
+      <nav class="pw-jump" aria-label="Jump to a section">
+        {
+          blocks.map((block) => (
+            <a href={`#sec-${block.section.id}`} aria-label={block.section.label} title={block.section.label}>
+              <WorkTypeIcon type={typeOfKind[block.section.kind as keyof typeof typeOfKind] ?? 'short'} />
+            </a>
+          ))
+        }
+      </nav>
+      <div class="pw-cf" data-chips>
+        <button class="pw-carr" type="button" data-chips-prev hidden aria-label="Show previous creators">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <div class="pw-cfv" data-chips-view>
+          <div class="pw-chips" role="group" aria-label="Filter by creator" data-chips-row>
+            <button class="filter-chip pw-chip" type="button" data-filter-kind="creator" data-filter-value="" aria-pressed="true">
+              <svg class="pw-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>All
+            </button>
+            {
+              profiles.map((profile) => (
+                <button class="filter-chip pw-chip" type="button" data-filter-kind="creator" data-filter-value={profile.id} aria-pressed="false">
+                  <span class="pw-av" aria-hidden="true">{profile.initial}</span>{profile.label}
+                </button>
+              ))
+            }
+          </div>
         </div>
-      </div>
-      <div class="works-filter-row">
-        <span class="works-filter-label" id="filter-creator-heading">VTuber</span>
-        <div class="filters" role="group" aria-labelledby="filter-creator-heading">
-          <button class="filter-chip" type="button" data-filter-kind="creator" data-filter-value="" aria-pressed="true">All creators</button>
-          {
-            creators.map((creator) => (
-              <button class="filter-chip" type="button" data-filter-kind="creator" data-filter-value={creator.id} aria-pressed="false">
-                {creator.label}
-              </button>
-            ))
-          }
-        </div>
+        <button class="pw-carr" type="button" data-chips-next hidden aria-label="Show more creators">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
       </div>
       {
         clipTags.length > 0 && (
-          <div class="works-filter-row">
+          <div class="pw-tags works-filter-row">
             <span class="works-filter-label" id="filter-tags-heading">Tags</span>
             <div class="filters" role="group" aria-labelledby="filter-tags-heading">
               <button class="filter-chip" type="button" data-filter-kind="tag" data-filter-value="" aria-pressed="true">All tags</button>
@@ -100,11 +163,13 @@ const stackClips = clips.filter((clip) => !clip.wide).slice(0, 3);
       }
       <a class="pc-clear" href="/works" data-clear hidden>Clear filters</a>
     </div>
+    <p class="sr-only" aria-live="polite" data-works-live></p>
     <WorksFilters client:load />
     <ClipPreview client:visible />
+    <div class="pw-secs">
     {
       blocks.map((block) => (
-        <div class="works-block pc-wsec" data-block={block.section.id} data-section-kind={block.section.kind} data-rows-section>
+        <div class="works-block pc-wsec" id={`sec-${block.section.id}`} data-block={block.section.id} data-section-kind={block.section.kind} data-rows-section>
           <div class="pc-wsec-head">
             <h2 class="works-kicker">{block.section.label}</h2>
             <span class="pc-count" data-block-count></span>
@@ -187,7 +252,11 @@ const stackClips = clips.filter((clip) => !clip.wide).slice(0, 3);
     }
     <div class="pc-empty" data-empty-wrap hidden>
       <p class="works-empty" data-empty>No edits match.</p>
-      <a class="pc-btn pc-btn-blue" href="/works">Clear filters</a>
+      <div class="pc-empty-acts">
+        <button class="pc-btn pc-btn-peach" type="button" data-filter-kind="type" data-filter-value="" data-filter-keep data-empty-other hidden></button>
+        <a class="pc-btn pc-btn-blue" href="/works" data-empty-clear>Clear filters</a>
+      </div>
+    </div>
     </div>
     <ClipViewer client:idle clips={clips.map(toViewerClip)} />
     <ThumbnailViewer client:idle items={thumbnails} />
@@ -234,10 +303,37 @@ const stackClips = clips.filter((clip) => !clip.wide).slice(0, 3);
         var empty = document.querySelector('[data-empty]');
         var emptyWrap = document.querySelector('[data-empty-wrap]');
         if (emptyWrap) emptyWrap.hidden = shown !== 0;
+        var html = document.documentElement;
+        var creatorId = html.getAttribute('data-creator-filter') || '';
+        var typeId = html.getAttribute('data-type-filter') || '';
+        var typeNames = { short: 'short-form videos', long: 'long-form videos', thumbnail: 'thumbnails' };
+        var other = document.querySelector('[data-empty-other]');
+        var clearLink = document.querySelector('[data-empty-clear]');
+        if (other) other.hidden = true;
+        if (clearLink) clearLink.textContent = creatorId ? 'Back to all works' : 'Clear filters';
+        if (clearLink) clearLink.setAttribute('href', query.length && creatorId ? '/works?q=' + encodeURIComponent(query.join(' ')) : '/works');
         if (empty) {
-          empty.textContent = query.length
-            ? 'No works match that search and filter combination.'
-            : 'No works match these filters.';
+          if (query.length) {
+            empty.textContent = 'No works match that search and filter combination.';
+          } else if (creatorId && typeId) {
+            var nameEl = document.querySelector('[data-profile="' + creatorId + '"] [data-profile-name]');
+            empty.textContent = 'No ' + (typeNames[typeId] || 'works') + ' for ' + (nameEl ? nameEl.textContent : 'this creator') + ' yet';
+            var alt = Object.keys(typeNames).filter(function (key) {
+              return key !== typeId && document.querySelector('.clip-card[data-creator="' + creatorId + '"][data-content-type="' + key + '"]');
+            })[0];
+            if (other && alt) {
+              other.hidden = false;
+              other.setAttribute('data-filter-value', alt);
+              other.textContent = 'See ' + typeNames[alt];
+            }
+          } else {
+            empty.textContent = 'No works match these filters.';
+          }
+        }
+        var live = document.querySelector('[data-works-live]');
+        if (live) {
+          var who = creatorId ? document.querySelector('[data-profile="' + creatorId + '"] [data-profile-name]') : null;
+          live.textContent = (who ? 'Showing ' + who.textContent + '\u2019s works. ' : '') + shown + (shown === 1 ? ' work shown' : ' works shown');
         }
         // Long Form tabs: one group shows at a time; a group with no matches loses its tab.
         var tabs = Array.from(document.querySelectorAll('[data-lf-tab]'));
@@ -312,12 +408,32 @@ const stackClips = clips.filter((clip) => !clip.wide).slice(0, 3);
 
 <script>
   import { mountRows } from '../lib/poster-rows';
+  import { mountChips } from '../lib/works-chips';
   mountRows();
-  // The filter bar sticks under the nav; sections size themselves to the space left below it.
-  const bar = document.querySelector<HTMLElement>('[data-works-bar]');
-  if (bar) {
-    const set = () => document.documentElement.style.setProperty('--works-bar-height', `${bar.getBoundingClientRect().height}px`);
-    new ResizeObserver(set).observe(bar);
-    set();
-  }
+  mountChips();
+  // The part that stays under the nav (the search bar on phones, the filter lane on wide screens) is measured so each section fills the space left.
+  const wide = window.matchMedia('(min-width: 1040px)');
+  const top = document.querySelector<HTMLElement>('.pw-top');
+  const lane = document.querySelector<HTMLElement>('[data-works-bar]');
+  const setBar = () => {
+    const stuck = wide.matches ? lane : top;
+    const height = stuck && stuck.offsetParent !== null ? stuck.getBoundingClientRect().height : 0;
+    document.documentElement.style.setProperty('--works-bar-height', `${height}px`);
+  };
+  const observer = new ResizeObserver(setBar);
+  if (top) observer.observe(top);
+  if (lane) observer.observe(lane);
+  wide.addEventListener('change', setBar);
+  setBar();
+  // Arrow keys move between the format tabs, like the Long Form tabs.
+  document.addEventListener('keydown', (event) => {
+    const tab = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-tabs] [role="tab"]');
+    if (!tab || (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft')) return;
+    const tabs = Array.from(document.querySelectorAll<HTMLElement>('[data-tabs] [role="tab"]'));
+    const next = tabs[(tabs.indexOf(tab) + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
+    next.click();
+  });
 </script>
