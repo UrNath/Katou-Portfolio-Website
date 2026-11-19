@@ -357,3 +357,8 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 - Flick/momentum now also handles touch (rows set `touch-action: pan-y`), so All-works Shorts/Thumbnails coast with the flick speed.
 - Menu: Works no longer has the yellow primary highlight.
 - Home intro curtain: the hero's entrance animations wait (`html.intro-wait`) until the curtain starts lifting.
+
+## Round 8: phone density (≤768px)
+- Tokens in `poster.css`: `--pc-bw` (outline width, 3px → 2px), `--pc-k` (radius/solid-shadow scale, 1 → .62), `--pc-pad` 16px; all Poster borders, radii and shadows now use them. Desktop values unchanged.
+- Phone block at the end of `poster.css` (and one for Meet the Clients in `scroll-portfolio.css`): bar 52px, wordmark 17px, headings 18-26px, body 15px, buttons/chips/inputs 40-42px, smaller hero art, cards and tighter section padding.
+- Featured carousel card width capped at 50% of the screen on phones.
