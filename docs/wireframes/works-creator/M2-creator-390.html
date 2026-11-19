@@ -30,12 +30,12 @@
 .wf.m .srch{flex:1;width:auto;min-width:0}
 .wf .srch input{border:0;outline:0;background:transparent;width:100%;min-width:0;font-size:15px}
 .wf .srch input::placeholder{color:#555}
-.wf .srch:focus-within{outline:3px solid #1a1a1a;outline-offset:2px}
+.wf .srch:focus-within,.wf .srch.f{outline:3px solid #1a1a1a;outline-offset:2px;background:#d4d4d4}
 .wf .sort{min-height:44px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;font-weight:700;padding:0 14px;white-space:nowrap;display:flex;align-items:center;gap:6px}
 .wf .jump{display:flex;gap:4px;margin-top:20px;border-bottom:2px solid #bbb}
-.wf .jump a{min-height:44px;display:flex;align-items:center;gap:6px;padding:0 14px;color:#1a1a1a;font-weight:700;text-decoration:none;font-size:15px}
+.wf .jump a{min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 20px;color:#1a1a1a;text-decoration:none;border-bottom:4px solid transparent;margin-bottom:-2px}
 .wf.m .jump{margin-top:14px;gap:0}
-.wf.m .jump a{padding:0 8px;font-size:13.5px;flex:1;justify-content:center}
+.wf.m .jump a{padding:0 8px;flex:1}
 .wf .lbl{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#555}
 .wf .chiprow{margin-top:20px;display:flex;align-items:center;gap:14px}
 .wf.m .chiprow{margin-top:14px;display:block}
@@ -48,6 +48,13 @@
 .wf .chip.all{padding-left:14px}
 .wf .av{width:26px;height:26px;border-radius:50%;background:#c4c4c4;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#1a1a1a}
 .wf .chip.on .av{background:#fff}
+.wf.m .chip{min-height:34px;font-size:13px;padding:0 10px 0 4px;gap:5px;position:relative}
+.wf.m .chip.all{padding-left:9px}
+.wf.m .chip:before,.wf.m .carr:before{content:"";position:absolute;inset:-5px -2px}
+.wf.m .av{width:20px;height:20px;font-size:11px}
+.wf.m .carr{width:34px;height:34px;position:relative}
+.wf.m .chips{gap:6px}
+.wf.m .cf{gap:6px}
 .wf .sec{margin-top:36px}
 .wf.m .sec{margin-top:28px}
 .wf .sh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
@@ -82,7 +89,8 @@
 .wf .more{margin-top:16px;min-height:44px;border:2px dashed #777;background:#fff;border-radius:8px;font-weight:700;padding:0 18px;color:#444}
 .wf.m .more{width:100%}
 .wf .back{margin-bottom:14px}
-.wf .backbtn{min-height:44px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;font-weight:700;padding:0 16px 0 12px;display:inline-flex;align-items:center;gap:8px}
+.wf .backbtn{width:44px;height:44px;border:2px solid #1a1a1a;border-radius:50%;background:#fff;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.wf.m .back{display:none}
 .wf .prof{display:flex;gap:32px;align-items:center}
 .wf.m .prof{display:block}
 .wf .avatar{border-radius:50%;background:#cfcfcf;border:3px solid #777;display:flex;align-items:center;justify-content:center;font-weight:800;color:#444;flex:none}
@@ -91,19 +99,15 @@
 .wf .bio{margin-top:10px;max-width:640px;color:#333}
 .wf .bio i{font-style:normal;border:1px dashed #888;padding:0 4px}
 .wf .stats{margin-top:10px;font-weight:700;display:inline-block}
-.wf .cta{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 28px;background:#1a1a1a;color:#fff;font-weight:800;border-radius:8px;text-decoration:none;font-size:16px;border:2px solid #1a1a1a}
-.wf.m .cta{width:100%;margin-top:14px}
 .wf .pmob{display:flex;gap:14px;align-items:center}
 .wf .trow{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid #1a1a1a;margin-top:28px}
 .wf.m .trow{display:block;margin-top:18px;border-bottom:0}
 .wf .tabs{display:flex;gap:4px}
 .wf.m .tabs{border-bottom:2px solid #1a1a1a}
-.wf.m .tabs .tab{flex:1;padding:4px;font-size:14px;min-height:56px;display:flex;flex-direction:column;justify-content:center;align-items:center;line-height:1.15}
-.wf.m .tabs .tab .n{margin:2px 0 0;font-size:13px}
-.wf.m .cta{margin-bottom:20px}
-.wf .tab{min-height:48px;border:0;border-bottom:5px solid transparent;background:transparent;font-weight:700;padding:0 18px;font-size:16px}
-.wf .tab.on{border-bottom-color:#1a1a1a;font-weight:800}
-.wf .tab .n{color:#444;font-weight:600;margin-left:4px}
+.wf .tab{min-height:44px;border:0;border-bottom:4px solid transparent;background:transparent;padding:0 22px;display:inline-flex;align-items:center;justify-content:center;color:#666}
+.wf .tab.on{border-bottom-color:#1a1a1a;color:#1a1a1a}
+.wf.m .tabs .tab{flex:1;padding:0}
+.wf.m .pmob{margin-bottom:4px}
 .wf .trow .tools{padding-bottom:6px}
 .wf.m .trow .tools{margin-top:12px}
 .wf .gridwrap{margin-top:22px}
@@ -120,7 +124,6 @@
 .wf.cmp .back{margin-bottom:8px}
 .wf.cmp .bio{margin-top:4px}
 .wf.cmp .stats{margin-top:6px}
-.wf.cmp .cta{margin-top:10px;margin-bottom:12px}
 .wf.cmp .tabs{margin-top:0}
 .wf.cmp .trow{margin-top:10px}
 .wf .lane{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:20px;border-bottom:2px solid #bbb}
@@ -131,8 +134,11 @@
 .wf.m .cf{margin-top:12px;padding-bottom:0}
 .wf.m .chips{overflow:visible;-webkit-mask-image:none;mask-image:none;flex-wrap:nowrap;padding:0}
 .wf .carr{width:44px;height:44px;border:2px solid #1a1a1a;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
-.wf .mbar{padding:8px 16px;border-bottom:1px solid #ccc;background:#fff}
+.wf .mbar{padding:8px 16px;border-bottom:1px solid #ccc;background:#fff;display:flex;align-items:center;gap:8px}
+.wf .mbar .backbtn{display:inline-flex}
 .wf .mbar .srch{width:100%}
+.wf .mbar .pin{top:-8px;left:-6px}
+.wf .mbar .srch .pin{left:auto;right:8px;top:-10px}
 .wf .pager{display:flex;gap:8px;margin-left:auto}
 .wf.m .pager{display:none}
 .wf .strip .pin{top:8px;left:8px}
@@ -151,4 +157,4 @@
 .wf .sg li .pin{position:static;flex:none;margin-top:1px}
 .wf .sg ul li:before{content:"\2022";font-weight:800}
 .wf .sg code{background:#eee;padding:1px 5px;border-radius:4px;font-size:13px}
-</style></head><body><div class="wf m"><div class="nav a"><span class="logo">NassuKatou</span><i class="pin in">1</i><button type="button" class="menu" aria-label="Open menu">Menu</button></div><div class="mbar a"><i class="pin">3</i><label class="srch a"><span class="sr">Search works</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" placeholder="Search titles or clients"></label></div><div class="page"><div class="back a"><i class="pin">8</i><button type="button" class="backbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><path d="M15 5l-7 7 7 7"/></svg> Back to all works</button></div><div class="pmob"><div class="avatar a" style="width:72px;height:72px;font-size:24px"><i class="pin">9</i>C</div><div><h1 style="font-size:30px;margin:0">chiseyi</h1><p class="handle">@[handle placeholder]</p></div></div><p class="bio" style="margin-top:8px;font-size:14px"><i>[Bio placeholder, 2 lines max]</i></p><p class="stats">X shorts · Y long-form · Z thumbnails<i class="pin in">10</i></p><a class="cta a" href="#"><i class="pin">11</i>Start a project</a><div class="tabs a" role="tablist" aria-label="Works by format"><i class="pin">12</i><button type="button" role="tab" aria-selected="true" class="tab on">Short-form<span class="n">([Y])</span></button><button type="button" role="tab" aria-selected="false" class="tab">Long-form<span class="n">([Y])</span></button><button type="button" role="tab" aria-selected="false" class="tab">Thumbnails<span class="n">([Z])</span></button></div><div class="gridwrap a"><i class="pin">13</i><div class="sbox"><div class="strip" style="--n:3;--gap:8px;grid-template-rows:repeat(2,auto)"><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div><div class="card sel"><div class="pw a"><i class="pin">14</i><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button><span class="ovt"><span class="bar"><i style="width:40%"></i></span><button type="button" class="open" aria-label="Open full video">Open</button></span></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div></div><div class="prog" aria-hidden="true"><i style="width:33%"></i></div></div></div></div></div></body></html>
+</style></head><body><div class="wf m"><div class="nav a"><span class="logo">NassuKatou</span><i class="pin in">1</i><button type="button" class="menu" aria-label="Open menu">Menu</button></div><div class="mbar a"><button type="button" class="backbtn a" aria-label="Back to all works" title="Back to all works"><i class="pin">8</i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><path d="M15 5l-7 7 7 7"/></svg></button><label class="srch a"><i class="pin">3</i><span class="sr">Search works</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" placeholder="Search titles or clients"></label></div><div class="page"><div class="pmob"><div class="avatar a" style="width:72px;height:72px;font-size:24px"><i class="pin">9</i>C</div><div><h1 style="font-size:30px;margin:0">chiseyi</h1><p class="handle">@[handle placeholder]</p></div></div><p class="bio" style="margin-top:8px;font-size:14px"><i>[Bio placeholder, 2 lines max]</i></p><p class="stats" style="margin-bottom:14px">X shorts · Y long-form · Z thumbnails<i class="pin in">10</i></p><div class="tabs a" role="tablist" aria-label="Works by format"><i class="pin">12</i><button type="button" role="tab" aria-selected="true" aria-label="Short-form videos" title="Short-form videos" class="tab on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 10l3 2-3 2z"/></svg></button><button type="button" role="tab" aria-selected="false" aria-label="Long-form videos" title="Long-form videos" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><rect x="2.5" y="6" width="19" height="12" rx="2.2"/><path d="M10.5 9.6l3.8 2.4-3.8 2.4z"/></svg></button><button type="button" role="tab" aria-selected="false" aria-label="Thumbnails" title="Thumbnails" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><rect x="3" y="4" width="18" height="16" rx="2.2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5.5-5 4 3.5L16 14l4 4"/></svg></button></div><div class="gridwrap a"><i class="pin">13</i><div class="sbox"><div class="strip" style="--n:3;--gap:8px;grid-template-rows:repeat(2,auto)"><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div><div class="card sel"><div class="pw a"><i class="pin">14</i><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button><span class="ovt"><span class="bar"><i style="width:40%"></i></span><button type="button" class="open" aria-label="Open full video">Open</button></span></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div><div class="card"><div class="pw a"><button type="button" class="poster ps" aria-label="Work title placeholder, preview"><span class="x"></span><span class="dur">0:00</span></button></div></div></div><div class="prog" aria-hidden="true"><i style="width:33%"></i></div></div></div></div></div></body></html>

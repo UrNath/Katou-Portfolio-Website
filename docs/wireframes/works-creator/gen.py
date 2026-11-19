@@ -33,12 +33,12 @@ CSS = """
 .wf.m .srch{flex:1;width:auto;min-width:0}
 .wf .srch input{border:0;outline:0;background:transparent;width:100%;min-width:0;font-size:15px}
 .wf .srch input::placeholder{color:#555}
-.wf .srch:focus-within{outline:3px solid #1a1a1a;outline-offset:2px}
+.wf .srch:focus-within,.wf .srch.f{outline:3px solid #1a1a1a;outline-offset:2px;background:#d4d4d4}
 .wf .sort{min-height:44px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;font-weight:700;padding:0 14px;white-space:nowrap;display:flex;align-items:center;gap:6px}
 .wf .jump{display:flex;gap:4px;margin-top:20px;border-bottom:2px solid #bbb}
-.wf .jump a{min-height:44px;display:flex;align-items:center;gap:6px;padding:0 14px;color:#1a1a1a;font-weight:700;text-decoration:none;font-size:15px}
+.wf .jump a{min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 20px;color:#1a1a1a;text-decoration:none;border-bottom:4px solid transparent;margin-bottom:-2px}
 .wf.m .jump{margin-top:14px;gap:0}
-.wf.m .jump a{padding:0 8px;font-size:13.5px;flex:1;justify-content:center}
+.wf.m .jump a{padding:0 8px;flex:1}
 .wf .lbl{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#555}
 .wf .chiprow{margin-top:20px;display:flex;align-items:center;gap:14px}
 .wf.m .chiprow{margin-top:14px;display:block}
@@ -51,6 +51,13 @@ CSS = """
 .wf .chip.all{padding-left:14px}
 .wf .av{width:26px;height:26px;border-radius:50%;background:#c4c4c4;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#1a1a1a}
 .wf .chip.on .av{background:#fff}
+.wf.m .chip{min-height:34px;font-size:13px;padding:0 10px 0 4px;gap:5px;position:relative}
+.wf.m .chip.all{padding-left:9px}
+.wf.m .chip:before,.wf.m .carr:before{content:"";position:absolute;inset:-5px -2px}
+.wf.m .av{width:20px;height:20px;font-size:11px}
+.wf.m .carr{width:34px;height:34px;position:relative}
+.wf.m .chips{gap:6px}
+.wf.m .cf{gap:6px}
 .wf .sec{margin-top:36px}
 .wf.m .sec{margin-top:28px}
 .wf .sh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
@@ -85,7 +92,8 @@ CSS = """
 .wf .more{margin-top:16px;min-height:44px;border:2px dashed #777;background:#fff;border-radius:8px;font-weight:700;padding:0 18px;color:#444}
 .wf.m .more{width:100%}
 .wf .back{margin-bottom:14px}
-.wf .backbtn{min-height:44px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;font-weight:700;padding:0 16px 0 12px;display:inline-flex;align-items:center;gap:8px}
+.wf .backbtn{width:44px;height:44px;border:2px solid #1a1a1a;border-radius:50%;background:#fff;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.wf.m .back{display:none}
 .wf .prof{display:flex;gap:32px;align-items:center}
 .wf.m .prof{display:block}
 .wf .avatar{border-radius:50%;background:#cfcfcf;border:3px solid #777;display:flex;align-items:center;justify-content:center;font-weight:800;color:#444;flex:none}
@@ -94,19 +102,15 @@ CSS = """
 .wf .bio{margin-top:10px;max-width:640px;color:#333}
 .wf .bio i{font-style:normal;border:1px dashed #888;padding:0 4px}
 .wf .stats{margin-top:10px;font-weight:700;display:inline-block}
-.wf .cta{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 28px;background:#1a1a1a;color:#fff;font-weight:800;border-radius:8px;text-decoration:none;font-size:16px;border:2px solid #1a1a1a}
-.wf.m .cta{width:100%;margin-top:14px}
 .wf .pmob{display:flex;gap:14px;align-items:center}
 .wf .trow{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid #1a1a1a;margin-top:28px}
 .wf.m .trow{display:block;margin-top:18px;border-bottom:0}
 .wf .tabs{display:flex;gap:4px}
 .wf.m .tabs{border-bottom:2px solid #1a1a1a}
-.wf.m .tabs .tab{flex:1;padding:4px;font-size:14px;min-height:56px;display:flex;flex-direction:column;justify-content:center;align-items:center;line-height:1.15}
-.wf.m .tabs .tab .n{margin:2px 0 0;font-size:13px}
-.wf.m .cta{margin-bottom:20px}
-.wf .tab{min-height:48px;border:0;border-bottom:5px solid transparent;background:transparent;font-weight:700;padding:0 18px;font-size:16px}
-.wf .tab.on{border-bottom-color:#1a1a1a;font-weight:800}
-.wf .tab .n{color:#444;font-weight:600;margin-left:4px}
+.wf .tab{min-height:44px;border:0;border-bottom:4px solid transparent;background:transparent;padding:0 22px;display:inline-flex;align-items:center;justify-content:center;color:#666}
+.wf .tab.on{border-bottom-color:#1a1a1a;color:#1a1a1a}
+.wf.m .tabs .tab{flex:1;padding:0}
+.wf.m .pmob{margin-bottom:4px}
 .wf .trow .tools{padding-bottom:6px}
 .wf.m .trow .tools{margin-top:12px}
 .wf .gridwrap{margin-top:22px}
@@ -123,7 +127,6 @@ CSS = """
 .wf.cmp .back{margin-bottom:8px}
 .wf.cmp .bio{margin-top:4px}
 .wf.cmp .stats{margin-top:6px}
-.wf.cmp .cta{margin-top:10px;margin-bottom:12px}
 .wf.cmp .tabs{margin-top:0}
 .wf.cmp .trow{margin-top:10px}
 .wf .lane{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:20px;border-bottom:2px solid #bbb}
@@ -134,9 +137,11 @@ CSS = """
 .wf.m .cf{margin-top:12px;padding-bottom:0}
 .wf.m .chips{overflow:visible;-webkit-mask-image:none;mask-image:none;flex-wrap:nowrap;padding:0}
 .wf .carr{width:44px;height:44px;border:2px solid #1a1a1a;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
-.wf .mbar{padding:8px 16px;border-bottom:1px solid #ccc;background:#fff}
+.wf .mbar{padding:8px 16px;border-bottom:1px solid #ccc;background:#fff;display:flex;align-items:center;gap:8px}
+.wf .mbar .backbtn{display:inline-flex}
 .wf .mbar .srch{width:100%}
-.wf .mbar .pin{top:-6px;left:4px}
+.wf .mbar .pin{top:-8px;left:-6px}
+.wf .mbar .srch .pin{left:auto;right:8px;top:-10px}
 .wf .pager{display:flex;gap:8px;margin-left:auto}
 .wf.m .pager{display:none}
 .wf .strip .pin{top:8px;left:8px}
@@ -162,9 +167,12 @@ def svg(path, size=18, extra=''):
     return f'<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" {extra}>{path}</svg>'
 I_SEARCH = svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>')
 I_CHECK = svg('<path d="M5 12l5 5 9-10"/>', 16)
-I_BACK = svg('<path d="M15 5l-7 7 7 7"/>')
+I_BACK = svg('<path d="M15 5l-7 7 7 7"/>', 20)
 I_NEXT = svg('<path d="M9 5l7 7-7 7"/>')
 I_PREV = svg('<path d="M15 5l-7 7 7 7"/>')
+I_SHORT = svg('<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 10l3 2-3 2z"/>', 22)
+I_LONG = svg('<rect x="2.5" y="6" width="19" height="12" rx="2.2"/><path d="M10.5 9.6l3.8 2.4-3.8 2.4z"/>', 22)
+I_THUMB = svg('<rect x="3" y="4" width="18" height="16" rx="2.2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5.5-5 4 3.5L16 14l4 4"/>', 22)
 I_DOWN = svg('<path d="M6 9l6 6 6-6"/>', 14)
 
 def pin(n, inline=False):
@@ -178,9 +186,9 @@ def nav(m, n1=True):
         return f'<div class="nav a"><span class="logo">NassuKatou</span>{p}<button type="button" class="menu" aria-label="Open menu">Menu</button></div>'
     return f'<div class="nav a"><span style="display:flex;align-items:center"><span class="logo">NassuKatou</span>{p}</span><div class="links"><span>Home</span><span class="on">Works</span><span>Clients</span><span>Pricing</span><span>Terms</span><span>Contact</span></div></div>'
 
-def search(pn=None):
+def search(pn=None, f=False):
     p = pin(pn) if pn else ''
-    return f'<label class="srch a">{p}<span class="sr">Search works</span>{I_SEARCH}<input type="search" placeholder="Search titles or clients"></label>'
+    return f'<label class="srch a{" f" if f else ""}">{p}<span class="sr">Search works</span>{I_SEARCH}<input type="search" placeholder="Search titles or clients"></label>'
 
 def sortbtn(pn=None, m=False):
     p = pin(pn) if pn else ''
@@ -237,38 +245,36 @@ def section(title, count, body, subtabs=False, pn=None):
     return f'<section class="sec"><div class="sh"><h2>{title}</h2><span class="num">{count}</span>{p}{st}{pg}</div>{body}</section>'
 
 def jump(m):
-    lab = ('Short-form', 'Long-form', 'Thumbnails') if m else ('Short-form videos', 'Long-form videos', 'Thumbnails')
-    return f'<nav class="jump" aria-label="Jump to section">' + ''.join(f'<a href="#">{l}' + ('' if m else ' <span class="num">[N]</span>') + '</a>' for l in lab) + '</nav>'
+    items = [(I_SHORT, 'Short-form videos'), (I_LONG, 'Long-form videos'), (I_THUMB, 'Thumbnails')]
+    return '<nav class="jump" aria-label="Jump to section">' + ''.join(f'<a href="#" aria-label="{l}" title="{l}">{i}</a>' for i, l in items) + '</nav>'
 
 def tabs(active, m, pn=13):
-    labs = [('short', 'Short-form', '[Y]'), ('long', 'Long-form', '[Y]'), ('thumb', 'Thumbnails', '[Z]')]
+    labs = [('short', 'Short-form videos', I_SHORT), ('long', 'Long-form videos', I_LONG), ('thumb', 'Thumbnails', I_THUMB)]
     out = []
-    for key, lab, n in labs:
+    for key, lab, ic in labs:
         on = key == active
-        nn = '0' if (active == 'long' and key == 'long') else n
-        out.append(f'<button type="button" role="tab" aria-selected="{"true" if on else "false"}" class="tab{" on" if on else ""}">{lab}<span class="n">({nn})</span></button>')
+        out.append(f'<button type="button" role="tab" aria-selected="{"true" if on else "false"}" aria-label="{lab}" title="{lab}" class="tab{" on" if on else ""}">{ic}</button>')
     return f'<div class="tabs a" role="tablist" aria-label="Works by format">{pin(pn)}{"".join(out)}</div>'
 
 def profile(m, compact=False):
-    back = f'<div class="back a">{pin(9)}<button type="button" class="backbtn">{I_BACK} Back to all works</button></div>'
+    back = f'<div class="back a">{pin(9)}<button type="button" class="backbtn" aria-label="Back to all works" title="Back to all works">{I_BACK}</button></div>'
     if m:
         size = 56 if compact else 72
         bio = '<p class="bio" style="margin-top:8px;font-size:14px"><i>[Bio placeholder, 2 lines max]</i></p>'
-        return (back + f'<div class="pmob"><div class="avatar a" style="width:{size}px;height:{size}px;font-size:{size//3}px">{pin(10)}C</div>'
+        return (f'<div class="pmob"><div class="avatar a" style="width:{size}px;height:{size}px;font-size:{size//3}px">{pin(10)}C</div>'
                 f'<div><h1 style="font-size:{28 if compact else 30}px;margin:0">chiseyi</h1><p class="handle">@[handle placeholder]</p></div></div>'
-                + bio + f'<p class="stats">X shorts · Y long-form · Z thumbnails{pin(11, True)}{pin(17, True) if compact else ""}</p>'
-                + f'<a class="cta a" href="#">{pin(12)}Start a project</a>')
+                + bio + f'<p class="stats" style="margin-bottom:14px">X shorts · Y long-form · Z thumbnails{pin(11, True)}{pin(17, True) if compact else ""}</p>')
     return (back + f'<div class="prof"><div class="avatar a" style="width:136px;height:136px;font-size:44px">{pin(10)}C</div>'
             f'<div class="pinfo"><h1 style="margin:0">chiseyi</h1><p class="handle">@[handle placeholder]</p>'
             f'<p class="bio"><i>[Bio placeholder: 1–2 sentences, text to be supplied]</i></p>'
-            f'<p class="stats">X shorts · Y long-form · Z thumbnails{pin(11, True)}</p></div>'
-            f'<a class="cta a" href="#">{pin(12)}Start a project</a></div>')
+            f'<p class="stats">X shorts · Y long-form · Z thumbnails{pin(11, True)}</p></div></div>')
 
 def toolbar(pns=(3, 4), m=False):
     return f'<div class="tools">{search(pns[0])}</div>'
 
-def mbar(pn=3):
-    return f'<div class="mbar a">{pin(pn)}{search()}</div>'
+def mbar(pn=3, back=False, focus=False):
+    bk = f'<button type="button" class="backbtn a" aria-label="Back to all works" title="Back to all works">{pin(9)}{I_BACK}</button>' if (back and not focus) else ''
+    return f'<div class="mbar a">{bk}{search(18 if focus else 3, True if focus else False)}</div>'
 
 FOOT = '<div class="foot">Footer placeholder (unchanged from the site)</div>'
 
@@ -292,12 +298,12 @@ def default_board(m):
         + section('Thumbnails', '[M]', strip(4, 1, [card('t') for _ in range(4)], False, 50)) + FOOT)
     return wrap(m, nav(m) + f'<div class="page">{body}</div>')
 
-def creator_board(m, compact=False):
+def creator_board(m, compact=False, focus=False):
     if m:
         cards = [card('s', state='tap' if i == 1 else None, cap=False, pn=15 if i == 1 else None) for i in range(6)]
         body = (profile(True, compact) + tabs('short', True)
                 + f'<div class="gridwrap a">{pin(14)}{strip(3, 2, cards, True, 33)}</div>')
-        return wrap(m, nav(m) + mbar() + f'<div class="page">{body}</div>', ' cmp' if compact else '')
+        return wrap(m, nav(m) + mbar(back=True, focus=focus) + f'<div class="page">{body}</div>', ' cmp' if compact else '')
     cards = [card('s', state='hov' if i == 2 else None, pn=8 if i == 2 else None) for i in range(12)]
     body = (profile(False) + f'<div class="trow">{tabs("short", False)}<div class="tools">{search(3)}</div></div>'
             + '<p class="sticky">Tabs row sticks under the nav while the grid scrolls</p>'
@@ -310,27 +316,28 @@ def empty_board(m):
            '<p>[Placeholder copy: nothing has been added to this tab yet.]</p>'
            '<div class="acts"><button type="button" class="btn2">See short-form (X)</button><button type="button" class="btn2">Back to all works</button></div></div>')
     if m:
-        return wrap(m, nav(m) + mbar() + '<div class="page">' + profile(True) + tabs('long', True) + emp + '</div>')
+        return wrap(m, nav(m) + mbar(back=True) + '<div class="page">' + profile(True) + tabs('long', True) + emp + '</div>')
     body = profile(False) + f'<div class="trow">{tabs("long", False)}<div class="tools">{search(3)}</div></div>' + emp + FOOT
     return wrap(m, nav(m) + f'<div class="page">{body}</div>')
 
 NOTES = [
  (1, 'Site nav unchanged (existing SiteBar).'),
  (2, 'Title and live count of items that match the current filters (existing).'),
- (3, 'Search by title or client (existing), stored as <code>q</code> in the URL. Desktop: top right, easing down into the tabs row in creator state. Mobile: a bar under the nav that stays fixed at the top while scrolling. It sits above the content in the page flow, never over it, and is in the same place in both states.'),
- (5, 'Creator chips in the same lane as the content-type links, pushed to the right, same order. Mobile: the lane drops below the links. Only whole chips are shown; a › arrow appears when more creators exist (and ‹ after moving on). Active = filled + check, not colour. <code>aria-pressed</code>, 44px tall. Choosing one starts the profile transition.'),
+ (3, 'Search by title or client (existing), stored as <code>q</code> in the URL. Desktop: top right, easing down into the tabs row in creator state. Mobile: a bar under the nav that stays fixed at the top while scrolling, above the content and in the same place in both states. In creator state it sits on the same row as the back button, centred between it and the right edge.'),
+ (5, 'Creator chips in the same lane as the content-type icons, pushed to the right, same order. Mobile: the lane drops below the icons and the chips are smaller (34px, 44px touch area) so at least 3 always fit. Only whole chips are shown; a › arrow appears when more creators exist (and ‹ after moving on). Active = filled + check, not colour. <code>aria-pressed</code>. Choosing one starts the profile transition.'),
  (6, 'Section header with live count. Desktop adds ‹ › buttons that move the row one screen; mobile swipes, with the bar showing position. Long-form keeps Vlogs / MVs / Normal Videos tabs; a group with no items loses its tab (existing).'),
  (7, 'Card: 9:16 short-form, 16:9 long-form and thumbnails. Fixed-ratio box so nothing shifts. Duration badge and “Edit for @…” credit kept; thumbnails have no credit line (existing).'),
  (8, 'Desktop hover or keyboard focus plays a muted 5s MP4 preview. Title is also in the accessible name and the viewer: nothing is hover-only.'),
- (9, 'Back to all works. Returns to the default state; focus goes back to the chiseyi chip.'),
+ (9, 'Back button, icon only (accessible name “Back to all works”, tooltip on desktop). Returns to the default state; focus goes back to the chiseyi chip. Mobile: it sits in the search row, left of the search bar.'),
  (10, 'Profile header: neutral grey avatar with initial, name, handle and bio placeholders. No external links unless verified.'),
  (11, 'Stats: counts computed from portfolio items only. No followers, likes or views.'),
- (12, 'Primary CTA “Start a project” links to Contact. No Follow button.'),
- (13, 'Tabs: Short-form / Long-form / Thumbnails with counts. Search stays available. Arrow keys move between tabs.'),
+ (12, 'Content type icons replace the text labels, in the lane (jump links) and in the profile tabs: tall phone = short-form, wide screen with play = long-form, picture = thumbnails. Each has an accessible name and a tooltip; the active tab has an underline plus a darker icon.'),
+ (13, 'Tabs: Short-form / Long-form / Thumbnails as icons. Search stays available. Arrow keys move between tabs.'),
  (14, 'Rows scroll sideways with snapping, so cards stop on whole-card edges and nothing is cut off. Desktop shows 6 columns and mobile 3 (16:9 tabs: 4 and 2). Creator state has 2 rows. Move with swipe (mobile), ‹ › (desktop) or the keyboard; the bar shows position. No Load more.'),
  (15, 'Touch: first tap plays the preview in the card; the Open button (44px) opens the full video. Second tap on the card stops it.'),
- (16, 'Empty tab: message plus two exits. Count shows 0.'),
- (17, 'Short screen (667px tall): at 667px or less of height the header tightens (smaller avatar and gaps). Measured here: header, tabs, search/sort and the first full grid row end at 648px, so they fit in the first view.'),
+ (16, 'Empty tab: message plus two exits.'),
+ (18, 'Tapping the search bar expands it to the full row (the back button slides away) and darkens its background a little. It restores when focus leaves.'),
+ (17, 'Short screen (667px tall): at 667px or less of height the header tightens (smaller avatar and gaps). The header, search row, tabs and the first full grid row fit in the first view (checked at 667px).'),
 ]
 
 def spec_board():
@@ -347,10 +354,10 @@ def spec_board():
      'Media: posters (WebP, fixed ratio) load first; first row eager, the rest lazy. MP4 previews are not requested until hover, focus or tap; one preview at a time; stopped on leave, blur or tab change.',
     ]
     a11y = [
-     'Touch targets 44px or more: chips, tabs, back, sort, search, CTA, Open.',
+     'Touch targets 44px or more: chips (34px visible, 44px hit area on mobile), icon tabs, back, search, Open.',
      'Visible 3px focus outline on every control.',
-     'Search, sort and each icon-only control have labels; chip row is a labelled group; tabs use the tab pattern.',
-     'Active states use fill plus check or underline, not colour alone.',
+     'Search and each icon-only control (content types, back) have labels and tooltips; chip row is a labelled group; tabs use the tab pattern.',
+     'Active states use fill plus check or underline, not colour alone. Icon tabs add an underline.',
      'Info is never hover-only: title and credit are in captions (desktop), the accessible name and the viewer.',
      'Text 12px or larger; grayscale text passes 4.5:1.',
      'No sideways page scroll; only the mobile chip row scrolls inside its own box.',
@@ -372,7 +379,6 @@ def spec_board():
      'Rename ids chi → chiseyi and miu → miuoni, or keep the ids and change labels only (old shared links)?',
      'Keep the Content filter row (All types / Short / Long / Thumbnails)? Here the section links and tabs replace it, and <code>type=</code> would still work in URLs.',
      'Own URL per creator (<code>/works/chiseyi</code>) or the query string?',
-     'Should “Start a project” carry the creator into the contact form? Not assumed.',
     ]
     ul = lambda xs: '<ul>' + ''.join(f'<li><span>{x}</span></li>' for x in xs) + '</ul>'
     inner = (f'<div class="spec"><p class="eyebrow">Works redesign wireframe</p><h1>Annotations, assumptions, open questions</h1>'
@@ -390,6 +396,7 @@ BOARDS = {
     'M2-creator-390': ('Mobile 390: creator (chiseyi)', 390, lambda: creator_board(True)),
     'M3-empty-390': ('Mobile 390: empty tab', 390, lambda: empty_board(True)),
     'M4-short-390x667': ('Mobile 390×667: short screen', 390, lambda: creator_board(True, compact=True)),
+    'M5-search-390': ('Mobile 390: search focused', 390, lambda: creator_board(True, focus=True)),
     'S1-spec': ('Annotations and open questions', 1440, spec_board),
 }
 
