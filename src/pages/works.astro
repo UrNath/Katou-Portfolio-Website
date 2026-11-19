@@ -21,8 +21,8 @@ const blocks = workSections
     return { section, clips: clipsInSection(section, clips), thumbs: [] };
   })
   .filter((block) => block.clips.length > 0 || block.thumbs.length > 0);
-const landscapeThumbs = thumbnails.filter((thumb) => thumb.orientation !== 'vertical');
-const verticalThumbs = thumbnails.filter((thumb) => thumb.orientation === 'vertical');
+const landscapeThumbs = thumbnails.filter((thumb) => (thumb.ratio ?? 16 / 9) >= 1);
+const verticalThumbs = thumbnails.filter((thumb) => (thumb.ratio ?? 16 / 9) < 1);
 const editLabel = `${clips.length} video edits · ${thumbnails.length} thumbnails`;
 const names = creators.map((creator) => creator.label).join(', ');
 const sectionNames = blocks.map((block) => block.section.label).join(', ');
@@ -36,7 +36,7 @@ const presentTypes = (['short', 'long', 'thumbnail'] as WorkType[]).filter((type
   blocks.some((block) => block.section.kind in typeOfKind && typeOfKind[block.section.kind as keyof typeof typeOfKind] === type),
 );
 const tabLabel: Record<WorkType, string> = { short: 'Shorts', long: 'Long form', thumbnail: 'Thumbnails' };
-const avatars: Record<string, string> = { pidge: '/avatars/pidge.webp', chi: '/avatars/chi.webp' };
+const avatars: Record<string, string> = { pidge: '/avatars/pidge.webp', chi: '/avatars/chi.webp', miu: '/avatars/miu.webp' };
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 // Everything the profile view shows is computed from the portfolio data. No bio or avatar exists yet, so none is shown.
 const profiles = creators.map((creator) => {
@@ -187,9 +187,6 @@ const profileCss = profiles
               <button class="pc-arrow" type="button" data-rows-next aria-label={`Next ${block.section.label}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
             </div>}
           </div>
-          {block.section.kind === 'thumbnail' && (
-            <p class="works-thumbnails-note">A gallery of thumbnails used for these videos. Design credit may vary.</p>
-          )}
           {
             block.section.kind === 'thumbnail' ? (
               <div class="pc-thumbs">
@@ -203,7 +200,7 @@ const profileCss = profiles
                     <div class="works-grid thumb-grid pc-rows pc-rows-wide" data-rows>
                   {landscapeThumbs.map((thumb) => (
                     <article
-                      class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
+                      class:list={['clip-card', 'thumb-card', (thumb.ratio ?? 16 / 9) < 1 && 'is-portrait']}
                       data-creator={creatorIdOf(thumb.creator)}
                       data-content-type="thumbnail"
                       data-tags=""
@@ -215,7 +212,7 @@ const profileCss = profiles
                         data-open-thumb={thumb.id}
                         aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
                       >
-                        <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
+                        <span class="clip-frame" style={`--r: ${thumb.ratio ?? 16 / 9}`}>
                           <img src={thumb.image} alt="" loading="lazy" decoding="async" />
                         </span>
                       </button>
@@ -237,7 +234,7 @@ const profileCss = profiles
                     <div class="works-grid thumb-grid pc-rows pc-rows-tall thumb-vert" data-rows>
                   {verticalThumbs.map((thumb) => (
                     <article
-                      class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
+                      class:list={['clip-card', 'thumb-card', (thumb.ratio ?? 16 / 9) < 1 && 'is-portrait']}
                       data-creator={creatorIdOf(thumb.creator)}
                       data-content-type="thumbnail"
                       data-tags=""
@@ -249,7 +246,7 @@ const profileCss = profiles
                         data-open-thumb={thumb.id}
                         aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
                       >
-                        <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
+                        <span class="clip-frame" style={`--r: ${thumb.ratio ?? 16 / 9}`}>
                           <img src={thumb.image} alt="" loading="lazy" decoding="async" />
                         </span>
                       </button>

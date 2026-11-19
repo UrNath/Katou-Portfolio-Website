@@ -140,7 +140,10 @@ export default function WorksFilters() {
 
       // The clicked chip's avatar becomes the profile picture; the search bar eases to its new place.
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!reduce && (entering || leaving) && 'startViewTransition' in document) {
+      // Leaving a profile the avatar has scrolled out of: skip the avatar flight and use the plain fade.
+      const avatarRect = leaving ? document.querySelector<HTMLElement>(`[data-profile="${prev.creator}"] .pw-avatar`)?.getBoundingClientRect() : null;
+      const avatarSeen = !leaving || (!!avatarRect && avatarRect.bottom > 130 && avatarRect.top < window.innerHeight);
+      if (!reduce && (entering || leaving) && avatarSeen && 'startViewTransition' in document) {
         if (entering) nameAvatar(chipAvatar(next.creator));
         html.dataset.vt = 'view';
         const transition = document.startViewTransition(() => change());

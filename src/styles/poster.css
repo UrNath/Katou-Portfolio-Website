@@ -231,7 +231,7 @@ html:has(.poster) { background: #fff; scroll-padding-top: var(--site-header-heig
 html[data-creator-filter] .pw-all-only, html:not([data-creator-filter]) .pw-creator-only { display: none; }
 
 /* Search bar (phones: stays under the nav) with the Back button beside it in the creator view */
-.pw-top { position: sticky; top: var(--site-header-height, 82px); z-index: 30; display: flex; align-items: center; padding: 8px var(--pc-pad); background: #fff; border-bottom: 3px solid var(--pc-ink); view-transition-name: pw-top; }
+.pw-top { contain: layout style; position: sticky; top: var(--site-header-height, 82px); z-index: 30; display: flex; align-items: center; padding: 8px var(--pc-pad); background: #fff; border-bottom: 3px solid var(--pc-ink); view-transition-name: pw-top; }
 .pw-bw { position: absolute; left: var(--pc-pad); top: 50%; display: grid; place-items: center; width: 48px; margin: 0; padding: 0; overflow: visible; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-50%) scale(.6); transition: transform .45s cubic-bezier(.22, 1, .36, 1), opacity .25s ease, visibility 0s .45s; }
 .pw-bw .pw-back { display: inline-grid; }
 .pw-search { transition: margin-left .45s cubic-bezier(.22, 1, .36, 1); }
@@ -359,10 +359,10 @@ html[data-creator-filter] .pc-wsec-head { justify-content: flex-end; min-height:
   .pc-tabs-sm button { flex: 1; padding: 0 6px; font-size: 12px; }
 }
 @media (min-width: 1040px) {
-  .pw-frame { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; padding-inline: var(--pc-pad); --pw-x: 0px; }
+  .pw-frame { display: grid; grid-template-columns: auto minmax(0, 1fr) 460px; align-items: end; padding-inline: var(--pc-pad); --pw-x: 0px; }
   .pw-top { display: contents; }
   .pw-head { grid-area: 1 / 1 / 2 / 3; }
-  .pw-search { grid-area: 1 / 3 / 2 / 4; width: 380px; margin-bottom: 18px; transition: width .4s cubic-bezier(.22, 1, .36, 1); }
+  .pw-search { grid-area: 1 / 3 / 2 / 4; justify-self: end; width: 380px; margin-bottom: 18px; contain: layout; transition: width .4s cubic-bezier(.22, 1, .36, 1); }
   .pw-search:focus-within { width: 460px; }
   .pw-bw { position: static; grid-area: 1 / 1 / 2 / 2; align-self: center; width: auto; margin: 0 22px 0 0; opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition: none; }
   html[data-creator-filter] .pw-top .pw-search, html[data-creator-filter] .pw-top:has(.pw-search:focus-within) .pw-search { margin-left: 0; }
@@ -442,9 +442,9 @@ html[data-creator-filter] .pc-wsec-head { justify-content: flex-end; min-height:
 .pc-thumbgroup .pc-pager-head { display: none; }
 .pc-works .pc-rows.pc-rows-tall.thumb-vert { --cols: 2; --rows: 1; }
 @media (min-width: 768px) { .pc-works .pc-rows.pc-rows-tall.thumb-vert { --cols: 5; } }
-.thumb-card .thumb-open, .thumb-card .thumb-frame { aspect-ratio: 16 / 9; }
-.thumb-vert .thumb-card .thumb-open, .thumb-vert .thumb-card .thumb-frame { aspect-ratio: 9 / 16; }
-.thumb-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pc-works .pc-rows .thumb-card .clip-frame { aspect-ratio: var(--r, 16 / 9); height: auto; width: 100%; }
+.pc-works .pc-rows .thumb-card .thumb-open { height: auto; aspect-ratio: auto; display: block; }
+.pc-works .pc-rows .thumb-card .clip-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 /* Creator view scrolls down like a feed: no sideways rows, arrows or progress bars */
 html[data-creator-filter] .pc-works .pc-rows { display: grid; grid-auto-flow: row; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: none; grid-auto-columns: auto; overflow: visible; scroll-snap-type: none; }
