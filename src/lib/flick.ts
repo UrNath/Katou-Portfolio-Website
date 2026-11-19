@@ -1,7 +1,7 @@
 /**
- * Flick scrolling for sideways scrollers with a mouse or pen: drag, let go, and the strip keeps
- * gliding with the speed of the flick, slowing smoothly to a stop. Touch already coasts natively,
- * so the scrollers use soft snapping (see poster.css) and this only handles mouse and pen.
+ * Flick scrolling for sideways scrollers with a finger, mouse or pen: drag, let go, and the strip keeps
+ * gliding with the speed of the flick, slowing smoothly to a stop. The scrollers set touch-action: pan-y
+ * so sideways drags reach this code while vertical scrolling stays native.
  */
 const TAU = 325; // ms; time constant of the slow-down (about 0.95 per 60fps frame)
 const STOP = 0.02; // px/ms below which the glide ends
@@ -61,7 +61,7 @@ function coast(el: HTMLElement, velocity: number) {
 }
 
 document.addEventListener('pointerdown', (event) => {
-  if (event.pointerType === 'touch' || event.button !== 0 || !event.isPrimary) return;
+  if (event.button !== 0 || !event.isPrimary) return;
   const target = event.target instanceof Element ? event.target : null;
   if (!target || target.closest('input, textarea, select, button[data-rows-prev], button[data-rows-next]')) return;
   const el = scroller(target);

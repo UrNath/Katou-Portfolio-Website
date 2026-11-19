@@ -17,7 +17,6 @@ export function getRoutes(prices: { editing: string; web: string }): RouteItem[]
       label: 'Works',
       meta: 'Shorts, long form & thumbnails',
       icon: 'film',
-      primary: true,
     },
     {
       href: '/pricing',

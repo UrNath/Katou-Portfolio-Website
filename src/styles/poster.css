@@ -503,9 +503,7 @@ html[data-creator-filter] .pc-works .pc-rows.pc-rows-tall.pc-rows-tall { --cols:
 
 /* Sliding selection highlights */
 .nk-ind { position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0; transition: transform .5s cubic-bezier(.34, 1.25, .5, 1), width .5s cubic-bezier(.34, 1.25, .5, 1), opacity .2s ease; will-change: transform, width; }
-.pw-tabs > .nk-ind { border-radius: 999px; background: var(--pc-blue); box-shadow: 0 3px 0 rgb(58 35 28 / .9); z-index: 0; }
-.pw-tabs .pw-tab { position: relative; z-index: 1; border-bottom: 0; margin-bottom: 0; min-height: 56px; }
-.pw-tabs .pw-tab[aria-selected="true"] { color: #fff; }
+.pw-tabs > .nk-ind { top: auto; bottom: -3px; height: 5px; border-radius: 999px; background: var(--pc-blue); }
 .pc-tabs-sm > .nk-ind { border-radius: 11px; }
 .pw-tags .filters { position: relative; }
 .pw-tags .filters > .nk-ind { border-radius: 999px; background: var(--pc-ink); z-index: 0; }
@@ -531,3 +529,10 @@ html[data-creator-filter] .pc-works .pc-rows.pc-rows-tall.pc-rows-tall { --cols:
   border-bottom: 1px solid rgb(58 35 28 / .14);
 }
 .clean-portfolio.poster { --nav-accent: var(--pc-blue); --nav-on: #fff; --nav-line: rgb(58 35 28 / .55); }
+
+/* While the opening curtain is up, the page's entrance animations wait */
+html.intro-wait .pc-hero *, html.intro-wait .pc-hero { animation-play-state: paused !important; }
+html.intro-wait .pc-hero [data-reveal] { opacity: 0 !important; transform: translateY(18px) !important; transition: none !important; }
+
+.pc-rows, .pw-tags .filters { touch-action: pan-y; }
+html[data-creator-filter] .pc-works .pc-rows { touch-action: auto; }

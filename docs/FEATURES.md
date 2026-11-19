@@ -351,3 +351,9 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 ## Round 6
 - Works rows: depth motion reverted; only the flick/momentum remains.
 - Navbar on every page now uses the clients-page frosted-glass bar (translucent + blur + hairline), in the light Poster palette.
+
+## Round 7
+- Works content tabs: back to a small rounded line under the icon.
+- Flick/momentum now also handles touch (rows set `touch-action: pan-y`), so All-works Shorts/Thumbnails coast with the flick speed.
+- Menu: Works no longer has the yellow primary highlight.
+- Home intro curtain: the hero's entrance animations wait (`html.intro-wait`) until the curtain starts lifting.
