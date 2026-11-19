@@ -45,6 +45,7 @@ const services = defineCollection({
     process: z.array(z.string()).optional(),
     proof: z.string().optional(),
     pickNote: z.string(),
+    longNote: z.string().optional(),
   }).superRefine((data, ctx) => {
     data.compare.forEach((row, index) => {
       if (row.values.length !== data.tiers.length) {

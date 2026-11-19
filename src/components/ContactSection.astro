@@ -1,10 +1,9 @@
 ---
-import BrandIcon from './BrandIcon.astro';
 import Icon from './Icon.astro';
 import StatusChip from './StatusChip.astro';
 import { contactServices, guidelines } from '../data/contact';
 import { status } from '../data/status';
-import { isPlaceholder, site, socials } from '../data/site';
+import { site, socials } from '../data/site';
 const discord = socials.find((item) => item.id === 'discord');
 ---
 
@@ -73,22 +72,6 @@ const discord = socials.find((item) => item.id === 'discord');
     </form>
 
     <section class="block">
-      <h2 class="kicker">Elsewhere</h2>
-      <div class="social-row">
-        {
-          socials.map((item) => (
-            <a
-              class="icon-btn"
-              href={item.href}
-              target={item.href.startsWith('http') ? '_blank' : undefined}
-              rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-              aria-label={isPlaceholder(item.href) ? `${item.label}, placeholder link` : item.label}
-            >
-              <BrandIcon name={item.id} />
-            </a>
-          ))
-        }
-      </div>
       <div class="copy-row">
         <a class="copy-email" href={`mailto:${site.email}`}>{site.email}</a>
         <button class="copy-btn" type="button" id="copy-email">

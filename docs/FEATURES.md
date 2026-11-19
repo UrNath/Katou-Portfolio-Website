@@ -329,3 +329,10 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 - Home: location removed everywhere; hero scroll cue replaces the highlight-reel button; avatar slide-up; carousel without arrows, larger on phones; Works/Pricing section removed ("See all works" in Featured); About shows a placeholder video (set `site.aboutVideo` in `src/data/site.ts`).
 - Contact leads with the Discord tag `nassukatou` (open + copy); email form kept below.
 - Meet the Clients no longer plays the opening curtain.
+
+## Update: round 3 (Nov 20)
+- Works: avatar morph (chip to profile picture) restored; the static `clip-<id>` view-transition name on hero-featured cards (floating video) removed; work counts removed from profiles; sliding highlight (`.nk-ind`, placed in `WorksFilters.tsx` `placeIndicators`) for format tabs, tag chips and the long-form groups.
+- Home: Featured works headline and a highlighted "See all works" button at the bottom; About button removed.
+- Contact: socials row removed (footer has them), Discord card slimmed.
+- Menu: Editing and Web design merged into one Pricing button. Pricing: "Prices updated" removed; editing page notes long-form and normal videos (no new prices).
+- Pidge clips carry `youtubePrivate: true` in clips.json: the viewer uses TikTok only. Clips without a `tiktokUrl` show the fallback until a link is added.

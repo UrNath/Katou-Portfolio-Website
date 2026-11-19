@@ -32,8 +32,9 @@ function addonLabel(price: string) {
 
     <div class="status-row">
       <StatusChip status={serviceStatus} />
-      <p class="updated">Prices updated {status.updated}</p>
     </div>
+
+    {data.longNote && <p class="pick-note long-note"><strong>Not only shorts.</strong> {data.longNote}</p>}
 
     <section class="block">
       <h2 class="kicker">Includes</h2>

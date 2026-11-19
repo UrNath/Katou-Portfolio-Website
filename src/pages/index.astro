@@ -62,15 +62,14 @@ const viewerClips = featured;
 
     <section class="pc-screen pc-fit pc-feat" id="featured" aria-labelledby="featured-title">
       <div class="pc-feat-copy">
-        <p class="pc-eyebrow pc-eyebrow-ink" data-reveal>Featured works</p>
-        <h2 id="featured-title" data-reveal style="--i:1">Funny, cute, and totally watchable.</h2>
-        <p class="pc-feat-sub" data-reveal style="--i:2">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
-        <div class="pc-actions" data-reveal style="--i:3">
-          <a class="pc-btn pc-btn-blue" href="/works">See all works</a>
-        </div>
+        <h2 id="featured-title" data-reveal>Featured works</h2>
+        <p class="pc-feat-sub" data-reveal style="--i:1">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
       </div>
       <div class="pc-feat-visual" data-reveal>
         <FeaturedCarousel clips={featured} initialId={hero.id} />
+      </div>
+      <div class="pc-feat-cta">
+        <a class="pc-btn pc-btn-gold pc-btn-lg" href="/works">See all works <span aria-hidden="true">→</span></a>
       </div>
     </section>
 
@@ -89,7 +88,6 @@ const viewerClips = featured;
       <div class="pc-about-copy">
         <h2 id="about-title" data-reveal style="--i:1">About Katou</h2>
         <p data-reveal style="--i:2">{site.description}</p>
-        <a class="pc-btn pc-btn-blue" href="/about" data-reveal style="--i:3">About me</a>
       </div>
     </section>
 

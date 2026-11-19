@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../components/BaseLayout.astro';
 import ServiceSection from '../components/ServiceSection.astro';
-import { status } from '../data/status';
 import { loadService } from '../lib/services';
 const editing = await loadService('editing');
 const web = await loadService('web-design');
@@ -12,7 +11,6 @@ const web = await loadService('web-design');
       <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
       <p class="pc-eyebrow">Services</p>
       <h1>Pricing</h1>
-      <p class="pc-page-sub">Prices updated {status.updated}</p>
       <nav class="pc-jump" aria-label="Jump to a service">
         <a class="pc-chip" href="#editing">{editing.data.title}</a>
         <a class="pc-chip" href="#web-design">{web.data.title}</a>

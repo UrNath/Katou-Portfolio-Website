@@ -15,23 +15,15 @@ export function getRoutes(prices: { editing: string; web: string }): RouteItem[]
     {
       href: '/works',
       label: 'Works',
-      meta: '9:16 Shorts & TikTok',
+      meta: 'Shorts, long form & thumbnails',
       icon: 'film',
       primary: true,
     },
     {
-      href: '/pricing#editing',
-      label: 'Editing',
-      meta: `from ${prices.editing} per short`,
+      href: '/pricing',
+      label: 'Pricing',
+      meta: 'Editing & web design',
       icon: 'scissors',
-      statusKey: 'editing',
-    },
-    {
-      href: '/pricing#web-design',
-      label: 'Web design',
-      meta: `Creator sites from ${prices.web}`,
-      icon: 'code-xml',
-      statusKey: 'webDesign',
     },
     { href: '/clients', label: 'Meet the Clients!', meta: 'Creators I edit for', icon: 'film' },
     {

@@ -13,6 +13,53 @@ function effectiveType(filters: WorkFilters): string {
   return (window as NkWindow).__nkTabs?.[filters.creator] ?? '';
 }
 
+function syncChips(filters: WorkFilters) {
+  const type = effectiveType(filters);
+  document.querySelectorAll<HTMLElement>('[data-filter-kind][data-filter-value]').forEach((chip) => {
+    const kind = chip.getAttribute('data-filter-kind') as FilterDimension;
+    const value = chip.getAttribute('data-filter-value') ?? '';
+    if (kind !== 'creator' && kind !== 'type' && kind !== 'tag') return;
+    const active = (kind === 'type' ? type : filters[kind]) === value;
+    if (chip.getAttribute('role') === 'tab') chip.setAttribute('aria-selected', active ? 'true' : 'false');
+    else chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  placeIndicators();
+}
+
+/** One highlight per group slides to the selected item with an eased transform (no jump, no re-render). */
+function place(container: HTMLElement, activeSelector: string, fill: boolean) {
+  let ind = container.querySelector<HTMLElement>(':scope > .nk-ind');
+  if (container.offsetParent === null) {
+    if (ind) delete ind.dataset.ready;
+    return;
+  }
+  if (!ind) {
+    ind = document.createElement('i');
+    ind.className = 'nk-ind';
+    ind.setAttribute('aria-hidden', 'true');
+    container.prepend(ind);
+  }
+  const active = container.querySelector<HTMLElement>(activeSelector);
+  if (!active) { ind.style.opacity = '0'; return; }
+  const first = !ind.dataset.ready;
+  if (first) ind.style.transition = 'none';
+  ind.style.opacity = '1';
+  ind.style.width = `${active.offsetWidth}px`;
+  if (fill) ind.style.height = `${active.offsetHeight}px`;
+  ind.style.transform = `translate(${active.offsetLeft}px, ${fill ? active.offsetTop : 0}px)`;
+  if (first) {
+    void ind.offsetWidth;
+    ind.style.transition = '';
+    ind.dataset.ready = '1';
+  }
+}
+
+function placeIndicators() {
+  document.querySelectorAll<HTMLElement>('.pw-tabs').forEach((tabs) => place(tabs, '.pw-tab[aria-selected="true"]', false));
+  document.querySelectorAll<HTMLElement>('.pw-tags .filters').forEach((group) => place(group, '.filter-chip[aria-pressed="true"]', true));
+  document.querySelectorAll<HTMLElement>('.pc-tabs-sm').forEach((group) => place(group, '[data-lf-tab][aria-selected="true"]', true));
+}
+
 function apply(filters: WorkFilters) {
   const html = document.documentElement;
   const type = effectiveType(filters);
@@ -28,14 +75,7 @@ function apply(filters: WorkFilters) {
     else html.removeAttribute(dimension.attribute);
   }
 
-  document.querySelectorAll<HTMLElement>('[data-filter-kind][data-filter-value]').forEach((chip) => {
-    const kind = chip.getAttribute('data-filter-kind') as FilterDimension;
-    const value = chip.getAttribute('data-filter-value') ?? '';
-    if (kind !== 'creator' && kind !== 'type' && kind !== 'tag') return;
-    const active = (kind === 'type' ? type : filters[kind]) === value;
-    if (chip.getAttribute('role') === 'tab') chip.setAttribute('aria-selected', active ? 'true' : 'false');
-    else chip.setAttribute('aria-pressed', active ? 'true' : 'false');
-  });
+  syncChips(filters);
 
   // This sync also applies search terms, hides empty sections and updates the count.
   (window as NkWindow).__nkWorksSync?.();
@@ -75,15 +115,22 @@ export default function WorksFilters() {
       const entering = kind === 'creator' && !!next.creator && !prev.creator;
       const leaving = kind === 'creator' && !next.creator && !!prev.creator;
       const html = document.documentElement;
+      const nameAvatar = (element: Element | null | undefined) => (element as HTMLElement | null | undefined)?.style.setProperty('view-transition-name', 'pw-avatar');
+      const chipAvatar = (id: string) => document.querySelector<HTMLElement>(`.pw-chip[data-filter-value="${id}"] .pw-av`);
       const change = () => {
         if (location.pathname + location.search !== href) history.pushState(null, '', href);
         apply(next);
         if (entering || leaving) {
           window.scrollTo(0, 0);
-          if (leaving) window.dispatchEvent(new CustomEvent('nk-chips-reveal', { detail: prev.creator }));
+          if (leaving) {
+            window.dispatchEvent(new CustomEvent('nk-chips-reveal', { detail: prev.creator }));
+            nameAvatar(chipAvatar(prev.creator));
+          }
         }
       };
       const settle = () => {
+        document.querySelectorAll<HTMLElement>('.pw-av').forEach((avatar) => avatar.style.removeProperty('view-transition-name'));
+        delete html.dataset.vt;
         if (entering) {
           document.querySelector<HTMLElement>(`[data-profile="${next.creator}"] [data-profile-name]`)?.focus({ preventScroll: true });
         } else if (leaving) {
@@ -91,8 +138,17 @@ export default function WorksFilters() {
         }
       };
 
-      // Same motion for every change (format tab, creator, Back): current cards drop away, then the new ones rise in one after another. Nothing flies between views.
+      // The clicked chip's avatar becomes the profile picture; the search bar eases to its new place.
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && (entering || leaving) && 'startViewTransition' in document) {
+        if (entering) nameAvatar(chipAvatar(next.creator));
+        html.dataset.vt = 'view';
+        const transition = document.startViewTransition(() => change());
+        transition.finished.then(settle, settle);
+        return;
+      }
+
+      // Every other change (format tab, tag, no View Transitions): current cards drop away, then the new ones rise in one after another.
       if (reduce) {
         change();
         settle();
@@ -100,6 +156,7 @@ export default function WorksFilters() {
       }
       if (busy) return;
       busy = true;
+      if (!entering && !leaving) syncChips(next);
       const shown = () => Array.from(document.querySelectorAll<HTMLElement>('.pw-secs .clip-card')).filter((card) => card.offsetParent !== null).slice(0, 24);
       const out = shown().map((card) => card.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px)' }], { duration: 160, easing: 'ease-in', fill: 'forwards' }));
       Promise.all(out.map((animation) => animation.finished.catch(() => undefined))).then(() => {
@@ -119,11 +176,17 @@ export default function WorksFilters() {
     };
 
     const onPop = () => apply(current());
+    const refit = () => { syncChips(current()); };
+    (window as Window & { __nkSlide?: () => void }).__nkSlide = placeIndicators;
+    requestAnimationFrame(refit);
+    document.fonts?.ready.then(refit);
+    window.addEventListener('resize', refit);
     document.addEventListener('click', onClick);
     window.addEventListener('popstate', onPop);
     return () => {
       document.removeEventListener('click', onClick);
       window.removeEventListener('popstate', onPop);
+      window.removeEventListener('resize', refit);
     };
   }, []);
 
