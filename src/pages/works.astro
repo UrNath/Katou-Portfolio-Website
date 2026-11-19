@@ -76,9 +76,9 @@ const profileCss = profiles
     </div>
     <div class="pw-frame">
       <div class="pw-top">
-        <button class="pw-back pc-arrow" type="button" data-filter-kind="creator" data-filter-value="" data-filter-clear="type" aria-label="Back to all works" title="Back to all works">
+        <span class="pw-bw"><button class="pw-back pc-arrow" type="button" data-filter-kind="creator" data-filter-value="" data-filter-clear="type" aria-label="Back to all works" title="Back to all works">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-        </button>
+        </button></span>
         <form class="pw-search" role="search">
           <label>
             <span class="sr-only">Search edits</span>
@@ -181,9 +181,8 @@ const profileCss = profiles
               </div>
             )}
             <div class="pc-pager pc-pager-head">
-              <button class="pc-arrow" type="button" data-rows-prev aria-label={`Previous ${block.section.label}`}>←</button>
-              <span class="pc-page" data-rows-page aria-live="polite"></span>
-              <button class="pc-arrow" type="button" data-rows-next aria-label={`Next ${block.section.label}`}>→</button>
+              <button class="pc-arrow" type="button" data-rows-prev aria-label={`Previous ${block.section.label}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+              <button class="pc-arrow" type="button" data-rows-next aria-label={`Next ${block.section.label}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
             </div>
           </div>
           {block.section.kind === 'thumbnail' && (
@@ -211,9 +210,11 @@ const profileCss = profiles
                           <img src={thumb.image} alt="" loading="lazy" decoding="async" />
                         </span>
                       </button>
+                      <p class="clip-caption"><b>{thumb.title}</b></p>
                     </article>
                   ))}
                 </div>
+                <div class="pc-prog" aria-hidden="true"><i></i></div>
               </div>
             ) : block.section.kind === 'landscape' ? (
               <div class="works-long-form">
@@ -227,6 +228,7 @@ const profileCss = profiles
                         <div class="works-grid works-grid-wide pc-rows pc-rows-wide" data-rows>
                           {group.map((clip) => <ClipCard clip={clip} sizes={wideSizes} />)}
                         </div>
+                        <div class="pc-prog" aria-hidden="true"><i></i></div>
                       </div>
                     </section>
                   );
@@ -244,6 +246,7 @@ const profileCss = profiles
                     />
                   ))}
                 </div>
+                <div class="pc-prog" aria-hidden="true"><i></i></div>
               </div>
             )
           }

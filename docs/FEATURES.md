@@ -228,8 +228,8 @@ Kept from before: title and works count; search by title or client; Content filt
 
 Changed or added
 
-- Each section fills one screen. Cards sit in a strip that scrolls sideways inside its own box; the page never scrolls sideways. Card size comes from the height that is free, so cards shrink or grow with the screen.
-- Arrows and "Page 1 / N" at the top right of each section move the strip. On touch, swipe the strip.
+- Sections stack down the page like the wireframe. Each has a row that scrolls sideways and snaps to whole cards (6 short columns on desktop, 4 on tablet, 3 on phones; long form 3/2/1; thumbnails 4/3/2; a creator's page uses 2 rows). A thin bar under each row shows position, with round ‹ › buttons beside the title on desktop only. The page never scrolls sideways.
+- Title and "Edit for @..." credit sit under each card (shorts hide the caption on phones).
 - Long Form Videos: Vlogs, MVs and Normal Videos are tabs; one group shows at a time. A group with no matching videos loses its tab. Left / Right keys move between tabs.
 - A gold number next to each section title shows how many items match.
 - "Clear filters" appears in the filter bar when any filter or search is on. When nothing matches, a message and a Clear filters button show instead of the sections.

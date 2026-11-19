@@ -89,4 +89,5 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
       <span class="clip-progress" aria-hidden="true"></span>
     </div>
   </div>
+  {variant === 'grid' && <p class="clip-caption" aria-hidden="true"><b>{clip.title}</b><span>{credit}</span></p>}
 </article>

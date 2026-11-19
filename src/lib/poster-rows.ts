@@ -25,6 +25,11 @@ export function mountRows() {
     const page = Math.min(pages, Math.round(strip.scrollLeft / Math.max(1, strip.clientWidth)) + 1);
     const atEnd = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
     if (label) label.textContent = `Page ${atEnd ? pages : page} / ${pages}`;
+    const prog = strip.parentElement?.querySelector<HTMLElement>('.pc-prog');
+    if (prog) {
+      prog.style.setProperty('--prog-w', `${Math.min(100, (strip.clientWidth / Math.max(1, strip.scrollWidth)) * 100)}%`);
+      prog.style.setProperty('--prog-x', `${(strip.scrollLeft / Math.max(1, strip.scrollWidth)) * 100}%`);
+    }
     if (prev) prev.disabled = strip.scrollLeft <= 2;
     if (next) next.disabled = atEnd;
     section.toggleAttribute('data-rows-single', pages <= 1);
@@ -34,7 +39,8 @@ export function mountRows() {
     const step = (direction: number) => {
       const strip = activeStrip(section);
       if (!strip) return;
-      strip.scrollBy({ left: direction * strip.clientWidth * 0.9, behavior: reduced.matches ? 'auto' : 'smooth' });
+      const pad = parseFloat(getComputedStyle(strip).paddingLeft) || 0;
+      strip.scrollBy({ left: direction * (strip.clientWidth - pad * 2), behavior: reduced.matches ? 'auto' : 'smooth' });
     };
     section.querySelector('[data-rows-prev]')?.addEventListener('click', () => step(-1));
     section.querySelector('[data-rows-next]')?.addEventListener('click', () => step(1));

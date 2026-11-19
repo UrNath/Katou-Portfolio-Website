@@ -42,6 +42,7 @@ function apply(filters: WorkFilters) {
 
 export default function WorksFilters() {
   useEffect(() => {
+    let busy = false;
     const current = () => filterFromSearch(new URLSearchParams(location.search));
     apply(current());
 
@@ -98,11 +99,27 @@ export default function WorksFilters() {
 
       // The clicked chip's initial circle becomes the profile picture; the search bar eases to its new place.
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!reduce && 'startViewTransition' in document) {
+      if (!reduce && (entering || leaving) && 'startViewTransition' in document) {
         if (entering) nameAvatar(chipAvatar(next.creator));
-        html.dataset.vt = entering || leaving ? 'view' : 'tab';
+        html.dataset.vt = 'view';
         const transition = document.startViewTransition(() => change());
         transition.finished.then(settle, settle);
+      } else if (!reduce && !entering && !leaving) {
+        // Same look as the wireframe: current cards drop away, then the new ones rise in one after another.
+        if (busy) return;
+        busy = true;
+        const shown = () => Array.from(document.querySelectorAll<HTMLElement>('.pw-secs .clip-card')).filter((card) => card.offsetParent !== null).slice(0, 24);
+        const old = shown();
+        const out = old.map((card) => card.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px)' }], { duration: 160, easing: 'ease-in', fill: 'forwards' }));
+        Promise.all(out.map((animation) => animation.finished.catch(() => undefined))).then(() => {
+          change();
+          out.forEach((animation) => animation.cancel());
+          requestAnimationFrame(() => {
+            shown().forEach((card, index) => card.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 460, delay: Math.min(index, 8) * 30, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' }));
+            settle();
+            window.setTimeout(() => { busy = false; }, 200);
+          });
+        });
       } else {
         change();
         settle();
