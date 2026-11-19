@@ -27,7 +27,7 @@ function syncChips(filters: WorkFilters) {
 }
 
 /** One highlight per group slides to the selected item with an eased transform (no jump, no re-render). */
-function place(container: HTMLElement, activeSelector: string, fill: boolean) {
+function place(container: HTMLElement, activeSelector: string, fill: boolean, inset = 0) {
   let ind = container.querySelector<HTMLElement>(':scope > .nk-ind');
   if (container.offsetParent === null) {
     if (ind) delete ind.dataset.ready;
@@ -44,9 +44,9 @@ function place(container: HTMLElement, activeSelector: string, fill: boolean) {
   const first = !ind.dataset.ready;
   if (first) ind.style.transition = 'none';
   ind.style.opacity = '1';
-  ind.style.width = `${active.offsetWidth}px`;
-  if (fill) ind.style.height = `${active.offsetHeight}px`;
-  ind.style.transform = `translate(${active.offsetLeft}px, ${fill ? active.offsetTop : 0}px)`;
+  ind.style.width = `${active.offsetWidth - inset * 2}px`;
+  if (fill) ind.style.height = `${active.offsetHeight - inset * 2}px`;
+  ind.style.transform = `translate(${active.offsetLeft + inset}px, ${fill ? active.offsetTop + inset : 0}px)`;
   if (first) {
     void ind.offsetWidth;
     ind.style.transition = '';
@@ -55,9 +55,9 @@ function place(container: HTMLElement, activeSelector: string, fill: boolean) {
 }
 
 function placeIndicators() {
-  document.querySelectorAll<HTMLElement>('.pw-tabs').forEach((tabs) => place(tabs, '.pw-tab[aria-selected="true"]', false));
+  document.querySelectorAll<HTMLElement>('.pw-tabs').forEach((tabs) => place(tabs, '.pw-tab[aria-selected="true"]', true, 6));
   document.querySelectorAll<HTMLElement>('.pw-tags .filters').forEach((group) => place(group, '.filter-chip[aria-pressed="true"]', true));
-  document.querySelectorAll<HTMLElement>('.pc-tabs-sm').forEach((group) => place(group, '[data-lf-tab][aria-selected="true"]', true));
+  document.querySelectorAll<HTMLElement>('.pc-tabs-sm').forEach((group) => place(group, '[data-lf-tab][aria-selected="true"]', true, 4));
 }
 
 function apply(filters: WorkFilters) {

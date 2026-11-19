@@ -71,7 +71,7 @@ html:has(.poster) { background: #fff; scroll-padding-top: var(--site-header-heig
 .pc-tabs button { min-height: 48px; min-width: 120px; padding: 0 20px; border: 0; background: #fff; color: var(--pc-ink); font-family: var(--pc-body); font-weight: 800; font-size: 15px; text-transform: uppercase; cursor: pointer; }
 .pc-tabs button[aria-selected="true"] { background: var(--pc-blue); color: #fff; }
 .pc-tabs button:focus-visible { outline-offset: -6px; box-shadow: none; }
-.pc-tabs-sm { box-shadow: none; border-radius: 14px; }
+.pc-tabs-sm { box-shadow: none; border-radius: 16px; }
 .pc-tabs-sm button { min-height: 44px; min-width: 0; padding: 0 14px; font-size: 13px; }
 .pc-arrow { width: 48px; height: 48px; display: inline-grid; place-items: center; border: 3px solid var(--pc-ink); border-radius: 14px; background: #fff; color: var(--pc-ink); font-size: 20px; line-height: 1; cursor: pointer; box-shadow: 0 4px 0 var(--pc-ink); flex: none; }
 .pc-arrow:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--pc-ink); }
@@ -498,12 +498,15 @@ html[data-creator-filter] .pc-works .pc-rows.pc-rows-tall.pc-rows-tall { --cols:
 @media (max-width: 639px) { .pc-contact-page .pc-page-head, .pc-page:has(.dc-card) .pc-page-head { padding-block: 14px 18px; } .pc-page:has(.dc-card) .pc-page-body { padding-top: 18px; } }
 .pc-tabs-sm { position: relative; }
 .pc-tabs-sm > .nk-ind { background: var(--pc-blue); z-index: 0; }
-.poster .pc-tabs-sm button { position: relative; z-index: 1; background: transparent; transition: color .25s ease; }
+.poster .pc-tabs-sm button { position: relative; z-index: 1; background: transparent; transition: color .3s ease; border-radius: 11px; }
 .poster .pc-tabs-sm button[aria-selected="true"] { background: transparent; color: #fff; }
 
 /* Sliding selection highlights */
-.nk-ind { position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0; transition: transform .45s cubic-bezier(.22, 1, .36, 1), width .45s cubic-bezier(.22, 1, .36, 1), opacity .2s ease; will-change: transform, width; }
-.pw-tabs > .nk-ind { top: auto; bottom: -3px; height: 5px; background: var(--pc-blue); }
+.nk-ind { position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0; transition: transform .5s cubic-bezier(.34, 1.25, .5, 1), width .5s cubic-bezier(.34, 1.25, .5, 1), opacity .2s ease; will-change: transform, width; }
+.pw-tabs > .nk-ind { border-radius: 999px; background: var(--pc-blue); box-shadow: 0 3px 0 rgb(58 35 28 / .9); z-index: 0; }
+.pw-tabs .pw-tab { position: relative; z-index: 1; border-bottom: 0; margin-bottom: 0; min-height: 56px; }
+.pw-tabs .pw-tab[aria-selected="true"] { color: #fff; }
+.pc-tabs-sm > .nk-ind { border-radius: 11px; }
 .pw-tags .filters { position: relative; }
 .pw-tags .filters > .nk-ind { border-radius: 999px; background: var(--pc-ink); z-index: 0; }
 .poster .pw-tags .filter-chip { position: relative; z-index: 1; background: transparent; transition: color .25s ease; }
@@ -515,3 +518,7 @@ html[data-creator-filter] .pc-works .pc-rows.pc-rows-tall.pc-rows-tall { --cols:
 .pc-rows > * { scroll-snap-stop: normal; }
 @media (hover: hover) and (pointer: fine) { .pc-rows { cursor: grab; } }
 .is-flicking, .is-flicking * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+
+/* Featured works: keep the cards under the sticky header and inside the section */
+.pc-feat { position: relative; isolation: isolate; overflow: clip; }
+.pc-feat .carousel-card { will-change: transform, opacity; backface-visibility: hidden; }

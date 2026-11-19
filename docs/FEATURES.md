@@ -341,3 +341,9 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 - Home Featured Works on phones (≤899px) follows the mobile wireframe: 58%-width centre card, tilted side cards, caption under cards, 5 dots, gold "See all works" button with a blue pulse ring. Finger-following swipe with flick momentum.
 - Works: empty thumbnail groups are hidden so Thumbnails starts at the same offset as Shorts.
 - `src/lib/flick.ts`: mouse/pen flick-and-glide for every sideways scroller; touch coasts natively (soft snapping `x proximity`).
+
+## Round 5
+- Featured section is its own stacking context and clips its cards, so they stay under the sticky header.
+- Works rows get the carousel's depth motion on phones (cards shrink/tilt/drop toward the edges); skipped for reduced motion.
+- Works tab highlights are rounded sliding pills (content tabs and Vlogs/MVs/Normal).
+- New NK logo: `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`.
