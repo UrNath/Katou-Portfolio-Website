@@ -43,7 +43,8 @@ CSS = """
 .wf .chiprow{margin-top:20px;display:flex;align-items:center;gap:14px}
 .wf.m .chiprow{margin-top:14px;display:block}
 .wf.m .chiprow .lbl{display:block;margin-bottom:6px}
-.wf .chips{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.wf .chips{display:flex;flex-wrap:nowrap;gap:8px;min-width:0}
+.wf .chipwrap{min-width:0}
 .wf.m .chips{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 6px;-webkit-mask-image:linear-gradient(to right,#000 88%,transparent);mask-image:linear-gradient(to right,#000 88%,transparent)}
 .wf .chip{min-height:44px;border:2px solid #1a1a1a;border-radius:999px;background:#fff;font-weight:700;padding:0 16px 0 8px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex:none;scroll-snap-align:start}
 .wf .chip.on{background:#1a1a1a;color:#fff}
@@ -146,6 +147,7 @@ I_BACK = svg('<path d="M15 5l-7 7 7 7"/>')
 I_DOWN = svg('<path d="M6 9l6 6 6-6"/>', 14)
 
 def pin(n, inline=False):
+    n = n - 1 if n > 4 else n
     return f'<i class="pin{" in" if inline else ""}">{n}</i>'
 
 # ---------- parts ----------
@@ -172,7 +174,7 @@ def chips(active='All', pn=5):
         cls = 'chip' + (' on' if on else '') + (' all' if name == 'All' else '')
         inner = (I_CHECK + name) if name == 'All' else f'<span class="av" aria-hidden="true">{ini}</span>{name}'
         out.append(f'<button type="button" class="{cls}" aria-pressed="{"true" if on else "false"}">{inner}</button>')
-    return f'<div class="chiprow"><span class="lbl" id="cr">Creator{pin(pn, True)}</span><div class="chips" role="group" aria-labelledby="cr">{"".join(out)}</div></div>'
+    return f'<div class="chipwrap a">{pin(pn)}<div class="chips" role="group" aria-label="Filter by creator">{"".join(out)}</div></div>'
 
 def card(kind, state=None, cap=True, pn=None, name='Work title placeholder'):
     asp = 'ps' if kind == 's' else 'pl'
@@ -232,7 +234,7 @@ def profile(m, compact=False):
             f'<a class="cta a" href="#">{pin(12)}Start a project</a></div>')
 
 def toolbar(pns=(3, 4), m=False):
-    return f'<div class="tools">{search(pns[0])}{sortbtn(pns[1], m)}</div>'
+    return f'<div class="tools">{search(pns[0])}</div>'
 
 FOOT = '<div class="foot">Footer placeholder (unchanged from the site)</div>'
 
@@ -242,14 +244,14 @@ def wrap(m, inner, cls=''):
 # ---------- boards ----------
 def default_board(m):
     if m:
-        head = f'<div class="head"><div><p class="eyebrow">Portfolio</p><h1>Works</h1><p class="count">[N] video edits · [M] thumbnails{pin(2, True)}</p></div></div>{toolbar((3, 4), True)}'
-        body = (head + chips() + jump(True)
+        head = f'<div class="head"><div><p class="eyebrow">Portfolio</p><h1>Works</h1><p class="count">[N] video edits · [M] thumbnails{pin(2, True)}</p></div></div><div class="tools">{search(3)}</div><div style="margin-top:12px">{chips()}</div>'
+        body = (head + jump(True)
             + section('Short-form videos', '[N]', grid(3, [card('s', cap=False, pn=7 if i == 0 else None) for i in range(6)]) + more(), pn=6)
             + section('Long-form videos', '[N]', grid(1, [card('l'), card('l')]) + more(), subtabs=True)
             + section('Thumbnails', '[M]', grid(2, [card('t') for _ in range(4)]) + more()) + FOOT)
     else:
-        head = f'<div class="head"><div><p class="eyebrow">Portfolio</p><h1>Works</h1><p class="count">[N] video edits · [M] thumbnails{pin(2, True)}</p></div>{toolbar()}</div>'
-        body = (head + jump(False) + chips()
+        head = f'<div class="head"><div><p class="eyebrow">Portfolio</p><h1>Works</h1><p class="count">[N] video edits · [M] thumbnails{pin(2, True)}</p></div><div class="tools">{search(3)}{chips()}</div></div>'
+        body = (head + jump(False)
             + section('Short-form videos', '[N]', grid(6, [card('s', pn=7 if i == 0 else None) for i in range(6)]) + more(), pn=6)
             + section('Long-form videos', '[N]', grid(3, [card('l') for _ in range(3)]) + more(), subtabs=True)
             + section('Thumbnails', '[M]', grid(4, [card('t') for _ in range(4)]) + more()) + FOOT)
@@ -285,8 +287,7 @@ NOTES = [
  (1, 'Site nav unchanged (existing SiteBar).'),
  (2, 'Title and live count of items that match the current filters (existing).'),
  (3, 'Search by title or client (existing). Combines with creator and sort. Stored as <code>q</code> in the URL.'),
- (4, 'Sort control. NEW: the site has none today. Options: Newest, Oldest. No “Popular”: no view data exists.'),
- (5, 'Creator chips: All, Pidge, Miuoni, chiseyi, Lomi. Wrap on desktop; one scrolling row on mobile with an edge fade, active chip scrolled into view. Active = filled + check (not colour). <code>aria-pressed</code>, 44px tall.'),
+ (5, 'Creator chips: All, Pidge, Miuoni, chiseyi, Lomi, in the slot where Sort used to be (Sort is removed). Desktop: one row right of the search. Mobile: one scrolling row under the search with an edge fade. Active = filled + check, not colour. <code>aria-pressed</code>, 44px tall. Choosing a creator starts the profile transition (see Interaction).'),
  (6, 'Section header with live count. Long-form keeps Vlogs / MVs / Normal Videos tabs; a group with no items loses its tab (existing).'),
  (7, 'Card: 9:16 short-form, 16:9 long-form and thumbnails. Fixed-ratio box so nothing shifts. Duration badge and “Edit for @…” credit kept; thumbnails have no credit line (existing).'),
  (8, 'Desktop hover or keyboard focus plays a muted 5s MP4 preview. Title is also in the accessible name and the viewer: nothing is hover-only.'),
@@ -294,7 +295,7 @@ NOTES = [
  (10, 'Profile header: neutral grey avatar with initial, name, handle and bio placeholders. No external links unless verified.'),
  (11, 'Stats: counts computed from portfolio items only. No followers, likes or views.'),
  (12, 'Primary CTA “Start a project” links to Contact. No Follow button.'),
- (13, 'Tabs: Short-form / Long-form / Thumbnails with counts. Sort and search stay available. Arrow keys move between tabs.'),
+ (13, 'Tabs: Short-form / Long-form / Thumbnails with counts. Search stays available. Arrow keys move between tabs.'),
  (14, 'Grid: 3 columns on mobile and 6 on desktop for short-form; 16:9 tabs use 2 columns on mobile and 4 on desktop.'),
  (15, 'Touch: first tap plays the preview in the card; the Open button (44px) opens the full video. Second tap on the card stops it.'),
  (16, 'Empty tab: message plus two exits. Count shows 0.'),
@@ -307,7 +308,9 @@ def spec_board():
      'URL: <code>/works</code> is All. Creator: <code>/works?creator=chiseyi&amp;tab=short&amp;sort=newest&amp;q=</code>. Each filter change updates the URL (pushState); browser Back and Forward restore the state; a direct link renders the creator state on first paint.',
      'Unknown creator id falls back to All.',
      '“Back to all works” goes to <code>/works</code> and keeps <code>q</code> and <code>sort</code>.',
-     'Transition All → creator: a 220ms shared-element morph (chip avatar → profile avatar). With <code>prefers-reduced-motion: reduce</code>: no morph, instant swap, no autoplaying previews (a Play button instead).',
+     'Transition All → creator, about 1.5s, in this order: (1) the chip morphs into the profile avatar (pill → circle, label fades to the initial) while the other chips, the title and the old sections fade and slide out to the left; (2) the search bar eases down into the tabs row; (3) the profile details fade up, then the creator’s videos fade-slide up with an ease-out stagger. Back reverses it, and the old sections slide in from the right.',
+     'With <code>prefers-reduced-motion: reduce</code>: no morph or slides, an instant swap, no autoplaying previews. Only opacity and transform are animated except the morphing avatar; clicks are ignored while a transition runs.',
+     'Working version: the interactive prototype page (it uses <code>#creator-chiseyi</code> in the address because the preview frame only allows a hash).',
      'Focus: on entering creator state focus moves to the name heading; on Back it returns to the chip. A polite live region announces “Showing chiseyi’s works”.',
      'Media: posters (WebP, fixed ratio) load first; first row eager, the rest lazy. MP4 previews are not requested until hover, focus or tap; one preview at a time; stopped on leave, blur or tab change.',
     ]
