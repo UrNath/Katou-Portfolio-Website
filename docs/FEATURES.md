@@ -206,14 +206,16 @@ Motion: cards tilt on hover with a mouse and press in on touch; sections fade up
 
 ## 8. Works page and filters (`/works`)
 
-What it does: a blue title block (title, works count, search), a filter bar that stays under the nav bar, then one full-screen section each for Shorts, Long Form Videos and Thumbnails.
+What it does: on a white page, a "Works" title and search, a lane under the nav bar with icon links (Shorts, Long Form, Thumbnails) and a row of creator chips, then one full-screen section per content type. Picking a creator chip opens that creator's profile view (neutral initial avatar, name, handle and counts taken from the real clips) with icon tabs for Short, Long form and Thumbnails; the Back icon returns to all works. On phones the search bar is sticky next to the Back icon; focusing it expands and darkens it.
 
 Files
 
 | What | Where |
 |---|---|
 | Page layout, search and tab scripts | `src/pages/works.astro` |
-| Filter chips behaviour | `src/islands/WorksFilters.tsx`, `src/data/tags.ts` |
+| Filter chips, profile view, transitions | `src/islands/WorksFilters.tsx`, `src/data/tags.ts` |
+| Whole-chip paging (‹ › when chips do not fit) | `src/lib/works-chips.ts` |
+| Content-type icons | `src/components/WorkTypeIcon.astro` |
 | Videos | `src/data/clips.json` (edit in `/admin`) |
 | Thumbnails gallery | `src/data/thumbnails.json` (edit in `/admin`) |
 | Creators, sections, tags | `src/data/works-layout.json` (edit in `/admin`) |
@@ -232,7 +234,9 @@ Changed or added
 - A gold number next to each section title shows how many items match.
 - "Clear filters" appears in the filter bar when any filter or search is on. When nothing matches, a message and a Clear filters button show instead of the sections.
 - Thumbnail viewer: Previous / Next buttons, a counter, and Left / Right keys. Esc or the X closes it. It moves through the thumbnails that currently match the filters.
-- Title block: the three newest shorts are fanned out as decoration on wide screens only.
+- Creator profile: shows only data that exists (handle from the creator's clips, counts of shorts/long-form/thumbnails). There is no bio or avatar photo in the data, so none is shown; the avatar is an initial. Open tab defaults to the creator's first type that has work; the URL `type` param overrides it.
+- Enter/leave uses the View Transitions API (chip circle becomes the avatar); it is skipped with reduced motion or when unsupported.
+- Removed: the fanned-shorts title decoration and the blue title banner.
 
 How to change things
 
