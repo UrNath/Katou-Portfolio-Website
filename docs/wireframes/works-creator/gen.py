@@ -126,6 +126,25 @@ CSS = """
 .wf.cmp .cta{margin-top:10px;margin-bottom:12px}
 .wf.cmp .tabs{margin-top:0}
 .wf.cmp .trow{margin-top:10px}
+.wf .lane{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:20px;border-bottom:2px solid #bbb}
+.wf.m .lane{display:block;margin-top:14px}
+.wf .lane .jump{margin-top:0;border-bottom:0}
+.wf.m .lane .jump{border-bottom:2px solid #bbb}
+.wf .cf{display:flex;align-items:center;gap:8px;padding-bottom:6px}
+.wf.m .cf{margin-top:12px;padding-bottom:0}
+.wf.m .chips{overflow:visible;-webkit-mask-image:none;mask-image:none;flex-wrap:nowrap;padding:0}
+.wf .carr{width:44px;height:44px;border:2px solid #1a1a1a;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.wf .mbar{padding:8px 16px;border-bottom:1px solid #ccc;background:#fff}
+.wf .mbar .srch{width:100%}
+.wf .mbar .pin{top:-6px;left:4px}
+.wf .pager{display:flex;gap:8px;margin-left:auto}
+.wf.m .pager{display:none}
+.wf .strip .pin{top:8px;left:8px}
+.wf .prow{display:flex;justify-content:flex-end;margin-top:14px}
+.wf .strip{--gap:16px;display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - (var(--n) - 1) * var(--gap)) / var(--n));gap:16px var(--gap);overflow:hidden;padding:6px 4px;margin:-6px -4px}
+.wf.m .strip{--gap:8px;gap:12px 8px}
+.wf .prog{height:4px;background:#ccc;border-radius:2px;margin-top:12px}
+.wf .prog i{display:block;height:4px;background:#1a1a1a;border-radius:2px}
 .wf .sticky{font-size:12px;font-weight:700;color:#555;margin-top:4px}
 .wf .spec{padding:56px 80px 72px;font-size:15px}
 .wf .spec h1{font-size:36px;margin-bottom:6px}
@@ -144,6 +163,8 @@ def svg(path, size=18, extra=''):
 I_SEARCH = svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>')
 I_CHECK = svg('<path d="M5 12l5 5 9-10"/>', 16)
 I_BACK = svg('<path d="M15 5l-7 7 7 7"/>')
+I_NEXT = svg('<path d="M9 5l7 7-7 7"/>')
+I_PREV = svg('<path d="M15 5l-7 7 7 7"/>')
 I_DOWN = svg('<path d="M6 9l6 6 6-6"/>', 14)
 
 def pin(n, inline=False):
@@ -166,15 +187,18 @@ def sortbtn(pn=None, m=False):
     t = 'Sort' if m else 'Sort: Newest'
     return f'<button type="button" class="sort a" aria-label="Sort works, currently Newest first">{p}{t} {I_DOWN}</button>'
 
-def chips(active='All', pn=5):
+def chips(m=False, pn=5):
     names = [('All', ''), ('Pidge', 'P'), ('Miuoni', 'M'), ('chiseyi', 'C'), ('Lomi', 'L')]
+    if m:
+        names = names[:3]
     out = []
     for name, ini in names:
-        on = name == active
+        on = name == 'All'
         cls = 'chip' + (' on' if on else '') + (' all' if name == 'All' else '')
         inner = (I_CHECK + name) if name == 'All' else f'<span class="av" aria-hidden="true">{ini}</span>{name}'
         out.append(f'<button type="button" class="{cls}" aria-pressed="{"true" if on else "false"}">{inner}</button>')
-    return f'<div class="chipwrap a">{pin(pn)}<div class="chips" role="group" aria-label="Filter by creator">{"".join(out)}</div></div>'
+    arrow = f'<button type="button" class="carr" aria-label="Show more creators">{I_NEXT}</button>' if m else ''
+    return f'<div class="cf a">{pin(pn)}<div class="chips" role="group" aria-label="Filter by creator">{"".join(out)}</div>{arrow}</div>'
 
 def card(kind, state=None, cap=True, pn=None, name='Work title placeholder'):
     asp = 'ps' if kind == 's' else 'pl'
@@ -195,15 +219,22 @@ def card(kind, state=None, cap=True, pn=None, name='Work title placeholder'):
 def grid(cols, cards):
     return f'<div class="grid c{cols}">{"".join(cards)}</div>'
 
-def more():
-    return '<button type="button" class="more">Load more (paging model TBD)</button>'
+def strip(n, rows, cards, m, pct):
+    gap = 8 if m else 16
+    return (f'<div class="sbox"><div class="strip" style="--n:{n};--gap:{gap}px;grid-template-rows:repeat({rows},auto)">{"".join(cards)}</div>'
+            f'<div class="prog" aria-hidden="true"><i style="width:{pct}%"></i></div></div>')
+
+def pager(label):
+    return (f'<div class="pager"><button type="button" class="carr" aria-label="Previous {label}">{I_PREV}</button>'
+            f'<button type="button" class="carr" aria-label="Next {label}">{I_NEXT}</button></div>')
 
 def section(title, count, body, subtabs=False, pn=None):
+    pg = pager(title.lower())
     st = ''
     if subtabs:
         st = '<div class="stabs" role="tablist" aria-label="Long-form group"><button type="button" role="tab" aria-selected="true" class="stab on">Vlogs</button><button type="button" role="tab" aria-selected="false" class="stab">MVs</button><button type="button" role="tab" aria-selected="false" class="stab">Normal Videos</button></div>'
     p = pin(pn, True) if pn else ''
-    return f'<section class="sec"><div class="sh"><h2>{title}</h2><span class="num">{count}</span>{p}{st}</div>{body}</section>'
+    return f'<section class="sec"><div class="sh"><h2>{title}</h2><span class="num">{count}</span>{p}{st}{pg}</div>{body}</section>'
 
 def jump(m):
     lab = ('Short-form', 'Long-form', 'Thumbnails') if m else ('Short-form videos', 'Long-form videos', 'Thumbnails')
@@ -236,6 +267,9 @@ def profile(m, compact=False):
 def toolbar(pns=(3, 4), m=False):
     return f'<div class="tools">{search(pns[0])}</div>'
 
+def mbar(pn=3):
+    return f'<div class="mbar a">{pin(pn)}{search()}</div>'
+
 FOOT = '<div class="foot">Footer placeholder (unchanged from the site)</div>'
 
 def wrap(m, inner, cls=''):
@@ -243,52 +277,49 @@ def wrap(m, inner, cls=''):
 
 # ---------- boards ----------
 def default_board(m):
+    title = f'<div><p class="eyebrow">Portfolio</p><h1>Works</h1><p class="count">[N] video edits · [M] thumbnails{pin(2, True)}</p></div>'
     if m:
-        head = f'<div class="head"><div><p class="eyebrow">Portfolio</p><h1>Works</h1><p class="count">[N] video edits · [M] thumbnails{pin(2, True)}</p></div></div><div class="tools">{search(3)}</div><div style="margin-top:12px">{chips()}</div>'
-        body = (head + jump(True)
-            + section('Short-form videos', '[N]', grid(3, [card('s', cap=False, pn=7 if i == 0 else None) for i in range(6)]) + more(), pn=6)
-            + section('Long-form videos', '[N]', grid(1, [card('l'), card('l')]) + more(), subtabs=True)
-            + section('Thumbnails', '[M]', grid(2, [card('t') for _ in range(4)]) + more()) + FOOT)
-    else:
-        head = f'<div class="head"><div><p class="eyebrow">Portfolio</p><h1>Works</h1><p class="count">[N] video edits · [M] thumbnails{pin(2, True)}</p></div><div class="tools">{search(3)}{chips()}</div></div>'
-        body = (head + jump(False)
-            + section('Short-form videos', '[N]', grid(6, [card('s', pn=7 if i == 0 else None) for i in range(6)]) + more(), pn=6)
-            + section('Long-form videos', '[N]', grid(3, [card('l') for _ in range(3)]) + more(), subtabs=True)
-            + section('Thumbnails', '[M]', grid(4, [card('t') for _ in range(4)]) + more()) + FOOT)
+        top = mbar() + '<div class="page">' + f'<div class="head">{title}</div>' + f'<div class="lane">{jump(True)}{chips(True)}</div>'
+        body = (top
+            + section('Short-form videos', '[N]', strip(3, 1, [card('s', cap=False, pn=7 if i == 0 else None) for i in range(3)], True, 25), pn=6)
+            + section('Long-form videos', '[N]', strip(1, 1, [card('l')], True, 17), subtabs=True)
+            + section('Thumbnails', '[M]', strip(2, 1, [card('t') for _ in range(2)], True, 25)) + FOOT + '</div>')
+        return wrap(m, nav(m) + body)
+    head = f'<div class="head">{title}<div class="tools">{search(3)}</div></div>'
+    body = (head + f'<div class="lane">{jump(False)}{chips(False)}</div>'
+        + section('Short-form videos', '[N]', strip(6, 1, [card('s', pn=7 if i == 0 else None) for i in range(6)], False, 50), pn=6)
+        + section('Long-form videos', '[N]', strip(3, 1, [card('l') for _ in range(3)], False, 50), subtabs=True)
+        + section('Thumbnails', '[M]', strip(4, 1, [card('t') for _ in range(4)], False, 50)) + FOOT)
     return wrap(m, nav(m) + f'<div class="page">{body}</div>')
 
 def creator_board(m, compact=False):
     if m:
-        cards = [card('s', state='tap' if i == 4 else None, cap=False, pn=15 if i == 4 else None) for i in range(9)]
-        if compact:
-            cards = cards[:6]
+        cards = [card('s', state='tap' if i == 1 else None, cap=False, pn=15 if i == 1 else None) for i in range(6)]
         body = (profile(True, compact) + tabs('short', True)
-                + f'<div class="trow">{toolbar((3, 4), True)}</div>'
-                + f'<div class="gridwrap a">{pin(14)}{grid(3, cards)}</div>')
-    else:
-        cards = [card('s', state='hov' if i == 2 else None, pn=8 if i == 2 else None) for i in range(12)]
-        body = (profile(False) + f'<div class="trow">{tabs("short", False)}{toolbar((3, 4))}</div>'
-                + '<p class="sticky">Tabs row sticks under the nav while the grid scrolls</p>'
-                + f'<div class="gridwrap a">{pin(14)}{grid(6, cards)}</div>' + more() + FOOT)
-    inner = nav(m) + f'<div class="page">{body}</div>'
-    return wrap(m, inner, ' cmp' if compact else '')
+                + f'<div class="gridwrap a">{pin(14)}{strip(3, 2, cards, True, 33)}</div>')
+        return wrap(m, nav(m) + mbar() + f'<div class="page">{body}</div>', ' cmp' if compact else '')
+    cards = [card('s', state='hov' if i == 2 else None, pn=8 if i == 2 else None) for i in range(12)]
+    body = (profile(False) + f'<div class="trow">{tabs("short", False)}<div class="tools">{search(3)}</div></div>'
+            + '<p class="sticky">Tabs row sticks under the nav while the grid scrolls</p>'
+            + f'<div class="prow">{pager("short-form")}</div>'
+            + f'<div class="gridwrap a" style="margin-top:12px">{pin(14)}{strip(6, 2, cards, False, 33)}</div>' + FOOT)
+    return wrap(m, nav(m) + f'<div class="page">{body}</div>')
 
 def empty_board(m):
     emp = ('<div class="empty a">' + pin(16) + '<div class="ico" aria-hidden="true"></div><h2>No long-form videos for chiseyi yet</h2>'
            '<p>[Placeholder copy: nothing has been added to this tab yet.]</p>'
            '<div class="acts"><button type="button" class="btn2">See short-form (X)</button><button type="button" class="btn2">Back to all works</button></div></div>')
     if m:
-        body = profile(True) + tabs('long', True) + f'<div class="trow">{toolbar((3, 4), True)}</div>' + emp
-    else:
-        body = profile(False) + f'<div class="trow">{tabs("long", False)}{toolbar((3, 4))}</div>' + emp + FOOT
+        return wrap(m, nav(m) + mbar() + '<div class="page">' + profile(True) + tabs('long', True) + emp + '</div>')
+    body = profile(False) + f'<div class="trow">{tabs("long", False)}<div class="tools">{search(3)}</div></div>' + emp + FOOT
     return wrap(m, nav(m) + f'<div class="page">{body}</div>')
 
 NOTES = [
  (1, 'Site nav unchanged (existing SiteBar).'),
  (2, 'Title and live count of items that match the current filters (existing).'),
- (3, 'Search by title or client (existing). Combines with creator and sort. Stored as <code>q</code> in the URL.'),
- (5, 'Creator chips: All, Pidge, Miuoni, chiseyi, Lomi, in the slot where Sort used to be (Sort is removed). Desktop: one row right of the search. Mobile: one scrolling row under the search with an edge fade. Active = filled + check, not colour. <code>aria-pressed</code>, 44px tall. Choosing a creator starts the profile transition (see Interaction).'),
- (6, 'Section header with live count. Long-form keeps Vlogs / MVs / Normal Videos tabs; a group with no items loses its tab (existing).'),
+ (3, 'Search by title or client (existing), stored as <code>q</code> in the URL. Desktop: top right, easing down into the tabs row in creator state. Mobile: a bar under the nav that stays fixed at the top while scrolling. It sits above the content in the page flow, never over it, and is in the same place in both states.'),
+ (5, 'Creator chips in the same lane as the content-type links, pushed to the right, same order. Mobile: the lane drops below the links. Only whole chips are shown; a › arrow appears when more creators exist (and ‹ after moving on). Active = filled + check, not colour. <code>aria-pressed</code>, 44px tall. Choosing one starts the profile transition.'),
+ (6, 'Section header with live count. Desktop adds ‹ › buttons that move the row one screen; mobile swipes, with the bar showing position. Long-form keeps Vlogs / MVs / Normal Videos tabs; a group with no items loses its tab (existing).'),
  (7, 'Card: 9:16 short-form, 16:9 long-form and thumbnails. Fixed-ratio box so nothing shifts. Duration badge and “Edit for @…” credit kept; thumbnails have no credit line (existing).'),
  (8, 'Desktop hover or keyboard focus plays a muted 5s MP4 preview. Title is also in the accessible name and the viewer: nothing is hover-only.'),
  (9, 'Back to all works. Returns to the default state; focus goes back to the chiseyi chip.'),
@@ -296,7 +327,7 @@ NOTES = [
  (11, 'Stats: counts computed from portfolio items only. No followers, likes or views.'),
  (12, 'Primary CTA “Start a project” links to Contact. No Follow button.'),
  (13, 'Tabs: Short-form / Long-form / Thumbnails with counts. Search stays available. Arrow keys move between tabs.'),
- (14, 'Grid: 3 columns on mobile and 6 on desktop for short-form; 16:9 tabs use 2 columns on mobile and 4 on desktop.'),
+ (14, 'Rows scroll sideways with snapping, so cards stop on whole-card edges and nothing is cut off. Desktop shows 6 columns and mobile 3 (16:9 tabs: 4 and 2). Creator state has 2 rows. Move with swipe (mobile), ‹ › (desktop) or the keyboard; the bar shows position. No Load more.'),
  (15, 'Touch: first tap plays the preview in the card; the Open button (44px) opens the full video. Second tap on the card stops it.'),
  (16, 'Empty tab: message plus two exits. Count shows 0.'),
  (17, 'Short screen (667px tall): at 667px or less of height the header tightens (smaller avatar and gaps). Measured here: header, tabs, search/sort and the first full grid row end at 648px, so they fit in the first view.'),
@@ -312,6 +343,7 @@ def spec_board():
      'With <code>prefers-reduced-motion: reduce</code>: no morph or slides, an instant swap, no autoplaying previews. Only opacity and transform are animated except the morphing avatar; clicks are ignored while a transition runs.',
      'Working version: the interactive prototype page (it uses <code>#creator-chiseyi</code> in the address because the preview frame only allows a hash).',
      'Focus: on entering creator state focus moves to the name heading; on Back it returns to the chip. A polite live region announces “Showing chiseyi’s works”.',
+     'Scrolling rows use scroll-snap and one-screen paging; ‹ › disable at the ends. The page itself never scrolls sideways. Focus rings have room inside each row, so they are not clipped.',
      'Media: posters (WebP, fixed ratio) load first; first row eager, the rest lazy. MP4 previews are not requested until hover, focus or tap; one preview at a time; stopped on leave, blur or tab change.',
     ]
     a11y = [
@@ -330,6 +362,7 @@ def spec_board():
      'Stats come from <code>clips.json</code> and <code>thumbnails.json</code> at build time.',
      '16:9 tabs use 2 columns on mobile (3 columns would be about 115×65px). Confirm.',
      'The creator chip row is hidden in creator state; switching creators goes through Back.',
+     'Desktop: creator chips share one lane with the content-type links. Mobile cannot fit both, so they are two rows.',
      'Placeholders everywhere for bios, handles, stats, links and descriptions.',
     ]
     qs = [
@@ -338,7 +371,6 @@ def spec_board():
      'Lomi has no items today: show the chip with the empty state, or hide until there are items?',
      'Rename ids chi → chiseyi and miu → miuoni, or keep the ids and change labels only (old shared links)?',
      'Keep the Content filter row (All types / Short / Long / Thumbnails)? Here the section links and tabs replace it, and <code>type=</code> would still work in URLs.',
-     'Paging: load more, all at once, or keep paged strips?',
      'Own URL per creator (<code>/works/chiseyi</code>) or the query string?',
      'Should “Start a project” carry the creator into the contact form? Not assumed.',
     ]
