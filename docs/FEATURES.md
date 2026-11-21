@@ -374,3 +374,7 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 ## Round 11: transition polish
 - Search bar no longer a separate transition layer during page pushes (`html.vt-push` removes its `view-transition-name`), fixing the phone glitch where it drew over the incoming page.
 - Active nav tab springs to its new place (`nav-pill`); new page content rises in line by line after the card lands (`html.vt-arrive`), matching the preview.
+
+## Round 12: stamp iris page transition
+- Replaced the card push with a stamp iris between Home, Works, Pricing, Terms and Contact: a blue circle grows from the tap, a gold stamp names the page, then the new page opens out from the same point while its content rises in line by line.
+- Implemented in the inline script in `BaseLayout.astro` (sessionStorage hands the tap point to the next page); CSS in `global.css` (`nk-arrive`, `--nk-r`). Skipped for reduced motion and modified clicks; other routes keep the plain fade.
