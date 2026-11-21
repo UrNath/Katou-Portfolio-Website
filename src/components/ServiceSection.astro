@@ -32,8 +32,9 @@ function addonLabel(price: string) {
 
     <div class="status-row">
       <StatusChip status={serviceStatus} />
-      <p class="updated">Prices updated {status.updated}</p>
     </div>
+
+    {data.longNote && <p class="pick-note long-note"><strong>Not only shorts.</strong> {data.longNote}</p>}
 
     <section class="block">
       <h2 class="kicker">Includes</h2>
@@ -245,9 +246,9 @@ function addonLabel(price: string) {
     </section>
 
     <section class="block">
-      <a class="cta" href={`/?service=${data.contactService}#commission`}>{ctaLabel}</a>
+      <a class="cta" href={`/contact?service=${data.contactService}`}>{ctaLabel}</a>
       <p class="terms-nudge">
-        <a href="/#terms">Before you commission: read the Terms</a>
+        <a href="/terms">Before you commission: read the Terms</a>
       </p>
     </section>
   </article>

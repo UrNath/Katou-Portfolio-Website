@@ -10,6 +10,8 @@ export interface ViewerClip {
   previewSrc?: string;
   youtube: string;
   tiktok: string | null;
+  /** The YouTube upload is private, so players and links use TikTok only. */
+  youtubePrivate?: boolean;
   wide: boolean;
   heroFeatured: boolean;
 }

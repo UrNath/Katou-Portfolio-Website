@@ -1,166 +1,111 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../components/BaseLayout.astro';
 import SiteIntro from '../components/SiteIntro.astro';
-import CharacterArt from '../components/CharacterArt.astro';
 import FeaturedCarousel from '../components/FeaturedCarousel.astro';
-import ShortsWordmark from '../components/ShortsWordmark.astro';
-import ContactSection from '../components/ContactSection.astro';
-import ServiceSection from '../components/ServiceSection.astro';
-import TermsSection from '../components/TermsSection.astro';
 import StatusChip from '../components/StatusChip.astro';
 import ClipPreview from '../islands/ClipPreview';
 import ClipViewer from '../islands/ClipViewer';
+import chibi from '../assets/character/katou-chibi.webp';
 import { site } from '../data/site';
 import { status } from '../data/status';
 import { heroReel, hubClips, loadClips, toViewerClip } from '../lib/clips';
-import { loadService } from '../lib/services';
+
 const clips = await loadClips();
 const featured = hubClips(clips);
 const { hero } = heroReel(clips);
-const editing = await loadService('editing');
-const web = await loadService('web-design');
-const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
-// The featured pool, exclusions, order and gallery data remain unchanged.
+const art = site.characterArt;
+
+const viewerClips = featured;
 ---
 <BaseLayout>
   <SiteIntro />
   <script is:inline>
-    // Reveals are opt-in: content stays visible without scripting, without
-    // IntersectionObserver, and for visitors who prefer reduced motion.
+    // Reveals are opt-in: content stays visible without scripting and for reduced motion.
     if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
       document.documentElement.classList.add('reveal-ready');
     }
   </script>
-  <div class="scroll-portfolio">
-    <section class="intro-panel scroll-panel" id="home" aria-labelledby="intro-title">
-      <div class:list={['intro-visual', artOn && 'has-character']}>
-        {artOn ? <CharacterArt /> : (
-          /* PLACEHOLDER: typographic stand-in until Katou supplies human-drawn OC art
-             (enable site.characterArt). The square frame keeps its dimensions either way. */
-          <div class="type-art" data-placeholder="hero-art" aria-hidden="true">
-            <span class="art-label">PLACEHOLDER / CHARACTER ART TO COME</span>
-            <span class="art-orbit" data-parallax="-0.07"></span>
-            <span class="art-word" data-parallax="0.09">Cut.<br /><em>Create.</em></span>
-            <span class="art-star" data-parallax="-0.13">✳</span>
-            <span class="art-caption">A little timing.<br />A lot of personality.</span>
-          </div>
-        )}
-      </div>
-      <div class="intro-copy">
-        <p class="section-label" data-reveal>THE PERSON BEHIND THE TIMELINE</p>
-        <h1 id="intro-title" data-reveal style="--i:1">Meet the Editor!<br /><span>Katou</span></h1>
-        <p class="intro-role" data-reveal style="--i:2">{site.role}</p>
-        <div class="intro-actions" data-reveal style="--i:3">
-          <a class="solid-button" href="/works">View Works <span aria-hidden="true">↗</span></a>
-          <a class="outline-button" href="#commission">Contact Me <span aria-hidden="true">↓</span></a>
-          <button class="text-button" type="button" data-open-clip={hero.id}><span aria-hidden="true">▶</span> Play highlight reel</button>
+  <div class="pc-home">
+    <section class="pc-screen pc-fit pc-hero" id="home" aria-labelledby="intro-title">
+      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
+      <span class="pc-blob pc-blob-gold" aria-hidden="true"></span>
+      <div class="pc-art">
+        <div class="pc-figure">
+          <div class="pc-card" aria-hidden="true"></div>
+          {art.enabled && (
+            <div class="pc-pop">
+              <Image class="pc-oc" src={chibi} alt={art.alt} widths={[420, 698]} sizes="(min-width: 900px) 520px, 80vw" loading="eager" fetchpriority="high" />
+            </div>
+          )}
+          {art.enabled && art.artist && <p class="pc-credit">ART ILLUST: {art.artist}</p>}
         </div>
-        <div class="intro-status" data-reveal style="--i:4">
+      </div>
+      <div class="pc-hero-copy">
+        <p class="pc-eyebrow" data-reveal>Video editor · Web design</p>
+        <h1 id="intro-title" data-reveal style="--i:1">Meet the Editor!<br /><span>Katou</span></h1>
+        <p class="pc-tagline" data-reveal style="--i:2">{site.role}</p>
+        <div class="pc-actions" data-reveal style="--i:3">
+          <a class="pc-btn pc-btn-white" href="/works">View Works</a>
+          <a class="pc-btn pc-btn-peach" href="/contact">Contact</a>
+        </div>
+        <div class="pc-meta" data-reveal style="--i:4">
           <span>Editing <StatusChip status={status.editing} /></span>
           <span>Web design <StatusChip status={status.webDesign} /></span>
         </div>
-      </div>
-      <a class="scroll-cue" href="#services">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a>
-    </section>
-
-    <section class="services-panel detail-panel" id="services" aria-labelledby="services-title">
-      <div class="time-rule" style="--at:14" aria-hidden="true"><span></span></div>
-      <p class="section-label" data-reveal>WHAT I DO</p>
-      <h2 id="services-title" data-reveal style="--i:1">{site.role}</h2>
-      <div class="service-cards">
-        {[
-          { entry: editing, href: '#editing', state: status.editing, approx: undefined },
-          { entry: web, href: '#web-design', state: status.webDesign, approx: web.data.fromApprox },
-        ].map(({ entry, href, state, approx }, index) => (
-          <a class="service-card" href={href} data-reveal style={`--i:${index + 2}`}>
-            <span class="service-card-top"><span class="service-card-index">0{index + 1}</span><StatusChip status={state} /></span>
-            <span class="service-card-title">{entry.data.title}</span>
-            <span class="service-card-sub">{entry.data.subtitle}</span>
-            <span class="service-card-foot">
-              <span>From <strong>{entry.data.fromPrice}</strong>{approx && <small> {approx}</small>}</span>
-              <span class="service-card-arrow" aria-hidden="true">→</span>
-            </span>
-          </a>
-        ))}
+        <a class="pc-scroll" href="#featured" data-reveal style="--i:5" aria-label="Scroll down to see featured works">
+          <span class="pc-scroll-text">Scroll to see my edits</span>
+          <span class="pc-scroll-arrows" aria-hidden="true"><i></i><i></i></span>
+        </a>
       </div>
     </section>
 
-    <section class="featured-panel scroll-panel" id="featured" aria-labelledby="featured-title">
-      <div class="time-rule" style="--at:36" aria-hidden="true"><span></span></div>
-      <div class="featured-visual" data-reveal>
-        <ShortsWordmark />
+    <section class="pc-screen pc-fit pc-feat" id="featured" aria-labelledby="featured-title">
+      <div class="pc-feat-copy">
+        <h2 id="featured-title" data-reveal>Featured works</h2>
+        <p class="pc-feat-sub" data-reveal style="--i:1">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
+      </div>
+      <div class="pc-feat-visual" data-reveal>
         <FeaturedCarousel clips={featured} initialId={hero.id} />
       </div>
-      <div class="featured-copy">
-        <p class="section-label" data-reveal>FEATURED WORKS</p>
-        <h2 id="featured-title" data-reveal style="--i:1">Engaging edits that keep viewers hooked.</h2>
-        <p data-reveal style="--i:2">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
-        <div class="intro-actions" data-reveal style="--i:3">
-          <a class="solid-button" href="/works">View Full Gallery <span aria-hidden="true">↗</span></a>
-          <a class="outline-button" href="#commission">Contact Me <span aria-hidden="true">↓</span></a>
-        </div>
+      <div class="pc-feat-cta">
+        <a class="pc-btn pc-btn-gold pc-btn-lg" href="/works">See all works <span aria-hidden="true">→</span></a>
       </div>
     </section>
 
-    <section class="detail-panel" id="editing" aria-label="Editing commissions">
-      <div class="time-rule" style="--at:54" aria-hidden="true"><span></span></div>
-      <div class="section-marker"><span>01 / EDITING</span><span aria-hidden="true" data-parallax="0.05">✳</span></div>
-      <ServiceSection service={editing} />
+    <section class="pc-screen pc-fit pc-about" id="about" aria-labelledby="about-title">
+      {/* PLACEHOLDER VIDEO: set site.aboutVideo.src (and .poster) in src/data/site.ts once the About video is edited. */}
+      <div class="pc-photo" data-reveal>
+        {site.aboutVideo.src ? (
+          <video src={site.aboutVideo.src} poster={site.aboutVideo.poster || undefined} muted loop playsinline controls preload="metadata" aria-label="About Katou video"></video>
+        ) : (
+          <div class="pc-vid-ph" role="img" aria-label="Placeholder: About video coming soon">
+            <span class="pc-vid-play" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
+            <span class="pc-vid-cap">About video coming soon</span>
+          </div>
+        )}
+      </div>
+      <div class="pc-about-copy">
+        <h2 id="about-title" data-reveal style="--i:1">About Katou</h2>
+        <p data-reveal style="--i:2">{site.description}</p>
+      </div>
     </section>
-    <section class="detail-panel web-panel" id="web-design" aria-label="Web design commissions">
-      <div class="time-rule" style="--at:70" aria-hidden="true"><span></span></div>
-      <div class="section-marker"><span>02 / WEB DESIGN</span><span aria-hidden="true" data-parallax="-0.05">↗</span></div>
-      <ServiceSection service={web} />
-    </section>
-    <section class="detail-panel terms-panel" id="terms" aria-label="Commission terms">
-      <div class="time-rule" style="--at:84" aria-hidden="true"><span></span></div>
-      <p class="section-label">THE DETAILS, UP FRONT</p>
-      <TermsSection />
-    </section>
-    <section class="detail-panel commission-panel" id="commission" aria-label="Commission Katou">
-      <div class="time-rule" style="--at:97" aria-hidden="true"><span></span></div>
-      <p class="section-label">YOUR NEXT PROJECT STARTS HERE</p>
-      <ContactSection />
+
+    <section class="pc-screen pc-contact" id="contact" aria-labelledby="contact-title">
+      <span class="pc-blob pc-blob-blue" aria-hidden="true"></span>
+      <span class="pc-blob pc-blob-gold2" aria-hidden="true"></span>
+      <h2 id="contact-title" data-reveal>Let’s make something.</h2>
+      <a class="pc-btn pc-btn-gold" href="/contact" data-reveal style="--i:1">Contact</a>
     </section>
   </div>
   <ClipPreview client:idle />
-  <ClipViewer client:idle clips={featured.map(toViewerClip)} />
+  <ClipViewer client:idle clips={viewerClips.map(toViewerClip)} />
 </BaseLayout>
 
 <script>
-  import { mountHomeScroll } from '../lib/home-scroll';
-  mountHomeScroll();
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const mobile = window.matchMedia('(max-width: 767px)');
-  const layers = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));
-  let frame = 0;
-  function paint() {
-    frame = 0;
-    for (const layer of layers) {
-      if (reduced.matches || mobile.matches) {
-        layer.style.removeProperty('transform');
-        continue;
-      }
-      const section = layer.closest('section');
-      if (!section) continue;
-      const bounds = section.getBoundingClientRect();
-      if (bounds.bottom < -100 || bounds.top > innerHeight + 100) continue;
-      const offset = (innerHeight / 2 - (bounds.top + bounds.height / 2));
-      const strength = Number(layer.dataset.parallax) || 0;
-      layer.style.transform = `translate3d(0, ${Math.max(-64, Math.min(64, offset * strength))}px, 0)`;
-    }
-  }
-  function schedule() { if (!frame) frame = requestAnimationFrame(paint); }
-  window.addEventListener('scroll', schedule, { passive: true });
-  window.addEventListener('resize', schedule);
-  reduced.addEventListener('change', schedule);
-  mobile.addEventListener('change', schedule);
-  paint();
-
-  // Light staggered reveals, and a playhead that advances along each section's
-  // timeline rule. Transform and opacity only; each element animates once.
-  const revealed = document.querySelectorAll<HTMLElement>('[data-reveal], .time-rule');
+  // Light staggered reveals. Transform and opacity only; each element animates once.
   if (document.documentElement.classList.contains('reveal-ready')) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     const reveal = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
@@ -168,28 +113,11 @@ const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
         reveal.unobserve(entry.target);
       }
     }, { rootMargin: '0px 0px -8% 0px', threshold: .1 });
-    revealed.forEach((element) => reveal.observe(element));
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => reveal.observe(element));
     reduced.addEventListener('change', () => {
       if (!reduced.matches) return;
       document.documentElement.classList.remove('reveal-ready');
       reveal.disconnect();
     });
-  }
-
-  // Keep section links readable and useful for keyboard and browser history navigation.
-  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.desk-nav a[href^="/#"]'));
-  const sections = Array.from(document.querySelectorAll<HTMLElement>('.scroll-portfolio > section[id]'));
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        const id = entry.target.id === 'featured' ? 'home' : entry.target.id;
-        links.forEach((link) => {
-          if (link.hash === `#${id}`) link.setAttribute('aria-current', 'location');
-          else link.removeAttribute('aria-current');
-        });
-      }
-    }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
-    sections.forEach((section) => observer.observe(section));
   }
 </script>

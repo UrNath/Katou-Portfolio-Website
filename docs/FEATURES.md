@@ -162,67 +162,91 @@ Add a skin
 
 Remove a skin: delete its object. Keep at least one skin per client.
 
-## 7. Home page and sample carousel
+## 7. Home page and sample carousel (`/`)
 
-Home (`src/pages/index.astro`) has: hero, What I do, Featured works (carousel), Editing, Web design, Terms, Contact. Styles are in `src/styles/scroll-portfolio.css`.
+What it does: five full-screen sections in the Poster C look. In order: hero with the character card, featured carousel, Works / Pricing switch, About teaser, Contact band (then the footer).
 
-- Hero art is a placeholder until human-drawn art exists. To turn real art on, set `characterArt.enabled` to `true` and `src` to the image path in `src/data/site.ts`.
-- What I do cards read title, subtitle, and "from" price from the service files in section 9.
-- Section-to-section snapping is in `src/lib/home-scroll.ts`. Each new `<section>` in `index.astro` needs an `id`.
-
-Carousel
+Files
 
 | What | Where |
 |---|---|
-| Which clips, in what order | `src/data/hub-order.json`, array `order` |
-| A clip must also have | `"featured": true` in `src/data/clips.json` |
-| The clip shown first | the one with `"heroFeatured": true` (exactly one) |
-| Movement and timing | `src/lib/featured-carousel.ts` (slide time is the `560` in `progress`) |
+| Page layout and its small scripts | `src/pages/index.astro` |
+| All Poster C colours, sizes and motion | `src/styles/poster.css` |
+| Character image file | `src/assets/character/katou-chibi.webp` |
+| Character on/off, alt text, artist credit, location tag | `src/data/site.ts` (`characterArt`, `location`) |
+| Tagline and About sentence | `src/data/site-settings.json` (`role`, `description`) |
+| Carousel layout and behaviour | `src/components/FeaturedCarousel.astro`, `src/lib/featured-carousel.ts` |
+| Which clips are in the carousel | `/admin`, Home reel (saved to `src/data/hub-order.json`) |
+| Paged card strips | `src/lib/poster-rows.ts` |
 
-Change the carousel: edit it in `/admin` ("home reel"), or by hand set `featured` on the clip and add its id to `order`. Only the first five are shown. The centre sample plays on hover, focus, or its play button, never by itself.
+Hero
+
+- Headline: in `index.astro`, the `<h1 id="intro-title">` line. The word inside `<span>` gets the gold block.
+- Character: replace `katou-chibi.webp` with a new cut-out (one figure, transparent background, about 700 × 880). Keep the file name, or change the `import chibi` line in `index.astro`.
+- Credit: `characterArt.artist` in `site.ts`. It prints as "ART ILLUST: NAME" under the card. Do not remove the credit while this art is used.
+- To hide the character and credit, set `characterArt.enabled` to `false`.
+- Card size: in `poster.css`, the `--card` values in the `.pc-hero` rules. The character is always 110% of the card height.
+- The "Play highlight reel" button and the two status chips read the same data as before (`/admin` Home reel, `src/data/status.json`).
+
+Carousel: five samples, three in view, loops forever. Arrows, the dots, Left / Right keys, and swipe all move it; one move takes 450 ms (the number `450` in `featured-carousel.ts`). The centre sample plays its preview on hover or tap. With reduced motion it switches instantly.
+
+Works / Pricing switch
+
+- Two tabs change the panel in place. Left / Right keys move between tabs.
+- Works tab: a strip of real work in two rows that scrolls sideways inside its box. Chips filter it (All, Short-form, Long form videos, Thumbnails). How many of each: the three `.slice(0, 4)` lines near the top of `index.astro`.
+- Pricing tab: one card per service with its title and subtitle from `src/content/services/`. No prices are shown here by design; the cards and the button go to `/pricing`.
+
+About teaser: the photo is a marked placeholder (`data-placeholder="about-photo"`). Replace that `<div class="pc-photo">` with an image when one exists. The button goes to `/about` (section 15).
+
+Contact band: heading and a button to `/contact`.
+
+Fit to screen: each section is exactly as tall as the visible screen below the nav bar (`.pc-fit` in `poster.css`), so nothing is cut off. On very short screens (under 600 px tall) sections grow instead and the page scrolls normally. Do not give a section a fixed pixel height.
+
+Motion: cards tilt on hover with a mouse and press in on touch; sections fade up once as they scroll into view; background blobs drift. All of it is off with reduced motion (last block of `poster.css`).
 
 ## 8. Works page and filters (`/works`)
 
+What it does: on a white page, a "Works" title and search, a lane under the nav bar with icon links (Shorts, Long Form, Thumbnails) and a row of creator chips, then one full-screen section per content type. Picking a creator chip opens that creator's profile view (neutral initial avatar, name, handle and counts taken from the real clips) with icon tabs for Short, Long form and Thumbnails; the Back icon returns to all works. On phones the search bar is sticky next to the Back icon; focusing it expands and darkens it.
+
+Files
+
 | What | Where |
 |---|---|
-| Videos | `src/data/clips.json`, array `clips` (newest first) |
-| Client chips, sections, tag chips | `src/data/works-layout.json`: `creators`, `sections`, `tags` |
-| Thumbnail gallery | `src/data/thumbnails.json` |
-| Filter behaviour | `src/islands/WorksFilters.tsx`, `src/data/tags.ts` |
-| Posters | `src/assets/posters/` or `public/media/posters/` |
-| Preview loops | `public/media/previews/` |
+| Page layout, search and tab scripts | `src/pages/works.astro` |
+| Filter chips, profile view, transitions | `src/islands/WorksFilters.tsx`, `src/data/tags.ts` |
+| Whole-chip paging (‹ › when chips do not fit) | `src/lib/works-chips.ts` |
+| Content-type icons | `src/components/WorkTypeIcon.astro` |
+| Videos | `src/data/clips.json` (edit in `/admin`) |
+| Thumbnails gallery | `src/data/thumbnails.json` (edit in `/admin`) |
+| Creators, sections, tags | `src/data/works-layout.json` (edit in `/admin`) |
+| One video card | `src/components/ClipCard.astro` |
+| Thumbnail viewer | `src/islands/ThumbnailViewer.tsx` |
+| Paged card strips | `src/lib/poster-rows.ts` |
+| Look | `src/styles/poster.css`, "Works page" block |
 
-The easiest way to change any of this is the private editor at `/admin`.
+Kept from before: title and works count; search by title or client; Content filter (All types, Short Form, Long Form, Thumbnails); VTuber filter (All creators plus one chip per creator); filters and search combine and are stored in the page address, so a filtered view can be shared; duration badges; hover-to-play with a mouse and tap on touch; "Edit for @..." credit on video cards; the thumbnail viewer.
 
-One clip in `clips.json`:
+Changed or added
 
-```json
-{
-  "id": "chi-c1",
-  "creator": "Chi",
-  "channelHandle": "@chiseyi",
-  "title": "is chi an alpha ?",
-  "youtubeUrl": "https://www.youtube.com/shorts/zXEW0ZUERDo",
-  "tiktokUrl": null,
-  "uploadDate": "2026-09-15",
-  "durationSec": 43,
-  "orientation": "vertical",
-  "aspectRatio": "9:16",
-  "poster": "posters/chi-c1.webp",
-  "preview": "previews/chi-c1.mp4",
-  "tags": [],
-  "featured": false,
-  "heroFeatured": false
-}
-```
+- Sections stack down the page like the wireframe. Each has a row that scrolls sideways and snaps to whole cards (6 short columns on desktop, 4 on tablet, 3 on phones; long form 3/2/1; thumbnails 4/3/2; a creator's page uses 2 rows). A thin bar under each row shows position, with round ‹ › buttons beside the title on desktop only. The page never scrolls sideways.
+- Title and "Edit for @..." credit sit under each card (shorts hide the caption on phones).
+- Long Form Videos: Vlogs, MVs and Normal Videos are tabs; one group shows at a time. A group with no matching videos loses its tab. Left / Right keys move between tabs.
+- A gold number next to each section title shows how many items match.
+- "Clear filters" appears in the filter bar when any filter or search is on. When nothing matches, a message and a Clear filters button show instead of the sections.
+- Thumbnail viewer: Previous / Next buttons, a counter, and Left / Right keys. Esc or the X closes it. It moves through the thumbnails that currently match the filters.
+- Creator profile: shows only data that exists (handle from the creator's clips, counts of shorts/long-form/thumbnails). There is no bio or avatar photo in the data, so none is shown; the avatar is an initial. Open tab defaults to the creator's first type that has work; the URL `type` param overrides it.
+- Enter/leave uses the View Transitions API (chip circle becomes the avatar); it is skipped with reduced motion or when unsupported.
+- Removed: the fanned-shorts title decoration and the blue title banner.
 
-Add a video: follow "Add a clip" in `CONTENT.md` (poster, 5-second silent preview, then the JSON entry). `creator` must match a `label` in `creators`.
+How to change things
 
-Change a video's poster or preview: replace the file with the same name, or use Edit thumbnail in `/admin` → Videos.
+- Rows per strip: in `poster.css`, the `--rows` values under "Paged rows" (`.pc-rows-tall` is Shorts, `.pc-rows-wide` is Long Form and Thumbnails).
+- Section names: `sections` in `src/data/works-layout.json`. Long Form group names: `longFormCategories` in `src/lib/works-layout.ts`.
+- A video's Long Form group: its `longFormCategory` in `clips.json` (`vlogs`, `mvs` or `normal`), or in `/admin`.
 
-Add or rename a filter chip: client chips are `creators`; tag chips are the `tags` list (labels, for example `"Gaming"`); sections are `sections`. A clip shows under a tag when the same label is in its `tags`.
+Do not rename the `data-*` attributes in `works.astro` (`data-filter-kind`, `data-rows`, `data-lf-tab`, `data-block-count`, and so on). The scripts find elements by them.
 
-Do not add back the ids listed under "Do not add these clip ids back" in `CONTENT.md`; they are not Katou's edits.
+Thumbnails carry no "Edit for" line on purpose: the gallery note says design credit may vary.
 
 ## 9. Pricing
 
@@ -261,6 +285,8 @@ Known placeholder: the second line of `guidelines` says the reply time is a plac
 
 ## 12. Navigation bar
 
+Current links: Home, Works, Clients, Pricing, Terms, Contact. The last link in the list gets the outlined shape; `SiteBar.astro` picks it by its address `/contact`.
+
 Links: `src/data/site.ts`, array `navLinks` (`href`, `label`). Phone menu routes: `src/data/routes.ts`. The tab look (uppercase labels, slanted block on the current page) is at the end of `src/styles/scroll-portfolio.css` under "Tab-style navigation". A page can recolour it by setting `--nav-accent`; Meet the Clients does this with the current client's colour.
 
 ## 13. Opening curtain
@@ -275,3 +301,72 @@ Links: `src/data/site.ts`, array `navLinks` (`href`, `label`). Phone menu routes
 - The studio does not edit `src/data/clients.ts`. Meet the Clients facts are changed by hand as in section 1.
 
 Do not touch `src/middleware.ts`, `src/pages/api/admin/`, or `src/lib/admin-session.ts` unless you are fixing sign-in. A mistake there locks the editor.
+
+## 15. Poster C look, and the Pricing, Terms, Contact and About pages
+
+Look: every page except Meet the Clients and `/admin` uses `src/styles/poster.css`. The colours are the first block of that file (eye blue, hair brown, peach, tie gold, jacket slate). Change a value there and it changes everywhere. Headings use Bowlby One, body text Outfit, the nav bar Geist.
+
+Measured text contrast (WCAG AA needs 4.5): white on blue 5.0, brown on peach 9.2, brown on gold 9.0, white on slate 6.4, white on brown 14.6, muted brown on white 9.4, blue "Katou" on the nav bar 4.9. If you change a colour, re-check the pair it is used with.
+
+Pages
+
+| Address | File | Content comes from |
+|---|---|---|
+| `/pricing` | `src/pages/pricing.astro` | Section 9 files. Editing is at `/pricing#editing`, Web design at `/pricing#web-design` |
+| `/terms` | `src/pages/terms.astro` | Section 11 |
+| `/contact` | `src/pages/contact.astro` | Section 10. `/contact?service=editing` preselects a service |
+| `/about` | `src/pages/about.astro` | `description` in `site-settings.json`, plus a marked placeholder |
+| `/editing`, `/web-design` | forward to the two `/pricing` addresses | `src/components/SectionRedirect.astro` |
+
+Pricing, Terms and Contact used to be sections of the home page. They are pages now, so the old home addresses `/#editing`, `/#web-design`, `/#terms` and `/#commission` no longer exist.
+
+About page: the dashed box is a placeholder (`data-placeholder="about-copy"`). Replace that paragraph with real text. Do not invent experience or achievements. The About page is linked from the home About teaser but is not in the nav bar; add `{ href: '/about', label: 'About' }` to `navLinks` in `src/data/site.ts` if it should be.
+
+Known limits: Pricing, Terms and Contact hold long content and scroll; they are not one-screen pages. The About photo and About text are placeholders. The Discord link in `site-settings.json` should be confirmed.
+
+## Update: Works, Home, Contact (Nov 20)
+- Works creator view scrolls down as a feed (no sideways rows); format tabs only for formats that creator has, with names beside icons on desktop; no "works shown" chip or jump icons; Back/search animate without clipping; no shared-element avatar flight; thumbnails split by aspect ratio (16:9 / 9:16); Pidge and Chi avatars in `public/avatars/`.
+- Home: location removed everywhere; hero scroll cue replaces the highlight-reel button; avatar slide-up; carousel without arrows, larger on phones; Works/Pricing section removed ("See all works" in Featured); About shows a placeholder video (set `site.aboutVideo` in `src/data/site.ts`).
+- Contact leads with the Discord tag `nassukatou` (open + copy); email form kept below.
+- Meet the Clients no longer plays the opening curtain.
+
+## Update: round 3 (Nov 20)
+- Works: avatar morph (chip to profile picture) restored; the static `clip-<id>` view-transition name on hero-featured cards (floating video) removed; work counts removed from profiles; sliding highlight (`.nk-ind`, placed in `WorksFilters.tsx` `placeIndicators`) for format tabs, tag chips and the long-form groups.
+- Home: Featured works headline and a highlighted "See all works" button at the bottom; About button removed.
+- Contact: socials row removed (footer has them), Discord card slimmed.
+- Menu: Editing and Web design merged into one Pricing button. Pricing: "Prices updated" removed; editing page notes long-form and normal videos (no new prices).
+- Pidge clips carry `youtubePrivate: true` in clips.json: the viewer uses TikTok only. Clips without a `tiktokUrl` show the fallback until a link is added.
+
+## Round 4
+- Home Featured Works on phones (≤899px) follows the mobile wireframe: 58%-width centre card, tilted side cards, caption under cards, 5 dots, gold "See all works" button with a blue pulse ring. Finger-following swipe with flick momentum.
+- Works: empty thumbnail groups are hidden so Thumbnails starts at the same offset as Shorts.
+- `src/lib/flick.ts`: mouse/pen flick-and-glide for every sideways scroller; touch coasts natively (soft snapping `x proximity`).
+
+## Round 5
+- Featured section is its own stacking context and clips its cards, so they stay under the sticky header.
+- Works rows get the carousel's depth motion on phones (cards shrink/tilt/drop toward the edges); skipped for reduced motion.
+- Works tab highlights are rounded sliding pills (content tabs and Vlogs/MVs/Normal).
+- New NK logo: `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`.
+
+## Round 6
+- Works rows: depth motion reverted; only the flick/momentum remains.
+- Navbar on every page now uses the clients-page frosted-glass bar (translucent + blur + hairline), in the light Poster palette.
+
+## Round 7
+- Works content tabs: back to a small rounded line under the icon.
+- Flick/momentum now also handles touch (rows set `touch-action: pan-y`), so All-works Shorts/Thumbnails coast with the flick speed.
+- Menu: Works no longer has the yellow primary highlight.
+- Home intro curtain: the hero's entrance animations wait (`html.intro-wait`) until the curtain starts lifting.
+
+## Round 8: phone density (≤768px)
+- Tokens in `poster.css`: `--pc-bw` (outline width, 3px → 2px), `--pc-k` (radius/solid-shadow scale, 1 → .62), `--pc-pad` 16px; all Poster borders, radii and shadows now use them. Desktop values unchanged.
+- Phone block at the end of `poster.css` (and one for Meet the Clients in `scroll-portfolio.css`): bar 52px, wordmark 17px, headings 18-26px, body 15px, buttons/chips/inputs 40-42px, smaller hero art, cards and tighter section padding.
+- Featured carousel card width capped at 50% of the screen on phones.
+
+## Round 9
+- Home is excluded from the phone-density block (`body:not(:has(.pc-hero))`), so it keeps its previous sizes; the compact navbar is shared by every page. Carousel width cap and side-card offset restored.
+- Home hero buttons are centred on phones.
+
+## Round 10: card-push page transition
+- Cross-document view transitions (`@view-transition`) now push between Home, Works, Pricing, Terms and Contact: old page slides back and dims, new page slides in with an ink edge. Forward = right to left, back = left to right (tab order). Direction is set by an inline script in `BaseLayout.astro` (`pageswap`/`pagereveal` types `vt-forward`/`vt-back`); CSS is in `global.css`.
+- Navbar and footer stay put; the Works search bar travels with the page. Other routes and reduced-motion keep the old fade / no animation. Chromium and Safari 18.2+ only; other browsers just navigate.

@@ -24,7 +24,7 @@ const routes = getRoutes(prices);
     {
       navLinks.map((link) => (
         <a
-          class:list={['bar-link', link.href === '/#commission' && 'commission-link']}
+          class:list={['bar-link', link.href === '/contact' && 'commission-link']}
           href={link.href}
           aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
         >

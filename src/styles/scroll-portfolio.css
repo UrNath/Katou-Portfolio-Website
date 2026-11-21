@@ -296,3 +296,12 @@ html.home-snap-ready { scroll-behavior: auto; scroll-snap-type: none; overflow-a
 .clean-portfolio.immersive-clients .bar-link[aria-current],
 .clean-portfolio.immersive-clients .commission-link:hover { color: var(--nav-on); }
 @media (prefers-reduced-motion: reduce) { .clean-portfolio .bar-link, .clean-portfolio .bar-link::before { transition: none; } }
+
+/* Phone density for the Meet the Clients page (the Poster block handles every other page) */
+@media (max-width: 768px) {
+  .clean-portfolio.immersive-clients .site-bar { height: calc(52px + env(safe-area-inset-top)); padding-inline: 16px 8px; }
+  .clean-portfolio.immersive-clients .wordmark { font-size: 17px; }
+  .clean-portfolio.immersive-clients .menu-btn { width: 40px; height: 40px; }
+  body.immersive-clients h2.name { font-size: clamp(34px, 11vw, 44px) !important; }
+  body.immersive-clients .bg-band { font-size: 56px !important; }
+}

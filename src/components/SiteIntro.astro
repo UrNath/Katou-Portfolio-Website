@@ -21,6 +21,12 @@ const { gallery = false } = Astro.props;
     const count = opening.querySelector('[data-count]');
     const started = performance.now();
     opening.hidden = false;
+    // Hold the page's own entrance animations until the curtain starts lifting, so they are seen.
+    if (!gallery) {
+      const root = document.documentElement;
+      root.classList.add('intro-wait');
+      setTimeout(() => root.classList.remove('intro-wait'), 1000);
+    }
     if (gallery) document.querySelector('.site-bar').inert = true;
     const finish = () => {
       if (opening.hidden) return;

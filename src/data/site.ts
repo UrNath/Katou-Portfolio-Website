@@ -12,16 +12,19 @@ export const site = {
    * No AI-generated art and no third-party characters.
    */
   characterArt: {
-    enabled: false,
-    src: null as string | null,
-    alt: '',
-    artist: '',
+    enabled: true,
+    /** The image file itself is imported in src/pages/index.astro. */
+    src: 'src/assets/character/katou-chibi.webp' as string | null,
+    alt: 'Chibi illustration of Katou: brown hair, cat ears, blue eyes, grey jacket and yellow tie',
+    artist: 'MINGMING.IX',
   },
   /**
    * Preview loops are served from /media/previews/ until this is a CDN origin
    * (no trailing slash), for example a Vercel Blob base URL. See CONTENT.md.
    */
   previewBase: settings.previewBase,
+  /** About video on the home page. Leave src empty to show the placeholder; fill in once the video is edited. */
+  aboutVideo: { src: '', poster: '' },
 };
 
 export type SocialId = 'discord' | 'youtube' | 'tiktok' | 'x';
@@ -39,13 +42,12 @@ export const socials: SocialLink[] = settings.socials.map((item) => ({
 }));
 
 export const navLinks = [
-  { href: '/#home', label: 'Home' },
+  { href: '/', label: 'Home' },
   { href: '/works', label: 'Works' },
-  { href: '/#editing', label: 'Editing' },
-  { href: '/#web-design', label: 'Web design' },
-  { href: '/clients', label: 'Meet the Clients!' },
-  { href: '/#terms', label: 'Terms' },
-  { href: '/#commission', label: 'Commission' },
+  { href: '/clients', label: 'Clients' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/terms', label: 'Terms' },
+  { href: '/contact', label: 'Contact' },
 ] as const;
 
 export function isCurrent(pathname: string, href: string): boolean {

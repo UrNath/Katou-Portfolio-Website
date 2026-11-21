@@ -1,6 +1,9 @@
 ---
 import '../styles/global.css';
 import '../styles/scroll-portfolio.css';
+import '@fontsource/bowlby-one/latin-400.css';
+import '@fontsource-variable/outfit/index.css';
+import '../styles/poster.css';
 import SiteBar from './SiteBar.astro';
 import SiteFooter from './SiteFooter.astro';
 import { site } from '../data/site';
@@ -27,7 +30,7 @@ const pathname = Astro.url.pathname;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#F6F3EC" />
+    <meta name="theme-color" content="#FCFCFA" />
     <meta name="generator" content={Astro.generator} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -48,8 +51,26 @@ const pathname = Astro.url.pathname;
         if (reduce || (conn && conn.saveData)) document.documentElement.classList.add('poster-only');
       })();
     </script>
+    <script is:inline>
+      // Card-push page transition: tell the browser which way we are moving through the main pages.
+      (function () {
+        var order = ['/', '/works', '/pricing', '/terms', '/contact'];
+        var at = function (url) { var p = new URL(url, location.href).pathname.replace(/\/+$/, '') || '/'; return order.indexOf(p); };
+        var tag = function (event, from, to) {
+          if (!event.viewTransition || from < 0 || to < 0 || from === to) return;
+          event.viewTransition.types.add(to > from ? 'vt-forward' : 'vt-back');
+        };
+        addEventListener('pageswap', function (event) {
+          if (event.activation && event.activation.entry) tag(event, at(location.href), at(event.activation.entry.url));
+        });
+        addEventListener('pagereveal', function (event) {
+          var a = window.navigation && navigation.activation;
+          if (a && a.from && a.entry) tag(event, at(a.from.url), at(a.entry.url));
+        });
+      })();
+    </script>
   </head>
-  <body class:list={['clean-portfolio', pathname === '/' && 'is-scroll', immersive && 'immersive-clients']}>
+  <body class:list={['clean-portfolio', immersive ? 'immersive-clients' : 'poster']}>
     <a class="skip" href="#main">Skip to content</a>
     <SiteBar pathname={pathname} prices={{ editing, web }} />
     <main id="main">
@@ -66,5 +87,8 @@ const pathname = Astro.url.pathname;
         window.__nkClip = opener.getAttribute('data-open-clip');
       });
     </script>
-  </body>
+    <script>
+    import '../lib/flick';
+  </script>
+</body>
 </html>
