@@ -1,6 +1,9 @@
 ---
 import '../styles/global.css';
 import '../styles/scroll-portfolio.css';
+import '@fontsource/bowlby-one/latin-400.css';
+import '@fontsource-variable/outfit/index.css';
+import '../styles/poster.css';
 import SiteBar from './SiteBar.astro';
 import SiteFooter from './SiteFooter.astro';
 import { site } from '../data/site';
@@ -27,7 +30,7 @@ const pathname = Astro.url.pathname;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#F6F3EC" />
+    <meta name="theme-color" content="#FCFCFA" />
     <meta name="generator" content={Astro.generator} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -48,8 +51,87 @@ const pathname = Astro.url.pathname;
         if (reduce || (conn && conn.saveData)) document.documentElement.classList.add('poster-only');
       })();
     </script>
+    <script is:inline>
+      // Stamp iris page transition between Home, Works, Pricing, Terms and Contact.
+      (function () {
+        var routes = { '/': 'Home', '/works': 'Works', '/pricing': 'Pricing', '/terms': 'Terms', '/contact': 'Contact' };
+        var norm = function (p) { return p.replace(/\/+$/, '') || '/'; };
+        var reduce = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
+        var root = document.documentElement, busy = false, KEY = 'nk-iris';
+        var EASE = 'cubic-bezier(.65,0,.25,1)', DOTS = 'radial-gradient(rgba(255,255,255,.16) 1.2px,transparent 1.6px) 0 0/12px 12px,';
+        var canMask = !!(window.CSS && CSS.registerProperty) || (window.CSS && CSS.supports && CSS.supports('(--a: 1px)'));
+        var wrap = function () {
+          var o = document.createElement('div');
+          o.setAttribute('aria-hidden', 'true');
+          o.style.cssText = 'position:fixed;inset:0;z-index:2147483000;pointer-events:none;overflow:hidden';
+          return o;
+        };
+        var stampEl = function (label) {
+          var s = document.createElement('div');
+          s.textContent = label;
+          s.style.cssText = 'position:absolute;left:50%;top:52%;translate:-50% -50%;font:400 clamp(28px,9vw,76px)/1 var(--pc-head,"Bowlby One",system-ui,sans-serif);text-transform:uppercase;color:#3a231c;background:#f4c542;border:3px solid #3a231c;border-radius:14px;padding:.12em .4em;box-shadow:0 8px 0 #3a231c;white-space:nowrap;opacity:0';
+          return s;
+        };
+        var radius = function (x, y) { return Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 30; };
+        var done = function (a) { return a.finished.catch(function () {}); };
+        var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+
+        // Outgoing: circle grows from the tap, the page name is stamped, then we navigate.
+        async function leave(url, label, x, y) {
+          busy = true;
+          var o = wrap(), disc = document.createElement('div'), s = stampEl(label), k = radius(x, y);
+          disc.style.cssText = 'position:absolute;left:' + x + 'px;top:' + y + 'px;width:2px;height:2px;margin:-1px 0 0 -1px;border-radius:50%;background:#1f6fc9';
+          o.append(disc, s); root.append(o);
+          await done(disc.animate([{ transform: 'scale(0)' }, { transform: 'scale(' + k + ')' }], { duration: 500, easing: EASE, fill: 'forwards' }));
+          o.style.background = '#1f6fc9';
+          s.animate([{ opacity: 0, transform: 'scale(.5) rotate(6deg)' }, { opacity: 1, transform: 'scale(1.08) rotate(2deg)', offset: .65 }, { opacity: 1, transform: 'scale(1) rotate(2deg)' }], { duration: 380, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' });
+          await wait(420);
+          try { sessionStorage.setItem(KEY, JSON.stringify({ x: x / innerWidth, y: y / innerHeight, l: label, t: Date.now() })); } catch (e) {}
+          location.href = url;
+        }
+        document.addEventListener('click', function (e) {
+          if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || busy || reduce()) return;
+          var a = e.target && e.target.closest && e.target.closest('a[href]');
+          if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+          var u = new URL(a.href, location.href);
+          if (u.origin !== location.origin) return;
+          var to = norm(u.pathname);
+          if (!(to in routes) || to === norm(location.pathname)) return;
+          e.preventDefault();
+          var x = e.clientX, y = e.clientY;
+          if (!e.detail && a.getBoundingClientRect) { var r = a.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; }
+          leave(u.href, routes[to], x, y);
+        }, true);
+        addEventListener('pageshow', function (e) { if (e.persisted) { busy = false; document.querySelectorAll('body > div[aria-hidden][style*="2147483000"], html > div[aria-hidden][style*="2147483000"]').forEach(function (n) { n.remove(); }); } });
+        addEventListener('pageswap', function (e) { if (e.viewTransition && busy) e.viewTransition.skipTransition(); });
+
+        // Incoming: the new page is hidden behind the same blue sheet, then opens out from the tap point.
+        var s0 = null;
+        try { s0 = JSON.parse(sessionStorage.getItem(KEY)); sessionStorage.removeItem(KEY); } catch (e) {}
+        if (s0 && Date.now() - s0.t < 6000 && !reduce()) {
+          addEventListener('pagereveal', function (e) { if (e.viewTransition) e.viewTransition.skipTransition(); });
+          var o = wrap(), sheet = document.createElement('div'), s = stampEl(s0.l), x = s0.x * innerWidth, y = s0.y * innerHeight, k = radius(x, y);
+          var mask = 'radial-gradient(circle at ' + x + 'px ' + y + 'px,transparent var(--nk-r),#000 calc(var(--nk-r) + 1px))';
+          sheet.style.cssText = 'position:absolute;inset:0;background:' + DOTS + '#1f6fc9;-webkit-mask-image:' + mask + ';mask-image:' + mask + ';--nk-r:0px';
+          s.style.opacity = '1'; s.style.rotate = '2deg';
+          o.append(sheet, s); root.append(o); root.classList.add('nk-arrive');
+          var start = performance.now();
+          var open = async function () {
+            await wait(Math.max(0, 250 - (performance.now() - start)));
+            s.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: 'forwards' });
+            if (canMask) await done(sheet.animate([{ '--nk-r': '0px' }, { '--nk-r': k + 'px' }], { duration: 580, easing: EASE, fill: 'forwards' }));
+            else await done(sheet.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: 'forwards' }));
+            o.remove();
+            setTimeout(function () { root.classList.remove('nk-arrive'); }, 400);
+          };
+          var opened = false;
+          var go = function () { if (opened) return; opened = true; (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(open, open); };
+          if (document.readyState !== 'loading') go(); else { document.addEventListener('DOMContentLoaded', go); setTimeout(go, 1500); }
+        }
+      })();
+    </script>
   </head>
-  <body class:list={['clean-portfolio', pathname === '/' && 'is-scroll', immersive && 'immersive-clients']}>
+  <body class:list={['clean-portfolio', immersive ? 'immersive-clients' : 'poster']}>
     <a class="skip" href="#main">Skip to content</a>
     <SiteBar pathname={pathname} prices={{ editing, web }} />
     <main id="main">
@@ -66,5 +148,8 @@ const pathname = Astro.url.pathname;
         window.__nkClip = opener.getAttribute('data-open-clip');
       });
     </script>
-  </body>
+    <script>
+    import '../lib/flick';
+  </script>
+</body>
 </html>

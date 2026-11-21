@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../components/BaseLayout.astro';
-import SiteIntro from '../components/SiteIntro.astro';
 import ClientGallery from '../components/ClientGallery.astro';
 import { creators } from '../data/tags';
 import { hasProfile, profileFor } from '../data/clients';
@@ -27,6 +26,5 @@ const clients = creators
   });
 ---
 <BaseLayout title="Meet the Clients" immersive>
-  <SiteIntro gallery />
   <ClientGallery clients={clients} />
 </BaseLayout>

@@ -1,6 +1,8 @@
 ---
+import { Picture } from 'astro:assets';
 import BaseLayout from '../components/BaseLayout.astro';
 import ClipCard from '../components/ClipCard.astro';
+import WorkTypeIcon from '../components/WorkTypeIcon.astro';
 import ClipPreview from '../islands/ClipPreview';
 import ClipViewer from '../islands/ClipViewer';
 import ThumbnailViewer from '../islands/ThumbnailViewer';
@@ -19,56 +21,136 @@ const blocks = workSections
     return { section, clips: clipsInSection(section, clips), thumbs: [] };
   })
   .filter((block) => block.clips.length > 0 || block.thumbs.length > 0);
+const landscapeThumbs = thumbnails.filter((thumb) => (thumb.ratio ?? 16 / 9) >= 1);
+const verticalThumbs = thumbnails.filter((thumb) => (thumb.ratio ?? 16 / 9) < 1);
 const editLabel = `${clips.length} video edits · ${thumbnails.length} thumbnails`;
 const names = creators.map((creator) => creator.label).join(', ');
 const sectionNames = blocks.map((block) => block.section.label).join(', ');
 const cardSizes = '(min-width: 1280px) 220px, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 46vw';
 const wideSizes = '(min-width: 768px) 46vw, 100vw';
+
+type WorkType = 'short' | 'long' | 'thumbnail';
+const typeOfKind = { vertical: 'short', landscape: 'long', thumbnail: 'thumbnail' } as const;
+const typeLabel: Record<WorkType, string> = { short: 'Short-form videos', long: 'Long-form videos', thumbnail: 'Thumbnails' };
+const presentTypes = (['short', 'long', 'thumbnail'] as WorkType[]).filter((type) =>
+  blocks.some((block) => block.section.kind in typeOfKind && typeOfKind[block.section.kind as keyof typeof typeOfKind] === type),
+);
+const tabLabel: Record<WorkType, string> = { short: 'Shorts', long: 'Long form', thumbnail: 'Thumbnails' };
+const avatars: Record<string, string> = { pidge: '/avatars/pidge.webp', chi: '/avatars/chi.webp', miu: '/avatars/miu.webp' };
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+// Everything the profile view shows is computed from the portfolio data. No bio or avatar exists yet, so none is shown.
+const profiles = creators.map((creator) => {
+  const count: Record<WorkType, number> = {
+    short: clips.filter((clip) => clip.creatorId === creator.id && !clip.wide).length,
+    long: clips.filter((clip) => clip.creatorId === creator.id && clip.wide).length,
+    thumbnail: thumbnails.filter((thumb) => creatorIdOf(thumb.creator) === creator.id).length,
+  };
+  const handle = clips.find((clip) => clip.creatorId === creator.id && clip.channelHandle && clip.channelHandle !== '@unknown')?.channelHandle ?? '';
+  const parts = [
+    count.short ? plural(count.short, 'short', 'shorts') : '',
+    count.long ? `${count.long} long-form` : '',
+    count.thumbnail ? plural(count.thumbnail, 'thumbnail', 'thumbnails') : '',
+  ].filter(Boolean);
+  const types = presentTypes.filter((type) => count[type] > 0);
+  const firstTab = types[0] ?? presentTypes[0] ?? 'short';
+  return {
+    types,
+    avatar: avatars[creator.id] ?? '',
+    id: creator.id,
+    label: creator.label,
+    initial: creator.label.trim().charAt(0).toUpperCase(),
+    handle,
+    stats: parts.length ? parts.join(' · ') : 'No works yet',
+    firstTab,
+  };
+});
+const defaultTabs = Object.fromEntries(profiles.map((profile) => [profile.id, profile.firstTab]));
+const typesBy = Object.fromEntries(profiles.map((profile) => [profile.id, profile.types]));
+const profileCss = profiles
+  .map((profile) => `html[data-creator-filter="${profile.id}"] [data-profile="${profile.id}"]{display:flex}\nhtml[data-creator-filter="${profile.id}"] [data-tabs-for="${profile.id}"]{display:flex}`)
+  .join('\n');
 ---
 
 <BaseLayout
   title="Works"
   description={`${editLabel} for ${names}. ${sectionNames}, with content type, creator, and tag filters.`}
 >
-  <style slot="head" is:inline set:html={filterCss()} />
-  <script slot="head" is:inline set:html={filterBoot()} />
-  <section class="works">
-    <header class="works-head">
-      <h1 class="page-title reveal">Works</h1>
-      <p class="clip-count" data-clip-count aria-live="polite">{editLabel}</p>
-    </header>
-    <form class="works-search" role="search">
-      <label>
-        <span class="sr-only">Search edits</span>
-        <input id="works-search" type="search" name="q" placeholder="Search titles or clients" autocomplete="off" enterkeyhint="search" />
-      </label>
-    </form>
-    <div class="works-filter-groups" aria-label="Filter works">
-      <div class="works-filter-row">
-        <span class="works-filter-label" id="filter-type-heading">Content</span>
-        <div class="filters" role="group" aria-labelledby="filter-type-heading">
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="" aria-pressed="true">All types</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="short" aria-pressed="false">Short Form</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="long" aria-pressed="false">Long Form</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="thumbnail" aria-pressed="false">Thumbnails</button>
-        </div>
+  <style slot="head" is:inline set:html={filterCss() + '\n' + profileCss} />
+  <script slot="head" is:inline set:html={filterBoot(defaultTabs, typesBy)} />
+  <section class="works pc-works" data-works>
+    <div class="pw-blobs pw-all-only" aria-hidden="true">
+      <span class="pc-blob pc-blob-peach"></span>
+      <span class="pc-blob pc-blob-gold"></span>
+    </div>
+    <div class="pw-frame">
+      <div class="pw-top">
+        <span class="pw-bw"><button class="pw-back pc-arrow" type="button" data-filter-kind="creator" data-filter-value="" data-filter-clear="type" aria-label="Back to all works" title="Back to all works">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button></span>
+        <form class="pw-search" role="search">
+          <label>
+            <span class="sr-only">Search edits</span>
+            <svg class="pw-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <input id="works-search" type="search" name="q" placeholder="Search titles or clients" autocomplete="off" enterkeyhint="search" />
+          </label>
+        </form>
       </div>
-      <div class="works-filter-row">
-        <span class="works-filter-label" id="filter-creator-heading">VTuber</span>
-        <div class="filters" role="group" aria-labelledby="filter-creator-heading">
-          <button class="filter-chip" type="button" data-filter-kind="creator" data-filter-value="" aria-pressed="true">All creators</button>
-          {
-            creators.map((creator) => (
-              <button class="filter-chip" type="button" data-filter-kind="creator" data-filter-value={creator.id} aria-pressed="false">
-                {creator.label}
-              </button>
-            ))
-          }
+      <header class="pw-head pw-all-only">
+        <p class="pc-eyebrow pc-eyebrow-ink">Portfolio</p>
+        <h1 class="page-title">Works</h1>
+      </header>
+      {
+        profiles.map((profile) => (
+          <div class="pw-profile" data-profile={profile.id}>
+            <span class="pw-avatar" aria-hidden="true">{profile.avatar ? <img src={profile.avatar} alt="" width="192" height="192" decoding="async" /> : profile.initial}</span>
+            <div class="pw-profile-info">
+              <h1 class="pw-name" tabindex="-1" data-profile-name>{profile.label}</h1>
+              {profile.handle && <p class="pw-handle">{profile.handle}</p>}
+            </div>
+          </div>
+        ))
+      }
+      {
+        profiles.map((profile) => (
+          <div class="pw-tabs" role="tablist" aria-label={`${profile.label}: works by format`} data-tabs data-tabs-for={profile.id}>
+            {
+              profile.types.map((type) => (
+                <button class="pw-tab" role="tab" type="button" data-filter-kind="type" data-filter-value={type} data-filter-keep aria-selected="false" aria-label={typeLabel[type]} title={typeLabel[type]}>
+                  <WorkTypeIcon type={type} />
+                  <span class="pw-tab-label">{tabLabel[type]}</span>
+                </button>
+              ))
+            }
+          </div>
+        ))
+      }
+    </div>
+    <div class="pw-lane pw-all-only" data-works-bar>
+      <div class="pw-cf" data-chips>
+        <button class="pw-carr" type="button" data-chips-prev hidden aria-label="Show previous creators">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <div class="pw-cfv" data-chips-view>
+          <div class="pw-chips" role="group" aria-label="Filter by creator" data-chips-row>
+            <button class="filter-chip pw-chip" type="button" data-filter-kind="creator" data-filter-value="" aria-pressed="true">
+              <svg class="pw-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>All
+            </button>
+            {
+              profiles.map((profile) => (
+                <button class="filter-chip pw-chip" type="button" data-filter-kind="creator" data-filter-value={profile.id} aria-pressed="false">
+                  <span class="pw-av" aria-hidden="true">{profile.avatar ? <img src={profile.avatar} alt="" width="48" height="48" loading="lazy" decoding="async" /> : profile.initial}</span>{profile.label}
+                </button>
+              ))
+            }
+          </div>
         </div>
+        <button class="pw-carr" type="button" data-chips-next hidden aria-label="Show more creators">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
       </div>
       {
         clipTags.length > 0 && (
-          <div class="works-filter-row">
+          <div class="pw-tags works-filter-row">
             <span class="works-filter-label" id="filter-tags-heading">Tags</span>
             <div class="filters" role="group" aria-labelledby="filter-tags-heading">
               <button class="filter-chip" type="button" data-filter-kind="tag" data-filter-value="" aria-pressed="true">All tags</button>
@@ -81,39 +163,101 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
           </div>
         )
       }
+      <a class="pc-clear" href="/works" data-clear hidden>Clear filters</a>
     </div>
-    <WorksFilters client:visible />
+    <p class="sr-only" aria-live="polite" data-works-live></p>
+    <WorksFilters client:load />
     <ClipPreview client:visible />
+    <div class="pw-secs">
     {
       blocks.map((block) => (
-        <div class="works-block" data-block={block.section.id} data-section-kind={block.section.kind}>
-          <h2 class="works-kicker">{block.section.label}</h2>
-          {block.section.kind === 'thumbnail' && (
-            <p class="works-thumbnails-note">A gallery of thumbnails used for these videos. Design credit may vary.</p>
-          )}
+        <div class="works-block pc-wsec" id={`sec-${block.section.id}`} data-block={block.section.id} data-section-kind={block.section.kind} data-rows-section={block.section.kind === 'thumbnail' ? undefined : ''}>
+          <div class="pc-wsec-head">
+            <h2 class="works-kicker">{block.section.label}</h2>
+            <span class="pc-count" data-block-count></span>
+            {block.section.kind === 'landscape' && (
+              <div class="pc-tabs pc-tabs-sm" role="tablist" aria-label="Long form group" data-lf-tabs>
+                {longFormCategories.map((category) => (
+                  <button role="tab" type="button" data-lf-tab={category.id} aria-selected="false">{category.label}</button>
+                ))}
+              </div>
+            )}
+            {block.section.kind !== 'thumbnail' && <div class="pc-pager pc-pager-head">
+              <button class="pc-arrow" type="button" data-rows-prev aria-label={`Previous ${block.section.label}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+              <button class="pc-arrow" type="button" data-rows-next aria-label={`Next ${block.section.label}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+            </div>}
+          </div>
           {
             block.section.kind === 'thumbnail' ? (
-              <div class="works-grid works-grid-wide thumb-grid">
-                {block.thumbs.map((thumb) => (
-                  <article
-                    class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
-                    data-creator={creatorIdOf(thumb.creator)}
-                    data-content-type="thumbnail"
-                    data-tags=""
-                    data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
-                  >
-                    <button
-                      class="thumb-open"
-                      type="button"
-                      data-open-thumb={thumb.id}
-                      aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
+              <div class="pc-thumbs">
+                {landscapeThumbs.length > 0 && (
+                <div class="pc-thumbgroup" data-rows-section>
+                  <div class="pc-pager pc-pager-head">
+                    <button class="pc-arrow" type="button" data-rows-prev aria-label="Previous thumbnails"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+                    <button class="pc-arrow" type="button" data-rows-next aria-label="Next thumbnails"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+                  </div>
+                  <div class="pc-rowwrap">
+                    <div class="works-grid thumb-grid pc-rows pc-rows-wide" data-rows>
+                  {landscapeThumbs.map((thumb) => (
+                    <article
+                      class:list={['clip-card', 'thumb-card', (thumb.ratio ?? 16 / 9) < 1 && 'is-portrait']}
+                      data-creator={creatorIdOf(thumb.creator)}
+                      data-content-type="thumbnail"
+                      data-tags=""
+                      data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
                     >
-                      <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
-                        <img src={thumb.image} alt="" loading="lazy" decoding="async" />
-                      </span>
-                    </button>
-                  </article>
-                ))}
+                      <button
+                        class="thumb-open"
+                        type="button"
+                        data-open-thumb={thumb.id}
+                        aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
+                      >
+                        <span class="clip-frame" style={`--r: ${thumb.ratio ?? 16 / 9}`}>
+                          <img src={thumb.image} alt="" loading="lazy" decoding="async" />
+                        </span>
+                      </button>
+                      <p class="clip-caption"><b>{thumb.title}</b></p>
+                    </article>
+                  ))}
+                    </div>
+                    <div class="pc-prog" aria-hidden="true"><i></i></div>
+                  </div>
+                </div>
+                )}
+                {verticalThumbs.length > 0 && (
+                <div class="pc-thumbgroup" data-rows-section>
+                  <div class="pc-pager pc-pager-head">
+                    <button class="pc-arrow" type="button" data-rows-prev aria-label="Previous thumbnails"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+                    <button class="pc-arrow" type="button" data-rows-next aria-label="Next thumbnails"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+                  </div>
+                  <div class="pc-rowwrap">
+                    <div class="works-grid thumb-grid pc-rows pc-rows-tall thumb-vert" data-rows>
+                  {verticalThumbs.map((thumb) => (
+                    <article
+                      class:list={['clip-card', 'thumb-card', (thumb.ratio ?? 16 / 9) < 1 && 'is-portrait']}
+                      data-creator={creatorIdOf(thumb.creator)}
+                      data-content-type="thumbnail"
+                      data-tags=""
+                      data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
+                    >
+                      <button
+                        class="thumb-open"
+                        type="button"
+                        data-open-thumb={thumb.id}
+                        aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
+                      >
+                        <span class="clip-frame" style={`--r: ${thumb.ratio ?? 16 / 9}`}>
+                          <img src={thumb.image} alt="" loading="lazy" decoding="async" />
+                        </span>
+                      </button>
+                      <p class="clip-caption"><b>{thumb.title}</b></p>
+                    </article>
+                  ))}
+                    </div>
+                    <div class="pc-prog" aria-hidden="true"><i></i></div>
+                  </div>
+                </div>
+                )}
               </div>
             ) : block.section.kind === 'landscape' ? (
               <div class="works-long-form">
@@ -122,31 +266,44 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
                   if (group.length === 0) return null;
                   return (
                     <section class="works-subgroup" data-long-form-category={category.id}>
-                      <h3 class="works-subtitle">{category.label}</h3>
-                      <div class="works-grid works-grid-wide">
-                        {group.map((clip) => <ClipCard clip={clip} sizes={wideSizes} />)}
+                      <h3 class="works-subtitle sr-only">{category.label}</h3>
+                      <div class="pc-rowwrap">
+                        <div class="works-grid works-grid-wide pc-rows pc-rows-wide" data-rows>
+                          {group.map((clip) => <ClipCard clip={clip} sizes={wideSizes} />)}
+                        </div>
+                        <div class="pc-prog" aria-hidden="true"><i></i></div>
                       </div>
                     </section>
                   );
                 })}
               </div>
             ) : (
-              <div class="works-grid">
-                {block.clips.map((clip, index) => (
-                  <ClipCard
-                    clip={clip}
-                    sizes={cardSizes}
-                    eager={index < 2 && block.section.kind === 'vertical'}
-                    priority={index === 0 && block.section.kind === 'vertical'}
-                  />
-                ))}
+              <div class="pc-rowwrap">
+                <div class="works-grid pc-rows pc-rows-tall" data-rows>
+                  {block.clips.map((clip, index) => (
+                    <ClipCard
+                      clip={clip}
+                      sizes={cardSizes}
+                      eager={index < 2 && block.section.kind === 'vertical'}
+                      priority={index === 0 && block.section.kind === 'vertical'}
+                    />
+                  ))}
+                </div>
+                <div class="pc-prog" aria-hidden="true"><i></i></div>
               </div>
             )
           }
         </div>
       ))
     }
-    <p class="works-empty" data-empty hidden>No edits match.</p>
+    <div class="pc-empty" data-empty-wrap hidden>
+      <p class="works-empty" data-empty>No edits match.</p>
+      <div class="pc-empty-acts">
+        <button class="pc-btn pc-btn-peach" type="button" data-filter-kind="type" data-filter-value="" data-filter-keep data-empty-other hidden></button>
+        <a class="pc-btn pc-btn-blue" href="/works" data-empty-clear>Clear filters</a>
+      </div>
+    </div>
+    </div>
     <ClipViewer client:idle clips={clips.map(toViewerClip)} />
     <ThumbnailViewer client:idle items={thumbnails} />
   </section>
@@ -187,16 +344,93 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
         document.querySelectorAll('.clip-card').forEach(function (card) {
           if (getComputedStyle(card).display !== 'none') shown += 1;
         });
-        var count = document.querySelector('[data-clip-count]');
-        if (count) count.textContent = shown + (shown === 1 ? ' work shown' : ' works shown');
         var empty = document.querySelector('[data-empty]');
+        var emptyWrap = document.querySelector('[data-empty-wrap]');
+        if (emptyWrap) emptyWrap.hidden = shown !== 0;
+        var html = document.documentElement;
+        var creatorId = html.getAttribute('data-creator-filter') || '';
+        var typeId = html.getAttribute('data-type-filter') || '';
+        var typeNames = { short: 'short-form videos', long: 'long-form videos', thumbnail: 'thumbnails' };
+        var other = document.querySelector('[data-empty-other]');
+        var clearLink = document.querySelector('[data-empty-clear]');
+        if (other) other.hidden = true;
+        if (clearLink) clearLink.textContent = creatorId ? 'Back to all works' : 'Clear filters';
+        if (clearLink) clearLink.setAttribute('href', query.length && creatorId ? '/works?q=' + encodeURIComponent(query.join(' ')) : '/works');
         if (empty) {
-          empty.hidden = shown !== 0;
-          empty.textContent = query.length
-            ? 'No works match that search and filter combination.'
-            : 'No works match these filters.';
+          if (query.length) {
+            empty.textContent = 'No works match that search and filter combination.';
+          } else if (creatorId && typeId) {
+            var nameEl = document.querySelector('[data-profile="' + creatorId + '"] [data-profile-name]');
+            empty.textContent = 'No ' + (typeNames[typeId] || 'works') + ' for ' + (nameEl ? nameEl.textContent : 'this creator') + ' yet';
+            var alt = Object.keys(typeNames).filter(function (key) {
+              return key !== typeId && document.querySelector('.clip-card[data-creator="' + creatorId + '"][data-content-type="' + key + '"]');
+            })[0];
+            if (other && alt) {
+              other.hidden = false;
+              other.setAttribute('data-filter-value', alt);
+              other.textContent = 'See ' + typeNames[alt];
+            }
+          } else {
+            empty.textContent = 'No works match these filters.';
+          }
         }
+        var live = document.querySelector('[data-works-live]');
+        if (live) {
+          var who = creatorId ? document.querySelector('[data-profile="' + creatorId + '"] [data-profile-name]') : null;
+          live.textContent = (who ? 'Showing ' + who.textContent + '\u2019s works. ' : '') + shown + (shown === 1 ? ' work shown' : ' works shown');
+        }
+        // Long Form tabs: one group shows at a time; a group with no matches loses its tab.
+        var tabs = Array.from(document.querySelectorAll('[data-lf-tab]'));
+        var groups = Array.from(document.querySelectorAll('.works-subgroup'));
+        var live = groups.filter(function (group) { return !group.hidden; }).map(function (group) { return group.getAttribute('data-long-form-category'); });
+        if (live.indexOf(window.__nkLongTab) === -1) window.__nkLongTab = live[0] || '';
+        groups.forEach(function (group) {
+          group.setAttribute('data-active', String(group.getAttribute('data-long-form-category') === window.__nkLongTab));
+        });
+        tabs.forEach(function (tab) {
+          var id = tab.getAttribute('data-lf-tab');
+          tab.hidden = live.indexOf(id) === -1;
+          tab.setAttribute('aria-selected', String(id === window.__nkLongTab));
+          tab.tabIndex = id === window.__nkLongTab ? 0 : -1;
+        });
+        if (window.__nkSlide) window.__nkSlide();
+        // A thumbnail group with nothing to show (e.g. no landscape thumbnails for this client) leaves no gap.
+        document.querySelectorAll('.pc-thumbgroup').forEach(function (group) {
+          var any = false;
+          group.querySelectorAll('.clip-card').forEach(function (card) { if (getComputedStyle(card).display !== 'none') any = true; });
+          group.hidden = !any;
+        });
+        // Per-section counts and the Clear filters link.
+        document.querySelectorAll('.works-block').forEach(function (block) {
+          var n = 0;
+          block.querySelectorAll('.clip-card').forEach(function (card) {
+            if (getComputedStyle(card).display !== 'none') n += 1;
+          });
+          var out = block.querySelector('[data-block-count]');
+          if (out) out.textContent = String(n);
+        });
+        var clear = document.querySelector('[data-clear]');
+        if (clear) clear.hidden = location.search.length < 2;
+        window.dispatchEvent(new Event('nk-rows'));
       }
+
+      document.addEventListener('click', function (event) {
+        var tab = event.target && event.target.closest ? event.target.closest('[data-lf-tab]') : null;
+        if (!tab) return;
+        window.__nkLongTab = tab.getAttribute('data-lf-tab');
+        sync();
+      });
+      document.addEventListener('keydown', function (event) {
+        var tab = event.target && event.target.closest ? event.target.closest('[data-lf-tab]') : null;
+        if (!tab || (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft')) return;
+        var open = Array.from(document.querySelectorAll('[data-lf-tab]')).filter(function (item) { return !item.hidden; });
+        var next = open[(open.indexOf(tab) + (event.key === 'ArrowRight' ? 1 : open.length - 1)) % open.length];
+        if (!next) return;
+        event.preventDefault();
+        window.__nkLongTab = next.getAttribute('data-lf-tab');
+        sync();
+        next.focus();
+      });
 
       window.__nkWorksSync = sync;
       if (input) {
@@ -222,3 +456,35 @@ const wideSizes = '(min-width: 768px) 46vw, 100vw';
     })();
   </script>
 </BaseLayout>
+
+<script>
+  import { mountRows } from '../lib/poster-rows';
+  import { mountChips } from '../lib/works-chips';
+  mountRows();
+  mountChips();
+  // The part that stays under the nav (the search bar on phones, the filter lane on wide screens) is measured so each section fills the space left.
+  const wide = window.matchMedia('(min-width: 1040px)');
+  const top = document.querySelector<HTMLElement>('.pw-top');
+  const lane = document.querySelector<HTMLElement>('[data-works-bar]');
+  const setBar = () => {
+    const stuck = wide.matches ? lane : top;
+    const height = stuck && stuck.offsetParent !== null ? stuck.getBoundingClientRect().height : 0;
+    document.documentElement.style.setProperty('--works-bar-height', `${height}px`);
+  };
+  const observer = new ResizeObserver(setBar);
+  if (top) observer.observe(top);
+  if (lane) observer.observe(lane);
+  wide.addEventListener('change', setBar);
+  setBar();
+  // Arrow keys move between the format tabs, like the Long Form tabs.
+  document.addEventListener('keydown', (event) => {
+    const tab = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-tabs] [role="tab"]');
+    if (!tab || (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft')) return;
+    const tabs = Array.from(document.querySelectorAll<HTMLElement>('[data-tabs] [role="tab"]'));
+    const next = tabs[(tabs.indexOf(tab) + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
+    next.click();
+  });
+</script>
