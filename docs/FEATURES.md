@@ -75,7 +75,7 @@ Remove a client
 
 Do not touch: the `data-*` attribute names and class names in `ClientGallery.astro`. The script finds elements by them; renaming one silently breaks switching, tabs, or diamonds.
 
-Known limits: Miu has no art. Descriptions and Discord links are placeholders for all clients. Pidge has no class, element, or weapon yet. YouTube links were built from the channel handles on the clips and should be confirmed.
+Known limits: Miu has no art. Descriptions and Discord links are placeholders for all clients. Pidgeira has no class, element, or weapon yet. YouTube links were built from the channel handles on the clips and should be confirmed.
 
 ## 2. Highlight diamonds
 
@@ -325,7 +325,7 @@ About page: the dashed box is a placeholder (`data-placeholder="about-copy"`). R
 Known limits: Pricing, Terms and Contact hold long content and scroll; they are not one-screen pages. The About photo and About text are placeholders. The Discord link in `site-settings.json` should be confirmed.
 
 ## Update: Works, Home, Contact (Nov 20)
-- Works creator view scrolls down as a feed (no sideways rows); format tabs only for formats that creator has, with names beside icons on desktop; no "works shown" chip or jump icons; Back/search animate without clipping; no shared-element avatar flight; thumbnails split by aspect ratio (16:9 / 9:16); Pidge and Chi avatars in `public/avatars/`.
+- Works creator view scrolls down as a feed (no sideways rows); format tabs only for formats that creator has, with names beside icons on desktop; no "works shown" chip or jump icons; Back/search animate without clipping; no shared-element avatar flight; thumbnails split by aspect ratio (16:9 / 9:16); Pidgeira and Chi avatars in `public/avatars/`.
 - Home: location removed everywhere; hero scroll cue replaces the highlight-reel button; avatar slide-up; carousel without arrows, larger on phones; Works/Pricing section removed ("See all works" in Featured); About shows a placeholder video (set `site.aboutVideo` in `src/data/site.ts`).
 - Contact leads with the Discord tag `nassukatou` (open + copy); email form kept below.
 - Meet the Clients no longer plays the opening curtain.
@@ -335,7 +335,7 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 - Home: Featured works headline and a highlighted "See all works" button at the bottom; About button removed.
 - Contact: socials row removed (footer has them), Discord card slimmed.
 - Menu: Editing and Web design merged into one Pricing button. Pricing: "Prices updated" removed; editing page notes long-form and normal videos (no new prices).
-- Pidge clips carry `youtubePrivate: true` in clips.json: the viewer uses TikTok only. Clips without a `tiktokUrl` show the fallback until a link is added.
+- Pidgeira clips carry `youtubePrivate: true` in clips.json: the viewer uses TikTok only. Clips without a `tiktokUrl` show the fallback until a link is added.
 
 ## Round 4
 - Home Featured Works on phones (≤899px) follows the mobile wireframe: 58%-width centre card, tilted side cards, caption under cards, 5 dots, gold "See all works" button with a blue pulse ring. Finger-following swipe with flick momentum.

@@ -36,7 +36,7 @@ const presentTypes = (['short', 'long', 'thumbnail'] as WorkType[]).filter((type
   blocks.some((block) => block.section.kind in typeOfKind && typeOfKind[block.section.kind as keyof typeof typeOfKind] === type),
 );
 const tabLabel: Record<WorkType, string> = { short: 'Shorts', long: 'Long form', thumbnail: 'Thumbnails' };
-const avatars: Record<string, string> = { pidge: '/avatars/pidge.webp', chi: '/avatars/chi.webp', miu: '/avatars/miu.webp' };
+const avatars: Record<string, string> = { pidgeira: '/avatars/pidge.webp', chi: '/avatars/chi.webp', miu: '/avatars/miu.webp' };
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 // Everything the profile view shows is computed from the portfolio data. No bio or avatar exists yet, so none is shown.
 const profiles = creators.map((creator) => {

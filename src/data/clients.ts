@@ -48,7 +48,7 @@ export interface ClientProfile {
 const neutral = { panel: '#27323a', deep: '#141b20', accent: '#a3f0db', rim: '#e9fffa' };
 
 export const clientProfiles: Record<string, ClientProfile> = {
-  pidge: {
+  pidgeira: {
     description: null,
     type: 'Cat',
     role: null,
