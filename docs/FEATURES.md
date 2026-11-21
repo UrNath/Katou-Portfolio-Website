@@ -370,3 +370,7 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 ## Round 10: card-push page transition
 - Cross-document view transitions (`@view-transition`) now push between Home, Works, Pricing, Terms and Contact: old page slides back and dims, new page slides in with an ink edge. Forward = right to left, back = left to right (tab order). Direction is set by an inline script in `BaseLayout.astro` (`pageswap`/`pagereveal` types `vt-forward`/`vt-back`); CSS is in `global.css`.
 - Navbar and footer stay put; the Works search bar travels with the page. Other routes and reduced-motion keep the old fade / no animation. Chromium and Safari 18.2+ only; other browsers just navigate.
+
+## Round 11: transition polish
+- Search bar no longer a separate transition layer during page pushes (`html.vt-push` removes its `view-transition-name`), fixing the phone glitch where it drew over the incoming page.
+- Active nav tab springs to its new place (`nav-pill`); new page content rises in line by line after the card lands (`html.vt-arrive`), matching the preview.

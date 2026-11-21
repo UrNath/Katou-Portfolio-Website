@@ -203,6 +203,7 @@ a {
   html:is(:active-view-transition-type(vt-forward), :active-view-transition-type(vt-back))::view-transition-new(root) {
     animation-duration: .62s;
     animation-timing-function: cubic-bezier(.7, 0, .2, 1);
+    will-change: transform;
     animation-fill-mode: both;
     mix-blend-mode: normal;
   }
@@ -211,19 +212,22 @@ a {
   html:active-view-transition-type(vt-back)::view-transition-old(root) { animation-name: vt-push-away-b; }
   html:active-view-transition-type(vt-back)::view-transition-new(root) { animation-name: vt-push-in-b; box-shadow: 10px 0 0 #3a231c; }
 }
-/* The Works search bar rides along with the page instead of popping in */
+/* While pushing between pages the Works search bar is part of the page snapshot (not its own layer, which would draw over the incoming page). */
+html.vt-push .pw-top, html.vt-push .pw-search { view-transition-name: none !important; }
+
+/* The active nav tab slides to its new place with a springy ease; the bar itself stays put. */
 @media (prefers-reduced-motion: no-preference) {
-  html:is(:active-view-transition-type(vt-forward), :active-view-transition-type(vt-back))::view-transition-old(pw-top),
-  html:is(:active-view-transition-type(vt-forward), :active-view-transition-type(vt-back))::view-transition-new(pw-top),
-  html:is(:active-view-transition-type(vt-forward), :active-view-transition-type(vt-back))::view-transition-old(pw-search),
-  html:is(:active-view-transition-type(vt-forward), :active-view-transition-type(vt-back))::view-transition-new(pw-search) {
-    display: block; animation-duration: .62s; animation-timing-function: cubic-bezier(.7, 0, .2, 1); animation-fill-mode: both; mix-blend-mode: normal;
-  }
-  html:active-view-transition-type(vt-forward)::view-transition-old(pw-top), html:active-view-transition-type(vt-forward)::view-transition-old(pw-search) { animation-name: vt-push-away-f; }
-  html:active-view-transition-type(vt-forward)::view-transition-new(pw-top), html:active-view-transition-type(vt-forward)::view-transition-new(pw-search) { animation-name: vt-push-in-f; }
-  html:active-view-transition-type(vt-back)::view-transition-old(pw-top), html:active-view-transition-type(vt-back)::view-transition-old(pw-search) { animation-name: vt-push-away-b; }
-  html:active-view-transition-type(vt-back)::view-transition-new(pw-top), html:active-view-transition-type(vt-back)::view-transition-new(pw-search) { animation-name: vt-push-in-b; }
+  html.vt-push .bar-link[aria-current="page"] { view-transition-name: nav-pill; }
+  ::view-transition-group(nav-pill) { animation-duration: .6s; animation-timing-function: cubic-bezier(.34, 1.25, .5, 1); }
+  ::view-transition-old(nav-pill), ::view-transition-new(nav-pill) { height: 100%; object-fit: fill; mix-blend-mode: normal; }
+  /* New page content rises in line by line once the card has landed */
+  html.vt-arrive #main > * { animation: vt-rise .56s cubic-bezier(.22, 1, .36, 1) both; }
+  html.vt-arrive #main > *:nth-child(1) { animation-delay: .30s; }
+  html.vt-arrive #main > *:nth-child(2) { animation-delay: .37s; }
+  html.vt-arrive #main > *:nth-child(3) { animation-delay: .44s; }
+  html.vt-arrive #main > *:nth-child(n+4) { animation-delay: .51s; }
 }
+@keyframes vt-rise { from { opacity: 0; transform: translateY(22px); } }
 @keyframes vt-push-away-f { to { transform: translateX(-18%) scale(.94); filter: brightness(.78); } }
 @keyframes vt-push-away-b { to { transform: translateX(18%) scale(.94); filter: brightness(.78); } }
 @keyframes vt-push-in-f { from { transform: translateX(108%); } }
