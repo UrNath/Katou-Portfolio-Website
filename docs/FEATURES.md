@@ -366,3 +366,7 @@ Known limits: Pricing, Terms and Contact hold long content and scroll; they are 
 ## Round 9
 - Home is excluded from the phone-density block (`body:not(:has(.pc-hero))`), so it keeps its previous sizes; the compact navbar is shared by every page. Carousel width cap and side-card offset restored.
 - Home hero buttons are centred on phones.
+
+## Round 10: card-push page transition
+- Cross-document view transitions (`@view-transition`) now push between Home, Works, Pricing, Terms and Contact: old page slides back and dims, new page slides in with an ink edge. Forward = right to left, back = left to right (tab order). Direction is set by an inline script in `BaseLayout.astro` (`pageswap`/`pagereveal` types `vt-forward`/`vt-back`); CSS is in `global.css`.
+- Navbar and footer stay put; the Works search bar travels with the page. Other routes and reduced-motion keep the old fade / no animation. Chromium and Safari 18.2+ only; other browsers just navigate.

@@ -51,6 +51,24 @@ const pathname = Astro.url.pathname;
         if (reduce || (conn && conn.saveData)) document.documentElement.classList.add('poster-only');
       })();
     </script>
+    <script is:inline>
+      // Card-push page transition: tell the browser which way we are moving through the main pages.
+      (function () {
+        var order = ['/', '/works', '/pricing', '/terms', '/contact'];
+        var at = function (url) { var p = new URL(url, location.href).pathname.replace(/\/+$/, '') || '/'; return order.indexOf(p); };
+        var tag = function (event, from, to) {
+          if (!event.viewTransition || from < 0 || to < 0 || from === to) return;
+          event.viewTransition.types.add(to > from ? 'vt-forward' : 'vt-back');
+        };
+        addEventListener('pageswap', function (event) {
+          if (event.activation && event.activation.entry) tag(event, at(location.href), at(event.activation.entry.url));
+        });
+        addEventListener('pagereveal', function (event) {
+          var a = window.navigation && navigation.activation;
+          if (a && a.from && a.entry) tag(event, at(a.from.url), at(a.entry.url));
+        });
+      })();
+    </script>
   </head>
   <body class:list={['clean-portfolio', immersive ? 'immersive-clients' : 'poster']}>
     <a class="skip" href="#main">Skip to content</a>
