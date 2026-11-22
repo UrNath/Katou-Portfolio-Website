@@ -1,138 +1,123 @@
 ---
-import { Picture } from 'astro:assets';
+import { Image } from 'astro:assets';
 import BaseLayout from '../components/BaseLayout.astro';
-import CharacterArt from '../components/CharacterArt.astro';
-import ClipCard from '../components/ClipCard.astro';
-import Icon from '../components/Icon.astro';
+import SiteIntro from '../components/SiteIntro.astro';
+import FeaturedCarousel from '../components/FeaturedCarousel.astro';
 import StatusChip from '../components/StatusChip.astro';
-import Wordmark from '../components/Wordmark.astro';
 import ClipPreview from '../islands/ClipPreview';
 import ClipViewer from '../islands/ClipViewer';
-import { status } from '../data/status';
+import chibi from '../assets/character/katou-chibi.webp';
 import { site } from '../data/site';
-import { editCredit } from '../lib/clip-shared';
+import { status } from '../data/status';
 import { heroReel, hubClips, loadClips, toViewerClip } from '../lib/clips';
-import { loadService, loadServicePrices } from '../lib/services';
 
 const clips = await loadClips();
-// Hub content is featured-only by design. See hubClips() in src/lib/clips.ts.
 const featured = hubClips(clips);
-const { hero, prev, next, position, total } = heroReel(clips);
-const pager = `${String(position).padStart(2, '0')} — ${String(total).padStart(2, '0')}`;
-const editCount = `${clips.length} ${clips.length === 1 ? 'edit' : 'edits'}`;
-const prices = await loadServicePrices();
-const editing = await loadService('editing');
-const turnaround = editing.data.compare.find((row) => row.feature === 'Turnaround')?.values[0];
-const artOn = site.characterArt.enabled && Boolean(site.characterArt.src);
-const minis = featured.slice(0, 3);
----
+const { hero } = heroReel(clips);
+const art = site.characterArt;
 
+const viewerClips = featured;
+---
 <BaseLayout>
-  <div class="hub">
-    <section class:list={['stage-banner', artOn && 'has-character']} aria-label="Featured edit">
-      <CharacterArt />
-      <div class="stage-top">
-        <div>
-          <p class="stage-mark stage-line"><Wordmark /></p>
-          <p class="stage-role stage-line stage-line-2">{site.role}</p>
-        </div>
-        <div class="stage-corner">
-          <p class="stage-now">Now playing · {hero.title}</p>
-          <Icon name="sparkles" size={18} />
-          <span class="heart"><Icon name="heart" size={16} /></span>
-          <span class="pager">{pager}</span>
-        </div>
-      </div>
-      <div class="reel-wrap">
-        <p class="ghost-word" aria-hidden="true">shorts</p>
-        <div class="reel">
-          <ClipCard clip={prev} variant="neighbor" sizes="118px" />
-          <ClipCard
-            clip={hero}
-            variant="hero"
-            eager
-            priority
-            sizes="(min-width: 960px) 196px, 136px"
-          />
-          <ClipCard clip={next} variant="neighbor" sizes="118px" />
+  <SiteIntro />
+  <script is:inline>
+    // Reveals are opt-in: content stays visible without scripting and for reduced motion.
+    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('reveal-ready');
+    }
+  </script>
+  <div class="pc-home">
+    <section class="pc-screen pc-fit pc-hero" id="home" aria-labelledby="intro-title">
+      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
+      <span class="pc-blob pc-blob-gold" aria-hidden="true"></span>
+      <div class="pc-art">
+        <div class="pc-figure">
+          <div class="pc-card" aria-hidden="true"></div>
+          {art.enabled && (
+            <div class="pc-pop">
+              <Image class="pc-oc" src={chibi} alt={art.alt} widths={[420, 698]} sizes="(min-width: 900px) 520px, 80vw" loading="eager" fetchpriority="high" />
+            </div>
+          )}
+          {art.enabled && art.artist && <p class="pc-credit">ART ILLUST: {art.artist}</p>}
         </div>
       </div>
-      <a class="stage-cta" href="/works">Watch Works</a>
-      <ClipPreview client:visible />
+      <div class="pc-hero-copy">
+        <p class="pc-eyebrow" data-reveal>Video editor · Web design</p>
+        <h1 id="intro-title" data-reveal style="--i:1">Meet the Editor!<br /><span>Katou</span></h1>
+        <p class="pc-tagline" data-reveal style="--i:2">{site.role}</p>
+        <div class="pc-actions" data-reveal style="--i:3">
+          <a class="pc-btn pc-btn-white" href="/works">View Works</a>
+          <a class="pc-btn pc-btn-peach" href="/contact">Contact</a>
+        </div>
+        <div class="pc-meta" data-reveal style="--i:4">
+          <span>Editing <StatusChip status={status.editing} /></span>
+          <span>Web design <StatusChip status={status.webDesign} /></span>
+        </div>
+        <a class="pc-scroll" href="#featured" data-reveal style="--i:5" aria-label="Scroll down to see featured works">
+          <span class="pc-scroll-text">Scroll to see my edits</span>
+          <span class="pc-scroll-arrows" aria-hidden="true"><i></i><i></i></span>
+        </a>
+      </div>
     </section>
 
-    <div class="bento-side">
-      <section class="tile status-tile" aria-label="Service status">
-        <div class="status-tile-head">
-          <p class="kicker">Status</p>
-          <p class="kicker">updated {status.updated}</p>
-        </div>
-        <div class="status-line">
-          <span class="status-name">Editing</span>
-          <StatusChip status={status.editing} />
-        </div>
-        <div class="status-line">
-          <span class="status-name">Web design</span>
-          <StatusChip status={status.webDesign} />
-        </div>
-      </section>
-      <a class="tile works-tile" href="/works">
-        <span class="works-copy">
-          <span class="works-label">Works</span>
-          <span class="works-meta">{editCount}</span>
-        </span>
-        <span class="works-minis" aria-hidden="true">
-          {
-            minis.map((clip) => (
-              <span class="mini-clip">
-                {
-                  clip.posterImage ? (
-                    <Picture
-                      src={clip.posterImage}
-                      formats={['webp']}
-                      fallbackFormat="webp"
-                      widths={[160]}
-                      sizes="80px"
-                      alt=""
-                      quality={50}
-                    />
-                  ) : (
-                    <img src={clip.poster} alt="" />
-                  )
-                }
-                <span>{editCredit(clip.channelHandle)}</span>
-              </span>
-            ))
-          }
-        </span>
-      </a>
-    </div>
+    <section class="pc-screen pc-fit pc-feat" id="featured" aria-labelledby="featured-title">
+      <div class="pc-feat-copy">
+        <h2 id="featured-title" data-reveal>Featured works</h2>
+        <p class="pc-feat-sub" data-reveal style="--i:1">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
+      </div>
+      <div class="pc-feat-visual" data-reveal>
+        <FeaturedCarousel clips={featured} initialId={hero.id} />
+      </div>
+      <div class="pc-feat-cta">
+        <a class="pc-btn pc-btn-gold pc-btn-lg" href="/works">See all works <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
 
-    <div class="bento-nums">
-      <a class="tile num-tile" href="/editing">
-        <span class="numeral">01</span>
-        <span>
-          <span class="num-label">Editing</span>
-          <span class="num-meta">{prices.editing}{turnaround ? ` · ${turnaround}` : ''}</span>
-        </span>
-      </a>
-      <a class="tile num-tile" href="/web-design">
-        <span class="numeral">02</span>
-        <span>
-          <span class="num-label">Web design</span>
-          <span class="num-meta">from {prices.web}</span>
-          {prices.webApprox && <span class="num-approx">{prices.webApprox}</span>}
-        </span>
-      </a>
-      <a class="tile num-tile slim" href="/terms">
-        <span class="numeral">03</span>
-        <span class="num-label">Terms</span>
-      </a>
-      <a class="tile num-tile slim" href="/contact">
-        <span class="numeral">04</span>
-        <span class="num-label">Contact</span>
-      </a>
-    </div>
+    <section class="pc-screen pc-fit pc-about" id="about" aria-labelledby="about-title">
+      {/* PLACEHOLDER VIDEO: set site.aboutVideo.src (and .poster) in src/data/site.ts once the About video is edited. */}
+      <div class="pc-photo" data-reveal>
+        {site.aboutVideo.src ? (
+          <video src={site.aboutVideo.src} poster={site.aboutVideo.poster || undefined} muted loop playsinline controls preload="metadata" aria-label="About Katou video"></video>
+        ) : (
+          <div class="pc-vid-ph" role="img" aria-label="Placeholder: About video coming soon">
+            <span class="pc-vid-play" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
+            <span class="pc-vid-cap">About video coming soon</span>
+          </div>
+        )}
+      </div>
+      <div class="pc-about-copy">
+        <h2 id="about-title" data-reveal style="--i:1">About Katou</h2>
+        <p data-reveal style="--i:2">{site.description}</p>
+      </div>
+    </section>
+
+    <section class="pc-screen pc-contact" id="contact" aria-labelledby="contact-title">
+      <span class="pc-blob pc-blob-blue" aria-hidden="true"></span>
+      <span class="pc-blob pc-blob-gold2" aria-hidden="true"></span>
+      <h2 id="contact-title" data-reveal>Let’s make something.</h2>
+      <a class="pc-btn pc-btn-gold" href="/contact" data-reveal style="--i:1">Contact</a>
+    </section>
   </div>
-  <ClipViewer client:idle clips={featured.map(toViewerClip)} />
+  <ClipPreview client:idle />
+  <ClipViewer client:idle clips={viewerClips.map(toViewerClip)} />
 </BaseLayout>
+
+<script>
+  // Light staggered reveals. Transform and opacity only; each element animates once.
+  if (document.documentElement.classList.contains('reveal-ready')) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const reveal = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('is-in');
+        reveal.unobserve(entry.target);
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: .1 });
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => reveal.observe(element));
+    reduced.addEventListener('change', () => {
+      if (!reduced.matches) return;
+      document.documentElement.classList.remove('reveal-ready');
+      reveal.disconnect();
+    });
+  }
+</script>

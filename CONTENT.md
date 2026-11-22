@@ -2,7 +2,7 @@
 
 Placeholder copy, prices, statuses, and clips live in data files. Components read those files. Do not hardcode a price or a status in a component.
 
-The contact email is `nassukatou@gmail.com`. Socials are Discord, YouTube, TikTok, and X, all under `nassukatou`, in `src/data/site-settings.json`. Clip pages are real edits for Pidge, Chi, and Miu.
+The contact email is `nassukatou@gmail.com`. Socials are Discord, YouTube, TikTok, and X, all under `nassukatou`, in `src/data/site-settings.json`. Clip pages are real edits for Pidgeira, Chi, and Miu.
 
 Editing has one real package: **Short edit**, PHP 1,000, up to 1 minute, for YouTube Shorts or TikTok (9:16), unlimited minor revisions, 2 major revisions, and a 1 to 3 day turnaround. Includes lists those lines without placeholder markers. Add-ons: an extra major revision is PHP 250 (≈ $4), and a thumbnail is PHP 500 each (≈ $8). The dollar lines use the web design rate, ₱3,800 = $60.
 
@@ -38,7 +38,7 @@ Status is one value per service: `'open'`, `'waitlist'`, or `'closed'`. The visi
 
 `src/data/clips.json` is the list, newest first. The hub and Works counts are calculated from `clips.length` (51 videos as of this update). View counts and `tiktokMatchConfidence` are not shown. `tagsSuggested` is true on every item, so the tags are kept. Tag chips come from `works-layout.json` and stay visible even when no clip uses that tag yet.
 
-The hub is featured-only. It centers `chi-c3` (`heroFeatured`). The dimmed neighbors, the Works thumbnails, and the hub viewer use only the featured clips, in this order: `chi-c3`, `chi-c4`, `pidge-p7`, `pidge-p8`, `pidge-p3`. Miu stays on `/works`, newest first. Cards read `Edit for @handle` (Pidge `@pidgeira`, Chi `@chiseyi`, Miu `@miuonivt`).
+The hub is featured-only. It centers `chi-c3` (`heroFeatured`). The dimmed neighbors, the Works thumbnails, and the hub viewer use only the featured clips, in this order: `chi-c3`, `chi-c4`, `pidge-p7`, `pidge-p8`, `pidge-p3`. Miu stays on `/works`, newest first. Cards read `Edit for @handle` (Pidgeira `@pidgeira`, Chi `@chiseyi`, Miu `@miuonivt`).
 
 Landscape items (`orientation: "landscape"`, 16:9) render inside **Long Form Videos** on `/works`, grouped under **Vlogs**, **MVs**, or **Normal Videos** (in that order). Set `longFormCategory` to `vlogs`, `mvs`, or `normal` in `src/data/clips.json`; the normal category is the fallback when omitted. The category is also editable through Keystatic and the studio. `miu-ms17` is square in the source and already padded to 9:16, and its `orientation` is `vertical`, so it stays in the short grid. The viewer sizes the frame to 9:16 or 16:9 from that same flag.
 
@@ -104,3 +104,11 @@ In **`/admin` → Thumbnails**, use Edit to change an entry's title, client, han
 On `/works`, content types **Short Form**, **Long Form**, and **Thumbnails** use a separate filter row from VTuber/client filters and optional tags. Each dimension is independent: selecting `Chi` and `Thumbnails` displays only Chi's thumbnail designs, selecting `Miu` and `Long Form` displays Miu's long videos, etc. `All creators`, `All types`, and `All tags` each clear only their corresponding selection. Filters are reflected in shareable URL search parameters `creator`, `type`, and `tag`; existing `?creator=...` and `?tag=...` links keep working. Search text `q` works simultaneously with each filter. Visible-card counts and empty sections are updated after filtering.
 
 Thumbnail cards intentionally have **no visible overlay text or gradient**, including on mobile. Titles remain searchable and available via the card's accessible label and in the enlarged thumbnail dialog.
+
+## Meet the Clients
+
+`/clients` is a character-select page. One entry per creator chip that has videos. Profile facts live in `src/data/clients.ts`: description, type, class, element, main weapon, YouTube / Discord / TikTok links, stage colours, and skins. A `null` field shows on the page as a marked placeholder; do not fill unknowns in. A skin with `art: null` shows the dashed "Character art placeholder" frame.
+
+Character art is a transparent cutout in `public/clients/`, kept separate from the backdrop so the two layers move independently. Pidgeira's current art is `pidge-cat.webp`; her former rat thief persona is the `rat-thief` skin (`pidge-foreground.webp` over `pidge-background.webp`). Chi and Miu have no art yet.
+
+The three highlight diamonds per client are that client's vertical clips with a preview loop, featured ones first (chosen in `src/pages/clients.astro`). A slot with no clip renders as a placeholder. Previews load on hover, focus, or first tap, never on their own.

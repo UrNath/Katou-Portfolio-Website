@@ -1,0 +1,20 @@
+---
+/** Old addresses such as /editing forward to their new home, e.g. /pricing#editing. */
+interface Props { to: string; title: string }
+const { to, title } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · NassuKatou</title>
+    <noscript><meta http-equiv="refresh" content={`0;url=${to}`} /></noscript>
+    <script is:inline define:vars={{ to }}>
+      const destination = new URL(to, location.origin);
+      if (location.search) destination.search = location.search;
+      location.replace(destination.href);
+    </script>
+  </head>
+  <body><p>This page has moved. <a href={to}>Continue to {title}</a>.</p></body>
+</html>

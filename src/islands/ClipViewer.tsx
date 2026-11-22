@@ -188,7 +188,7 @@ export default function ClipViewer({ clips }: Props) {
       </div>
       <div class="viewer-scroller" ref={scrollerRef} onScroll={onScroll}>
         {clips.map((clip, clipIndex) => {
-          const yt = youtubeId(clip.youtube);
+          const yt = clip.youtubePrivate ? null : youtubeId(clip.youtube);
           const tt = tiktokId(clip.tiktok);
           const embed = yt
             ? `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&playsinline=1`
@@ -199,7 +199,7 @@ export default function ClipViewer({ clips }: Props) {
           const showEmbed = Boolean(activeSlide && embed && !failed[clip.id]);
           const showFallback = activeSlide && !showEmbed;
           const near = open && Math.abs(clipIndex - index) <= 1;
-          const original = !placeholder(clip.youtube) ? clip.youtube : clip.tiktok;
+          const original = clip.youtubePrivate ? clip.tiktok : !placeholder(clip.youtube) ? clip.youtube : clip.tiktok;
           return (
             <section class="viewer-slide" data-slide={clip.id} key={clip.id} aria-label={clip.title}>
               <div class="viewer-stage">
@@ -237,14 +237,16 @@ export default function ClipViewer({ clips }: Props) {
                 <strong>{clip.title}</strong>
                 <span>{editCredit(clip.channelHandle)}</span>
               </p>
-              <div class={clip.tiktok ? 'viewer-actions' : 'viewer-actions one-link'}>
-                <a
-                  class="watch-link"
-                  href={clip.youtube}
-                  title={placeholder(clip.youtube) ? 'Placeholder link' : undefined}
-                >
-                  Watch on YouTube
-                </a>
+              <div class={clip.tiktok && !clip.youtubePrivate ? 'viewer-actions' : 'viewer-actions one-link'}>
+                {!clip.youtubePrivate && (
+                  <a
+                    class="watch-link"
+                    href={clip.youtube}
+                    title={placeholder(clip.youtube) ? 'Placeholder link' : undefined}
+                  >
+                    Watch on YouTube
+                  </a>
+                )}
                 {clip.tiktok && (
                   <a class="watch-link" href={clip.tiktok}>
                     Watch on TikTok

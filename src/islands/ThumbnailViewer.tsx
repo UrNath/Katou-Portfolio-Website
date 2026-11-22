@@ -28,8 +28,29 @@ export default function ThumbnailViewer({ items }: Props) {
     setCurrent(null);
   };
 
+  // Previous / next move through the thumbnails that are showing on the page right now,
+  // so search and filters also apply inside the viewer.
+  const shown = () => {
+    const ids: string[] = [];
+    document.querySelectorAll<HTMLElement>('[data-open-thumb]').forEach((opener) => {
+      const id = opener.getAttribute('data-open-thumb');
+      if (id && opener.getClientRects().length > 0 && !ids.includes(id)) ids.push(id);
+    });
+    const list = ids.map((id) => items.find((thumb) => thumb.id === id)).filter((thumb): thumb is StudioThumbnail => Boolean(thumb));
+    return list.length > 0 ? list : items;
+  };
+  const list = current ? shown() : [];
+  const index = current ? Math.max(0, list.findIndex((thumb) => thumb.id === current.id)) : 0;
+  const step = (direction: number) => {
+    if (list.length < 2) return;
+    setCurrent(list[(index + direction + list.length) % list.length]);
+  };
+
   return (
-    <dialog class="thumb-viewer" ref={dialogRef} aria-label="Thumbnail" onClick={(event) => {
+    <dialog class="thumb-viewer" ref={dialogRef} aria-label="Thumbnail" onClose={() => setCurrent(null)} onKeyDown={(event) => {
+      if (event.key === 'ArrowRight') { event.preventDefault(); step(1); }
+      if (event.key === 'ArrowLeft') { event.preventDefault(); step(-1); }
+    }} onClick={(event) => {
       if (event.target === dialogRef.current) close();
     }}>
       {current && (
@@ -41,6 +62,13 @@ export default function ThumbnailViewer({ items }: Props) {
             </svg>
           </button>
           <img src={current.image} alt={current.title} />
+          {list.length > 1 && (
+            <div class="thumb-nav">
+              <button class="icon-btn" type="button" aria-label="Previous thumbnail" onClick={() => step(-1)}>←</button>
+              <span aria-live="polite">{index + 1} / {list.length}</span>
+              <button class="icon-btn" type="button" aria-label="Next thumbnail" onClick={() => step(1)}>→</button>
+            </div>
+          )}
           <div class="thumb-copy">
             <p class="thumb-owner">{current.creator}</p>
             {current.channelHandle && <p class="thumb-handle">{current.channelHandle}</p>}

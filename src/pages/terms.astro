@@ -1,49 +1,24 @@
 ---
 import BaseLayout from '../components/BaseLayout.astro';
-import Icon from '../components/Icon.astro';
-import { status } from '../data/status';
-import { termsSections } from '../data/terms';
+import TermsSection from '../components/TermsSection.astro';
 ---
-
-<BaseLayout
-  title="Terms"
-  description="Terms for commissioning an edit or a site with Katou: scope, revisions, payment, and delivery."
->
-  <article class="narrow">
-    <a class="back" href="/">← Home</a>
-    <h1 class="page-title">Terms</h1>
-    <p class="page-sub">How an edit or a site is commissioned, revised, and delivered.</p>
-    <p class="updated" style="margin-top: 12px">Terms updated {status.termsUpdated}</p>
-    <div class="terms-list">
-      {
-        termsSections.map((section) => (
-          <details class="terms" id={section.id} name="terms">
-            <summary>
-              <h2 class="term-title">{section.title}</h2>
-              <span class="chevron">
-                <Icon name="chevron-down" size={18} />
-              </span>
-            </summary>
-            <div class="terms-body">
-              {section.paragraphs.map((paragraph) => (
-                <p>{paragraph}</p>
-              ))}
-            </div>
-          </details>
-        ))
-      }
-    </div>
-  </article>
-  <script>
-    function openFromHash() {
-      const id = location.hash.replace('#', '');
-      if (!id) return;
-      const target = document.getElementById(id);
-      if (target instanceof HTMLDetailsElement) {
-        target.open = true;
-      }
-    }
-    openFromHash();
-    window.addEventListener('hashchange', openFromHash);
-  </script>
+<BaseLayout title="Terms" description="How an edit or a site is commissioned, revised, and delivered.">
+  <div class="pc-page">
+    <header class="pc-page-head">
+      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
+      <p class="pc-eyebrow">The details, up front</p>
+      <h1>Terms</h1>
+    </header>
+    <section class="pc-page-body" id="terms" aria-label="Commission terms">
+      <TermsSection />
+    </section>
+  </div>
 </BaseLayout>
+<script is:inline>
+  // Old links such as /terms#revisions open the matching term.
+  (function () {
+    var id = location.hash.slice(1).replace(/^term-/, '');
+    var item = id ? document.getElementById('term-' + id) : null;
+    if (item) { item.open = true; item.scrollIntoView(); }
+  })();
+</script>
