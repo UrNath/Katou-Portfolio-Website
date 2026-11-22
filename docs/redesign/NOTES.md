@@ -88,16 +88,19 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
 - Rows: Shorts (horizontal snap strip, arrow buttons on desktop), Long form (Vlogs / MVs / Normal tabs),
   Thumbnails. Desktop tiles 150px (wide 300px); mobile 112px (wide 220px).
 - Client chips and video order are shuffled on every visit to Works.
-- Picking a client = TikTok-style profile view (old site behaviour): back button, diamond avatar,
-  name, handle + counts, Shorts / Long form / Thumbnails tabs (icons only on mobile), 3-col grid
-  (5 on desktop; 2/3 for wide). Search stays usable (own row on mobile).
-- Morph (View Transitions API, as on the old site, but more connected): named shared elements
-  travel between views: header bar (pinned), banner (`w-head`), search (`w-search`),
-  chip avatar → profile avatar (`w-av`), chip label → profile name (`w-name`, cross-fade),
-  and every short of that client: strip poster → grid cell (`c-<clipId>`). Other content: old fades
-  left, new rises in. Back button reverses it. Fallback without the API: fade-up.
-- Profile banner and accents take the client's colours (slab, deep tint, avatar ring, tab underline,
-  handle colour, hover outline).
+- Picking a client = TikTok-style profile view (old site behaviour). The profile uses the SAME banner as
+  the main Works view (same slab colour, same height: 96px title row + 44px tab row on desktop,
+  46px + 40px on phone). Title row: back button, diamond avatar, name, handle (no counts), search on
+  the right. Tab row (where the chips were): Shorts / Long form / Thumbnails slanted tabs (icons only
+  on phone). Long form tab shows the Vlogs / MVs / Normal filter above the grid.
+  Grid: 3 cols (5 on desktop), wide items 2 / 3 cols.
+- Transition (View Transitions API, like the old site): header bar pinned; banner swaps instantly
+  (identical); search glides (.85s); chip avatar -> profile avatar morph; title block <-> name cross-fade;
+  chips row <-> tabs row fade/rise. Back button slides in from the left with a skew (.5s, .12s delay)
+  and slides out the same way on return. Content uses the old site's animation: old slides out left
+  (.38s), new fades up 28px (.6s, .42s delay). No per-tile morph. Fallback: fade-up.
+- Client colour only on the avatar ring, handle, active-tab underline and grid hover outline
+  (not on the banner).
 
 ## Meet the clients
 
@@ -120,6 +123,8 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
   two white/black stars popping; "NEXT UP!" black tag with white outline; ransom-note name
   (each letter its own box: paper / ink / client colour, mixed fonts, sizes and tilt).
   Reduced motion: instant swap.
+  Size: a thin centred diagonal band, not full-screen. Desktop: back plate 46% of the screen height,
+  ink band 32%, portrait strip 19%; phone: 34% / 24% / 15%. Name letters at 72% size.
 
 ## Pricing
 
@@ -170,3 +175,6 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
 4. Connected works morph + per-client banners; richer cut-in texture (ransom name, stars, torn bands);
    client data (Pidgeira, Chi); animate on scroll; pricing hovers; smooth terms accordion;
    new page transition.
+5. Works profile: no counts, Long form keeps Vlogs/MVs/Normal, same banner as main Works, old content
+   animation, back button in/out animation.
+6. Thinner centred cut-in band.
