@@ -10,6 +10,7 @@ import chibi from '../assets/character/katou-chibi.webp';
 import { site } from '../data/site';
 import { status } from '../data/status';
 import { heroReel, hubClips, loadClips, toViewerClip } from '../lib/clips';
+import { loadService } from '../lib/services';
 
 const clips = await loadClips();
 const featured = hubClips(clips);
@@ -17,6 +18,9 @@ const { hero } = heroReel(clips);
 const art = site.characterArt;
 
 const viewerClips = featured;
+const editing = await loadService('editing');
+const turnaround = editing.data.compare.find((row) => row.feature === 'Turnaround')?.values[0]?.replace(/ days?$/, ' d').replace(' to ', '–');
+const tagline = site.role.replace(/^Short-form\s+/i, '');
 ---
 <BaseLayout>
   <SiteIntro />
@@ -30,6 +34,8 @@ const viewerClips = featured;
     <section class="pc-screen pc-fit pc-hero" id="home" aria-labelledby="intro-title">
       <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
       <span class="pc-blob pc-blob-gold" aria-hidden="true"></span>
+      <span class="sk-slab" aria-hidden="true"></span>
+      <span class="sk-ghost" aria-hidden="true">Katou</span>
       <div class="pc-art">
         <div class="pc-figure">
           <div class="pc-card" aria-hidden="true"></div>
@@ -39,19 +45,23 @@ const viewerClips = featured;
             </div>
           )}
           {art.enabled && art.artist && <p class="pc-credit">ART ILLUST: {art.artist}</p>}
+          <span class="sk-hatch sk-decal" aria-hidden="true"></span>
         </div>
       </div>
       <div class="pc-hero-copy">
-        <p class="pc-eyebrow" data-reveal>Video editor · Web design</p>
-        <h1 id="intro-title" data-reveal style="--i:1">Meet the Editor!<br /><span>Katou</span></h1>
-        <p class="pc-tagline" data-reveal style="--i:2">{site.role}</p>
-        <div class="pc-actions" data-reveal style="--i:3">
-          <a class="pc-btn pc-btn-white" href="/works">View Works</a>
+        <p class="sk-kicker" data-reveal><span class="sk-slashes" aria-hidden="true"></span><span>Professor Number <b>67</b></span><span class="sk-hatch" aria-hidden="true"></span></p>
+        <h1 id="intro-title" data-reveal style="--i:1"><span class="sk-pre">Meet the Editor!</span> <span class="sk-name">Katou</span></h1>
+        <p class="sk-tags" data-reveal style="--i:2">
+          <span class="t1">Video editor</span><span class="t2">UI/UX Developer</span>{status.editing !== 'closed' && <span class="t3">★ Commissions open</span>}
+        </p>
+        <p class="pc-tagline" data-reveal style="--i:2">{tagline}</p>
+        <ul class="sk-skills" data-reveal style="--i:3" aria-label="Services">
+          <li><a class="sk-skill" href="/pricing#editing"><span class="sk-dia" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg></span><b>Editing<small><StatusChip status={status.editing} /></small></b></a></li>
+          <li><a class="sk-skill" href="/pricing#web-design"><span class="sk-dia" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></span><b>UI/UX Developer<small><StatusChip status={status.webDesign} /></small></b></a></li>
+        </ul>
+        <div class="pc-actions" data-reveal style="--i:4">
+          <a class="pc-btn pc-btn-white" href="/works"><span class="sk-tri" aria-hidden="true"></span>View Works</a>
           <a class="pc-btn pc-btn-peach" href="/contact">Contact</a>
-        </div>
-        <div class="pc-meta" data-reveal style="--i:4">
-          <span>Editing <StatusChip status={status.editing} /></span>
-          <span>Web design <StatusChip status={status.webDesign} /></span>
         </div>
         <a class="pc-scroll" href="#featured" data-reveal style="--i:5" aria-label="Scroll down to see featured works">
           <span class="pc-scroll-text">Scroll to see my edits</span>
@@ -62,6 +72,7 @@ const viewerClips = featured;
 
     <section class="pc-screen pc-fit pc-feat" id="featured" aria-labelledby="featured-title">
       <div class="pc-feat-copy">
+        <p class="sk-no" data-reveal><b>02</b> Featured</p>
         <h2 id="featured-title" data-reveal>Featured works</h2>
         <p class="pc-feat-sub" data-reveal style="--i:1">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
       </div>
@@ -75,27 +86,34 @@ const viewerClips = featured;
 
     <section class="pc-screen pc-fit pc-about" id="about" aria-labelledby="about-title">
       {/* PLACEHOLDER VIDEO: set site.aboutVideo.src (and .poster) in src/data/site.ts once the About video is edited. */}
-      <div class="pc-photo" data-reveal>
+      <div class="pc-photo">
         {site.aboutVideo.src ? (
           <video src={site.aboutVideo.src} poster={site.aboutVideo.poster || undefined} muted loop playsinline controls preload="metadata" aria-label="About Katou video"></video>
         ) : (
           <div class="pc-vid-ph" role="img" aria-label="Placeholder: About video coming soon">
             <span class="pc-vid-play" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
             <span class="pc-vid-cap">About video coming soon</span>
+            <span class="sk-rec" aria-hidden="true">Rec</span><span class="sk-tc" aria-hidden="true">00:00:00:00</span>
           </div>
         )}
       </div>
       <div class="pc-about-copy">
-        <h2 id="about-title" data-reveal style="--i:1">About Katou</h2>
-        <p data-reveal style="--i:2">{site.description}</p>
+        <p class="sk-no"><b>03</b> Profile</p>
+        <h2 id="about-title">About Katou</h2>
+        <p>{site.description}</p>
+        <dl class="sk-stats">
+          <div><dt>Edits</dt><dd>{clips.length}</dd></div>
+          {turnaround && <div><dt>Turnaround</dt><dd>{turnaround}</dd></div>}
+        </dl>
       </div>
     </section>
 
     <section class="pc-screen pc-contact" id="contact" aria-labelledby="contact-title">
       <span class="pc-blob pc-blob-blue" aria-hidden="true"></span>
       <span class="pc-blob pc-blob-gold2" aria-hidden="true"></span>
-      <h2 id="contact-title" data-reveal>Let’s make something.</h2>
-      <a class="pc-btn pc-btn-gold" href="/contact" data-reveal style="--i:1">Contact</a>
+      <p class="sk-no"><b>04</b> Contact</p>
+      <h2 id="contact-title">Let’s make <em>something.</em></h2>
+      <a class="pc-btn pc-btn-gold" href="/contact">Contact</a>
     </section>
   </div>
   <ClipPreview client:idle />

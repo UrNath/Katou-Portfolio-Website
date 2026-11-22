@@ -36,7 +36,7 @@ const presentTypes = (['short', 'long', 'thumbnail'] as WorkType[]).filter((type
   blocks.some((block) => block.section.kind in typeOfKind && typeOfKind[block.section.kind as keyof typeof typeOfKind] === type),
 );
 const tabLabel: Record<WorkType, string> = { short: 'Shorts', long: 'Long form', thumbnail: 'Thumbnails' };
-const avatars: Record<string, string> = { pidgeira: '/avatars/pidge.webp', chi: '/avatars/chi.webp', miu: '/avatars/miu.webp' };
+const avatars: Record<string, string> = { pidgeira: '/avatars/pidge.webp', chiseyi: '/avatars/chi.webp', miu: '/avatars/miu.webp' };
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 // Everything the profile view shows is computed from the portfolio data. No bio or avatar exists yet, so none is shown.
 const profiles = creators.map((creator) => {
@@ -453,6 +453,19 @@ const profileCss = profiles
         sync();
       });
       sync();
+    })();
+  </script>
+  <script is:inline>
+    // Fresh order on every visit: client chips and the cards in each row are shuffled before the filters start.
+    (function () {
+      var shuffle = function (parent, selector) {
+        if (!parent) return;
+        var items = Array.prototype.filter.call(parent.children, function (el) { return el.matches(selector); });
+        for (var i = items.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = items[i]; items[i] = items[j]; items[j] = t; }
+        items.forEach(function (el) { parent.appendChild(el); });
+      };
+      shuffle(document.querySelector('[data-chips-row]'), '.pw-chip:not([data-filter-value=""])');
+      document.querySelectorAll('[data-rows]').forEach(function (row) { shuffle(row, '*'); });
     })();
   </script>
 </BaseLayout>

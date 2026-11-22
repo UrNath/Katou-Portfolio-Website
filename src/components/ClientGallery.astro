@@ -17,14 +17,14 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   <h1 class="sr">Meet the Clients</h1>
 
   <nav class="roster-nav" aria-label="Choose a client">
-    <button class="roster-switch" type="button" data-step="1">
-      <span aria-hidden="true">⇄</span> <span class="switch-text">Switch client</span>
-    </button>
     <div class="roster-names">
       {clients.map((client, index) => (
         <button type="button" data-goto={index} aria-pressed={index === 0}>{client.label}</button>
       ))}
     </div>
+    <button class="roster-switch" type="button" data-step="1" aria-label="Switch client">
+      <span aria-hidden="true">⇄</span> <span class="switch-text">Switch<span class="switch-long"> client</span></span>
+    </button>
   </nav>
 
   {clients.map((client, index) => {
@@ -36,6 +36,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
     ];
     return (
       <article class="client" data-client={client.id} hidden={index !== 0} aria-label={client.label}
+        data-cut-art={profile.skins[0]?.art?.src} data-cut-eyes={profile.skins[0]?.art?.eyes ? `${profile.skins[0].art.eyes.x},${profile.skins[0].art.eyes.y},${profile.skins[0].art.eyes.w}` : undefined}
         style={`--panel:${profile.palette.panel};--deep:${profile.palette.deep};--accent:${profile.palette.accent};--rim:${profile.palette.rim}`}>
         <div class="stage" aria-hidden="true">
           <div class="stage-bg art-depth">
@@ -45,7 +46,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
             <span class="bg-band">{`${client.label} `.repeat(6)}</span>
           </div>
           {profile.skins.map((skin, skinIndex) => (
-            <div class:list={['char', skin.art?.framed && 'is-framed']} data-skin={skin.id} hidden={skinIndex !== 0}
+            <div class:list={['char', skin.art?.framed && 'is-framed', skin.art?.fadeFoot && 'fade-foot']} data-skin={skin.id} hidden={skinIndex !== 0}
               style={skin.art ? `--h:${skin.art.height_pct}%;--b:${skin.art.bottom_pct}%;--r:${skin.art.right_pct}%;--ratio:${skin.art.framed ? '4/3' : `${skin.art.width}/${skin.art.height}`};--focus:${skin.art.focus ?? '50% 50%'}` : undefined}>
               <div class="char-move character-depth">
                 {skin.art ? (
@@ -75,7 +76,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
               </li>
             ))}
           </ul>
-          <p class:list={['desc', !profile.description && 'is-placeholder']} data-seq style="--i:2">
+          <p class:list={['desc', !profile.description && 'is-placeholder', profile.description && 'is-quote']} data-seq style="--i:2">
             {profile.description ?? 'Description placeholder. To be supplied.'}
           </p>
 
@@ -146,7 +147,15 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
     );
   })}
 
-  <div class="wipe" aria-hidden="true"></div>
+  <div class="cutin" aria-hidden="true">
+    <div class="ci-band ci-b0"></div><div class="ci-band ci-b1"></div>
+    <div class="ci-band ci-w ci-w1"></div><div class="ci-band ci-w ci-w2"></div>
+    <div class="ci-band ci-shadow"></div>
+    <div class="ci-band ci-strip"><img class="ci-img" alt="" decoding="async" /></div>
+    <span class="ci-star ci-s1"></span><span class="ci-star ci-s2"></span>
+    <p class="ci-tag">Next up!</p><p class="ci-name"></p>
+    <div class="ci-flash"></div>
+  </div>
   <output class="sr" aria-live="polite"></output>
 
   <dialog class="reel-dialog" aria-labelledby="reel-title">
@@ -169,11 +178,29 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
     const clients = Array.from(stage.querySelectorAll<HTMLElement>('.client'));
     const picks = Array.from(stage.querySelectorAll<HTMLButtonElement>('[data-goto]'));
     const status = stage.querySelector('output')!;
-    const wipe = stage.querySelector<HTMLElement>('.wipe')!;
+    const cut = stage.querySelector<HTMLElement>('.cutin')!;
+    const cutImg = cut.querySelector<HTMLImageElement>('.ci-img')!;
+    const cutName = cut.querySelector<HTMLElement>('.ci-name')!;
+    // Ransom-note lettering: each letter in its own box (paper, ink, client colour) with mixed type.
+    const FONTS = ['var(--sk-name)', 'Georgia, "Times New Roman", serif', 'var(--sk-ui)', 'Impact, "Arial Black", sans-serif'];
+    function ransom(name: string) {
+      cutName.replaceChildren(...[...name].map((ch, i) => {
+        const span = document.createElement('span');
+        span.className = `r${i % 3}`;
+        span.textContent = ch;
+        span.style.setProperty('--r', `${((i * 37) % 13) - 6}deg`);
+        span.style.setProperty('--fs', `${[78, 96, 70, 104, 84][i % 5]}`);
+        span.style.setProperty('--ff', FONTS[(i * 3) % 4]);
+        return span;
+      }));
+    }
+    // Warm the next portraits so the cut-in never shows an empty strip.
+    clients.forEach((client) => { const src = client.dataset.cutArt; if (src) { const img = new Image(); img.decoding = 'async'; img.src = src; } });
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     const posterOnly = () => document.documentElement.classList.contains('poster-only');
     // Timing and gesture tuning (documented in docs/FEATURES.md).
-    const SWITCH = { leave: 340, enter: 900, reducedLeave: 160, reducedEnter: 200 };
+    // The cut-in runs 1.55 s; the client swaps at 640 ms while the bands cover the stage.
+    const SWITCH = { leave: 640, enter: 920, reducedLeave: 160, reducedEnter: 200 };
     const SWIPE = { start: 10, distance: .28, velocity: .45, settle: 280 };
     let current = 0;
     let busy = false;
@@ -206,10 +233,18 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
       const enter = simple ? SWITCH.reducedEnter : SWITCH.enter;
       from.classList.add('is-leaving');
       if (!simple) {
-        wipe.style.setProperty('--wipe', to.style.getPropertyValue('--accent'));
-        wipe.classList.remove('is-running');
-        void wipe.offsetWidth;
-        wipe.classList.add('is-running');
+        cut.style.setProperty('--ci', to.style.getPropertyValue('--accent'));
+        const eyes = (to.dataset.cutEyes ?? '50,45,.5').split(',').map(Number);
+        cutImg.style.setProperty('--ex', `${eyes[0]}%`);
+        cutImg.style.setProperty('--ey', `${eyes[1]}%`);
+        cutImg.style.setProperty('--ew', String(eyes[2]));
+        cutImg.hidden = !to.dataset.cutArt;
+        if (to.dataset.cutArt) cutImg.src = to.dataset.cutArt;
+        ransom(to.getAttribute('aria-label') ?? '');
+        cut.classList.remove('is-running');
+        void cut.offsetWidth;
+        cut.classList.add('is-running');
+        setTimeout(() => cut.classList.remove('is-running'), 1580);
       }
       setTimeout(() => {
         from.hidden = true;
@@ -220,7 +255,6 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
         paint();
         setTimeout(() => {
           to.classList.remove('is-entering');
-          wipe.classList.remove('is-running');
           busy = false;
           if (pending !== undefined && pending !== current) {
             const next = pending;
@@ -646,10 +680,9 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .socials span { border-style: dashed; }
 
   /* ---- Switch choreography (transform and opacity only) ---- */
-  .wipe { z-index: 4; justify-self: center; width: 44%; background: linear-gradient(to right, transparent, var(--wipe, white) 18% 82%, transparent); opacity: 0; pointer-events: none; transform: translateX(-260%) skewX(-16deg); }
+  .cutin { z-index: 6; position: relative; overflow: hidden; pointer-events: none; display: none; --ci: var(--scene-accent, white); container-type: inline-size; }
+  .cutin.is-running { display: block; }
   @media (prefers-reduced-motion: no-preference) {
-    .wipe.is-running { animation: wipe-pass 820ms cubic-bezier(.6, 0, .3, 1) both; }
-    [data-dir="prev"] .wipe.is-running { animation-direction: reverse; }
     .is-leaving .char { animation: char-out 320ms cubic-bezier(.5, 0, .9, .4) both; }
     .is-leaving [data-seq] { animation: seq-out 240ms ease-in both; animation-delay: calc((6 - var(--i)) * 14ms); }
     .is-leaving .gems li { animation: gem-out 240ms ease-in both; animation-delay: calc((2 - var(--n)) * 30ms); }
@@ -665,7 +698,6 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
     .is-entering { animation: fade-in 200ms linear both; }
     .gem-face, .gem-media, .gem-icon, .bg-paint, .tabs button::after, .roster-names button::before { transition: none; }
   }
-  @keyframes wipe-pass { 0% { transform: translateX(-260%) skewX(-16deg); opacity: .95; } 100% { transform: translateX(260%) skewX(-16deg); opacity: .95; } }
   @keyframes char-out { to { transform: translateX(7%) scale(.98); opacity: 0; } }
   @keyframes char-in { from { transform: translateX(-9%) scale(1.05); opacity: 0; } }
   @keyframes echo-in { from { transform: translate(-22%, 1.5%) scale(1.03); opacity: 0; } }

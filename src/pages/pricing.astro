@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../components/BaseLayout.astro';
-import ServiceSection from '../components/ServiceSection.astro';
+import PricingService from '../components/PricingService.astro';
 import { loadService } from '../lib/services';
 const editing = await loadService('editing');
 const web = await loadService('web-design');
@@ -17,10 +17,10 @@ const web = await loadService('web-design');
       </nav>
     </header>
     <section class="pc-page-body" id="editing" aria-label="Editing commissions">
-      <ServiceSection service={editing} />
+      <PricingService service={editing} />
     </section>
     <section class="pc-page-body pc-page-alt" id="web-design" aria-label="Web design commissions">
-      <ServiceSection service={web} />
+      <PricingService service={web} />
     </section>
   </div>
 </BaseLayout>

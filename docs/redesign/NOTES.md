@@ -191,3 +191,31 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
    "Chi" renamed "Chiseyi" everywhere. Chiseyi's model is a new cut-out of her current model
    (background removed; bottom edge faded with a mask). Client socials are not scroll-revealed
    (bottom of the one-screen phone layout).
+
+## Implementation (real site)
+
+- Skin lives in `src/styles/skin.css`, loaded last in `BaseLayout.astro`, on top of the existing
+  stylesheets, so the old layouts, features and animations keep working underneath.
+- Fonts: `@fontsource/barlow-condensed`, `@fontsource/barlow`, `@fontsource/chakra-petch`.
+- Page switch: slash wipe in `BaseLayout.astro` (replaces the stamp iris), Web Animations, transforms only.
+- Animate on scroll + frame-rate probe: `src/lib/fx.ts`.
+- Pricing: `src/components/PricingService.astro` (replaces `ServiceSection` on /pricing; MV card is a
+  placeholder defined in that file).
+- Terms: numbered diamonds + animated accordion in `TermsSection.astro`.
+- Clients: cut-in + layout in `ClientGallery.astro` (script) and `skin.css` (styles); Miu hidden via
+  `hiddenOnClientsPage` in `src/data/clients.ts`; Chiseyi model `public/clients/chiseyi-model.webp`.
+- Chi renamed to Chiseyi: creator id `chiseyi` in works-layout.json, clips.json, thumbnails.json, clients.ts.
+- Works: chips and cards shuffle on each visit (inline script at the end of works.astro).
+
+### Performance tiers (old phones and PCs)
+
+- `html.fx-lite` is set before first paint when the device reports 4 or fewer CPU cores or 4 GB or less
+  memory, or when a previous visit's frame-rate probe found it slow (saved as `nk-fx` in localStorage).
+- On first visit `lib/fx.ts` samples ~90 frames after load; if the slower frames exceed 25 ms
+  (below ~40 fps) it switches to fx-lite immediately and remembers it.
+- fx-lite keeps the same layout and every animation, but drops: header blur, large halftone fills,
+  stacked glow/drop-shadow filters on character art, the echo silhouette, cut-in halftone, stars,
+  flash and slivers, two of the three wipe bands, and the outlined ghost name.
+- Measured with Chrome at 4x CPU slowdown on a phone viewport: cut-in, page wipe, home scroll and the
+  Works morph stay at roughly 50-60 fps.
+- Reduced-motion users get instant swaps (no wipe, no cut-in, no scroll reveal).
