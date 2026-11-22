@@ -688,3 +688,4 @@ html[data-creator-filter] .pw-avatar::after { animation: sk-ring .8s var(--sk-ea
   .poster .pw-profile::before { content: ""; position: absolute; inset: 0 calc(-1 * var(--pc-pad)) 0 auto; width: 44%; z-index: -1; background: linear-gradient(160deg, var(--sk-hot), #8a2712); clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%); pointer-events: none; }
   .poster .pw-profile { isolation: isolate; }
 }
+@media (max-width: 768px) { body.poster .sv .sv-lbl { font-size: 10px; line-height: 1; margin-bottom: 4px; } body.poster .sv-takes > div { min-width: 0; } }
