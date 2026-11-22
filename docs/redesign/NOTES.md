@@ -178,3 +178,16 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
 5. Works profile: no counts, Long form keeps Vlogs/MVs/Normal, same banner as main Works, old content
    animation, back button in/out animation.
 6. Thinner centred cut-in band.
+7. Home wipe label "Home"; wipe tuned for 60fps (translate3d, will-change, no backdrop blur while
+   wiping). Cut-in 1.55s, name/tag nearer centre and smaller; seamless swap (old info slides out left,
+   old art fades right before the bands cover it; palette glides via @property colours; new info
+   staggers in from the right and new art slides in as the bands clear; content swaps at 640ms).
+   Cut-in strip shows only the eyes: every skin carries `eyes: { x, y, w }` (eye centre in % of the
+   image, eye-pair width as a fraction of image width): Pidgeira cat {50, 42.5, .21},
+   Chiseyi {49.3, 26, .27}. Future models need the same three numbers.
+   Phone: cut-in sits over the 45% art area only, smaller. Works: chip avatar diamond morphs into a
+   circle (clip-path polygon, 16 points) with a slight pop and two expanding rings in the client
+   colour; reverses to a diamond on back. Miu removed from Meet the Clients only (stays in Works).
+   "Chi" renamed "Chiseyi" everywhere. Chiseyi's model is a new cut-out of her current model
+   (background removed; bottom edge faded with a mask). Client socials are not scroll-revealed
+   (bottom of the one-screen phone layout).
