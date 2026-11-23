@@ -234,3 +234,15 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
 - Rows use fixed card sizes: shorts 150px (112px phone), wide/thumbnails 300px (220px phone); no progress bars.
 - Long form tabs sit on the right of the section header (under it on phones).
 - Profile view: 5-column grid (3 on phones), wide 3 (2 on phones), no captions; Long form filter on the left.
+
+### Works pass 3
+- The banner (`.pw-frame`) is one view-transition layer, so it never blanks; only its contents cross-fade.
+- Content overlaps out/in (old out .32s, new in .55s from .16s). The avatar flies chip -> circle and back
+  (circle -> diamond into the chip). Back button slides in with a skew.
+- Rows sit inside the 1280 content column instead of bleeding to the screen edge.
+
+### Pricing pass 2 (mockup layout and scale)
+- 1280 content column. Banner: title left, Editing/Web design jump tabs on the right of the same row (phone too).
+- Section head: title + status + description on one line on desktop; the "minor vs major" box and the
+  editing pick-note are hidden (they live on Terms). Steps fit in one row on phones.
+- Fix: scroll-reveal "revealed" state now beats the per-type start offsets (steps/tiers/terms were stuck offset).
