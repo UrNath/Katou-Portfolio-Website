@@ -790,3 +790,94 @@ html[data-creator-filter] .pw-avatar::after { animation: sk-ring .8s var(--sk-ea
 .poster .pc-feat .carousel-card[data-active="true"] .clip-pause { width: 64px !important; height: 64px !important; margin: -32px 0 0 -32px !important; box-shadow: 0 0 0 4px rgb(0 0 0 / .4); }
 .poster .pc-feat .carousel-card[data-active="true"] .clip-pause svg { width: 24px; height: 24px; fill: currentColor; }
 @media (max-width: 899px) { .poster .pc-feat .carousel-card[data-active="true"] .clip-pause { width: 54px !important; height: 54px !important; margin: -27px 0 0 -27px !important; } }
+
+/* ===================================================================
+   WORKS, pass 2: layout, positions and scale from the approved mockup
+   (content width 1280 with a 40px gutter, slim banner, fixed card sizes)
+   =================================================================== */
+.poster .pc-works { --pc-pad: max(40px, calc((100vw - 1280px) / 2 + 40px)); }
+@media (max-width: 899px) { .poster .pc-works { --pc-pad: 16px; } }
+
+/* Banner: one grid at every width. Row 1 = title or profile + search; row 2 = chips or format tabs. */
+.poster .pc-works .pw-frame { display: grid !important; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; column-gap: 16px; padding: 18px var(--pc-pad) 0 !important; --pw-x: 0px; }
+.poster .pc-works .pw-top { display: contents !important; position: static; }
+.poster .pc-works .pw-bw { position: static !important; grid-area: 1 / 1; width: auto; margin: 0 !important; opacity: 1; visibility: visible; pointer-events: auto; transform: none !important; transition: none; }
+html:not([data-creator-filter]) .poster .pc-works .pw-bw { display: none !important; }
+.poster .pc-works .pw-head { grid-area: 1 / 1 / 2 / 3; padding: 0 !important; gap: 4px; min-height: 96px; justify-content: flex-end; }
+.poster .pc-works .pw-profile { grid-area: 1 / 2 / 2 / 3; padding: 0 !important; min-height: 96px; gap: 16px; }
+.poster .pc-works .pw-search { grid-area: 1 / 3; justify-self: end; align-self: center; width: 340px !important; max-width: 100%; margin: 0 !important; view-transition-name: pw-search; }
+.poster .pc-works .pw-search:focus-within { width: 400px !important; }
+.poster .pc-works .pw-tabs { grid-area: 2 / 1 / 3 / 4; padding: 10px 0 14px !important; }
+.poster .pc-works .pw-lane { position: static !important; padding: 10px var(--pc-pad) 14px !important; border-bottom: 1px solid var(--sk-line); background: var(--sk-deck); }
+.poster .pc-works .pw-frame { border-bottom: 0; }
+html[data-creator-filter] .poster .pc-works .pw-frame { border-bottom: 1px solid var(--sk-line); }
+.poster .pw-head .page-title { font-size: clamp(52px, 5vw, 68px) !important; line-height: .86 !important; }
+.poster .pw-head .pc-eyebrow { font-size: 11px; }
+.poster .pw-avatar { width: 72px !important; height: 72px !important; }
+.poster .pw-name { font-size: clamp(52px, 5vw, 68px) !important; line-height: .86; }
+.poster .pc-works .pw-search input { height: 44px; }
+.poster .pc-works .pw-frame::before { width: 34% !important; }
+.pw-head::before, .poster .pw-profile::before { display: none !important; }
+.poster .pc-works .pw-frame::before { content: ""; position: absolute; top: 0; bottom: 0; right: 0; z-index: -1; background: linear-gradient(160deg, var(--sk-hot), #8a2712); clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%); pointer-events: none; }
+.poster .pc-works :is(.pw-frame, .pw-lane) { position: relative; }
+.poster .pc-works .pw-lane::before { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 34%; z-index: 0; background: linear-gradient(160deg, #c9461f, #6e1f0e); clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%); pointer-events: none; }
+.poster .pc-works .pw-lane > * { position: relative; z-index: 1; }
+
+/* Sections and rows */
+.poster .pc-works .pc-wsec { padding: 22px var(--pc-pad) 0; }
+.poster .pc-works .pc-wsec-head { margin-bottom: 12px; min-height: 0; }
+.poster .pc-wsec .works-kicker { font-size: 32px !important; }
+.poster .pc-works .pc-prog { display: none !important; }
+.poster .pc-works .pc-tabs-sm { margin-left: auto; order: 0 !important; width: auto !important; display: inline-flex !important; }
+.poster .pc-works .pc-tabs-sm button { flex: none !important; min-height: 34px !important; padding: 0 14px !important; font-size: 12px !important; }
+.poster .pc-works .pc-pager-head { margin-left: 0; }
+.poster .pc-works .pc-wsec-head:not(:has(.pc-tabs-sm)) .pc-pager-head { margin-left: auto; }
+.poster .pc-works .pc-rows { --gap: 14px; grid-auto-columns: 150px !important; padding: 4px var(--pc-pad) 12px !important; gap: 14px !important; }
+.poster .pc-works .pc-rows-wide, .poster .pc-works .pc-rows.thumb-grid:not(.thumb-vert) { grid-auto-columns: 300px !important; }
+.poster .pc-works .pc-rows .clip-caption { display: block; margin-top: 8px; }
+.poster .pc-works .clip-caption b { font-size: 14px; }
+.poster .pc-works .clip-caption span { font-size: 12px; }
+.poster .pc-thumbs { gap: 14px; }
+.poster .pc-works .pc-wsec:last-of-type { padding-bottom: 40px; }
+
+/* Creator (profile) view: TikTok-style grid, no captions, play + duration overlay */
+html[data-creator-filter] .poster .pc-works .pc-wsec { padding-top: 14px; }
+html[data-creator-filter] .poster .pc-works .pc-rows { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; grid-auto-columns: auto !important; gap: 8px !important; padding: 0 var(--pc-pad) 40px !important; }
+html[data-creator-filter] .poster .pc-works .pc-rows.pc-rows-wide, html[data-creator-filter] .poster .pc-works .pc-rows.thumb-grid:not(.thumb-vert) { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+html[data-creator-filter] .poster .pc-works .clip-caption { display: none !important; }
+html[data-creator-filter] .poster .pc-works .pc-tabs-sm { margin-left: 0; }
+
+/* Phones */
+@media (max-width: 899px) {
+  .poster .pc-works .pw-frame { grid-template-columns: auto auto minmax(0, 1fr); column-gap: 10px; padding-top: 12px !important; }
+  .poster .pc-works .pw-head { min-height: 46px; }
+  .poster .pc-works .pw-head .pc-eyebrow { display: none; }
+  .poster .pc-works .pw-profile { min-height: 46px; gap: 8px; }
+  .poster .pc-works .pw-search { width: 100% !important; justify-self: stretch; }
+  .poster .pc-works .pw-search:focus-within { width: 100% !important; }
+  .poster .pc-works .pw-search input { height: 42px; font-size: 14px; }
+  body.poster .pw-head .page-title { font-size: 46px !important; }
+  .poster .pw-avatar { width: 46px !important; height: 46px !important; padding: 2px; }
+  body.poster .pw-name { font-size: 34px !important; }
+  .poster .pw-handle { font-size: 11px; margin: 0; }
+  .poster .pw-back { width: 40px; height: 40px; }
+  .poster .pc-works .pw-tabs { padding: 8px 0 12px !important; }
+  .poster .pc-works .pw-tab { flex: 1 !important; justify-content: center; min-height: 38px; }
+  .poster .pc-works .pw-tab-label { display: none !important; }
+  .poster .pc-works .pw-lane { padding: 8px var(--pc-pad) 12px !important; }
+  .poster .pc-works .pw-lane::before, .poster .pc-works .pw-frame::before { width: 40% !important; }
+  .poster .pc-works .pc-wsec { padding-top: 14px; }
+  .poster .pc-wsec .works-kicker { font-size: 26px !important; }
+  .poster .pc-works .pc-wsec-head { margin-bottom: 8px; }
+  .poster .pc-works .pc-rows { grid-auto-columns: 112px !important; gap: 10px !important; padding-bottom: 8px !important; }
+  .poster .pc-works .pc-rows-wide, .poster .pc-works .pc-rows.thumb-grid:not(.thumb-vert) { grid-auto-columns: 220px !important; }
+  .poster .pc-works .clip-caption b { font-size: 12px; }
+  .poster .pc-works .clip-caption span { font-size: 11px; }
+  .poster .pc-works .pc-tabs-sm { width: 100% !important; margin: 0; }
+  .poster .pc-works .pc-tabs-sm button { min-height: 30px !important; padding: 0 12px !important; font-size: 10px !important; }
+  html[data-creator-filter] .poster .pc-works .pc-rows { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 4px !important; }
+  html[data-creator-filter] .poster .pc-works .pc-rows.pc-rows-wide, html[data-creator-filter] .poster .pc-works .pc-rows.thumb-grid:not(.thumb-vert) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+.poster .pc-works .pw-lane { position: relative !important; }
+.poster .pc-works .pw-lane { top: auto !important; }
+html[data-creator-filter] .poster .pc-works .pc-wsec-head { justify-content: flex-start !important; }

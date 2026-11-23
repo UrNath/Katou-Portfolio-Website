@@ -226,3 +226,11 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
 - Featured: content-height section, side cards dimmed, clip title + diamond dots + arrows on one row (desktop),
   CTA centred below, big lime play diamond. Phone: one-line title, subtitle shown, no arrows (swipe).
 - About and Contact band: content height instead of full-screen; "Let's make / something." on two lines.
+
+### Works pass 2 (mockup layout and scale)
+- Content width 1280 with a 40px gutter (16px on phones).
+- Banner is one grid at every width: row 1 = title (or back + avatar + name) and a 340px search on the right;
+  row 2 = client chips (or the format tabs). Phone: title and search share one row, no kicker.
+- Rows use fixed card sizes: shorts 150px (112px phone), wide/thumbnails 300px (220px phone); no progress bars.
+- Long form tabs sit on the right of the section header (under it on phones).
+- Profile view: 5-column grid (3 on phones), wide 3 (2 on phones), no captions; Long form filter on the left.
