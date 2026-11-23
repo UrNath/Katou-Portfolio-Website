@@ -4,6 +4,7 @@ import type { ClipRecord } from '../lib/clips';
 interface Props { clips: ClipRecord[]; initialId: string }
 const { clips, initialId } = Astro.props;
 const samples = clips.slice(0, 5);
+const clean = (title: string) => title.replace(/\s*#\S+/g, '').trim();
 const initial = Math.max(0, samples.findIndex((clip) => clip.id === initialId));
 function offset(index: number) {
   const half = Math.floor(samples.length / 2);
@@ -13,13 +14,17 @@ function offset(index: number) {
 <div class="sample-carousel" data-carousel data-initial={initial} role="region" aria-roledescription="carousel" aria-label="Featured video samples" tabindex="0">
   <div class="carousel-stage" data-carousel-stage>
     {samples.map((clip, index) => (
-      <div class="carousel-card" data-carousel-card data-index={index} data-caption={`${clip.creator}’s Short Video`} data-position={offset(index)} data-active={index === initial ? 'true' : 'false'} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${samples.length}: ${clip.title}`} aria-hidden={Math.abs(offset(index)) > 1 ? 'true' : 'false'} inert={Math.abs(offset(index)) > 1}>
+      <div class="carousel-card" data-carousel-card data-index={index} data-caption={clean(clip.title)} data-position={offset(index)} data-active={index === initial ? 'true' : 'false'} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${samples.length}: ${clip.title}`} aria-hidden={Math.abs(offset(index)) > 1 ? 'true' : 'false'} inert={Math.abs(offset(index)) > 1}>
         <ClipCard clip={clip} variant="hero" previewHero={index === initial} sizes="(min-width: 960px) 260px, 40vw" />
       </div>
     ))}
   </div>
-  <p class="carousel-current" data-carousel-current aria-live="polite" aria-atomic="true">{samples[initial]?.creator}’s Short Video</p>
+  <p class="carousel-current" data-carousel-current aria-live="polite" aria-atomic="true">{samples[initial] ? clean(samples[initial].title) : ''}</p>
   <div class="carousel-controls">
+    <div class="carousel-arrows">
+      <button class="carousel-arrow" type="button" data-carousel-prev aria-label="Previous sample">‹</button>
+      <button class="carousel-arrow" type="button" data-carousel-next aria-label="Next sample">›</button>
+    </div>
     <div class="carousel-indicators" role="group" aria-label="Choose a sample">
       {samples.map((clip, index) => <button class="carousel-dot" type="button" data-carousel-dot={index} aria-label={`Show sample ${index + 1}: ${clip.title}`} aria-pressed={index === initial}><span></span></button>)}
     </div>

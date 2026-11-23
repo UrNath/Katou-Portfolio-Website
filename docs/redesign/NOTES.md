@@ -219,3 +219,10 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
 - Measured with Chrome at 4x CPU slowdown on a phone viewport: cut-in, page wipe, home scroll and the
   Works morph stay at roughly 50-60 fps.
 - Reduced-motion users get instant swaps (no wipe, no cut-in, no scroll reveal).
+
+### Homepage pass 2 (match mockup exactly)
+- Hero: copy left, art right, blue slab on the right, ghost name behind the art, "Editor 01 / 01" index strip.
+  Entrance: slab sweeps in, ghost drifts in, art settles, skill diamonds pop in; art floats gently (off in fx-lite).
+- Featured: content-height section, side cards dimmed, clip title + diamond dots + arrows on one row (desktop),
+  CTA centred below, big lime play diamond. Phone: one-line title, subtitle shown, no arrows (swipe).
+- About and Contact band: content height instead of full-screen; "Let's make / something." on two lines.

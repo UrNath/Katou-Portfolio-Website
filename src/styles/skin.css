@@ -689,3 +689,104 @@ html[data-creator-filter] .pw-avatar::after { animation: sk-ring .8s var(--sk-ea
   .poster .pw-profile { isolation: isolate; }
 }
 @media (max-width: 768px) { body.poster .sv .sv-lbl { font-size: 10px; line-height: 1; margin-bottom: 4px; } body.poster .sv-takes > div { min-width: 0; } }
+
+/* ===================================================================
+   HOME, pass 2: match the approved mockup exactly
+   =================================================================== */
+/* Hero: copy left, art right, blue slab behind the art on the right */
+.sk-slab { inset: 0 0 0 auto; left: auto; width: 60%; clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%); }
+.sk-ghost { left: auto; right: 2%; }
+@media (min-width: 900px) {
+  .poster .pc-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); padding-inline: max(var(--pc-pad), calc((100vw - 1280px) / 2 + 40px)); }
+  .pc-hero .pc-hero-copy { grid-column: 1; grid-row: 1; }
+  .pc-hero .pc-art { grid-column: 2; grid-row: 1; }
+  .poster .pc-hero h1 .sk-name { font-size: clamp(110px, 11vw, 176px); }
+  .poster .pc-hero h1 .sk-pre { font-size: clamp(34px, 3.4vw, 52px); }
+  .pc-hero .pc-tagline { font-size: 18px; max-width: 40ch; }
+  .sk-decal { top: 4%; right: 2%; }
+}
+.sk-index { position: absolute; right: max(16px, calc((100vw - 1280px) / 2 + 12px)); bottom: 18px; z-index: 2; margin: 0; display: grid; justify-items: end; gap: 4px; }
+.sk-index span { color: rgb(255 255 255 / .6); font: 600 11px/1 var(--sk-ui); letter-spacing: .16em; text-transform: uppercase; }
+.sk-index b { font: 800 italic 30px/1 var(--sk-name); color: var(--sk-text); }
+.sk-index small { font-size: 18px; color: rgb(255 255 255 / .55); }
+@media (max-width: 899px) {
+  .sk-index { display: none; }
+  .sk-slab { inset: 0 0 auto 0; width: 100%; height: 52%; clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%); }
+  .poster .pc-hero { gap: 12px; padding-block: 14px 26px; }
+  .pc-hero-copy { gap: 8px !important; }
+  .poster .pc-hero .pc-tagline { font-size: 16px; }
+  .sk-skills { justify-content: flex-start; gap: 30px; }
+  .sk-skill { width: 92px; gap: 10px; }
+  .pc-hero .pc-actions { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px !important; width: 100%; }
+  .poster .pc-hero .pc-actions .pc-btn { min-height: 46px; }
+  .pc-hero .pc-scroll { margin-top: 4px; }
+}
+
+/* Hero entrance: slab sweeps in, ghost name drifts, art settles, skill diamonds pop one by one */
+@media (prefers-reduced-motion: no-preference) {
+  .sk-slab { animation: sk-slab-in .9s cubic-bezier(.2, .8, .2, 1) both; }
+  .sk-ghost { animation: sk-ghost-in 1.4s cubic-bezier(.2, .8, .2, 1) .1s both; }
+  .pc-hero .pc-figure { animation: sk-art-in .9s cubic-bezier(.2, .8, .2, 1) .15s both; }
+  .pc-hero .pc-oc { animation: sk-float 6s ease-in-out 1.2s infinite alternate; }
+  .sk-skills li { animation: sk-pop .55s cubic-bezier(.2, 1.4, .3, 1) both; animation-delay: calc(.55s + var(--n, 0) * .1s); }
+  .sk-skills li:nth-child(2) { --n: 1; }
+  .sk-index { animation: sk-rise .6s cubic-bezier(.2, .8, .2, 1) .7s both; }
+  .pc-hero .pc-scroll-arrows i { animation-duration: 1.4s; }
+}
+@keyframes sk-slab-in { from { transform: translateX(14%); opacity: 0; } }
+@keyframes sk-ghost-in { from { transform: translateX(60px); opacity: 0; } }
+@keyframes sk-art-in { from { transform: translateY(26px) rotate(2deg); opacity: 0; } }
+@keyframes sk-float { to { translate: 0 -8px; } }
+@keyframes sk-pop { from { transform: scale(.3) rotate(-30deg); opacity: 0; } }
+@keyframes sk-rise { from { transform: translateY(16px); opacity: 0; } }
+.fx-lite .pc-hero .pc-oc { animation: none; }
+
+/* Featured: compact like the mockup; side cards dimmed; title + dots + arrows row; CTA centred */
+.poster .pc-feat { height: auto; min-height: 0; padding-block: 54px 48px; padding-inline: max(var(--pc-pad), calc((100vw - 1280px) / 2 + 40px)); }
+.pc-feat::before { width: 46%; }
+.poster .pc-feat .carousel-card:not([data-active="true"]) { filter: brightness(.5) saturate(.6); transition: filter .4s ease; }
+.fx-lite .poster .pc-feat .carousel-card:not([data-active="true"]) { filter: none; opacity: .55; }
+.pc-feat .carousel-controls { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px 14px; }
+.pc-feat .carousel-arrows { display: flex; gap: 8px; grid-column: 2; grid-row: 1; }
+.pc-feat .carousel-indicators { grid-column: 1; grid-row: 1; justify-content: center; }
+.poster .pc-feat .carousel-arrow { width: 48px; height: 48px; font: 800 22px/1 var(--sk-name); }
+.poster .pc-feat .carousel-current { font-size: 16px; }
+@media (min-width: 900px) {
+  .pc-feat-visual { height: auto !important; min-height: 460px; }
+  .pc-feat .sample-carousel { width: min(100%, 560px); }
+  .pc-feat-cta { margin-top: 10px; }
+}
+@media (max-width: 899px) {
+  .poster .pc-feat { padding: 26px 16px 32px; gap: 10px; }
+  .pc-feat::before { height: 280px; }
+  .poster .pc-feat h2 { font-size: 46px; max-width: none; }
+  .poster .pc-feat-sub { display: block; font-size: 15px; }
+  .pc-feat-visual { min-height: 400px; }
+  .pc-feat .carousel-arrows { display: none; }
+  .pc-feat .carousel-controls { grid-template-columns: 1fr; }
+}
+
+/* About: content-height section */
+.poster .pc-about { min-height: 0; height: auto; padding-block: clamp(48px, 8svh, 80px); padding-inline: max(var(--pc-pad), calc((100vw - 1280px) / 2 + 40px)); }
+@media (min-width: 900px) { .poster .pc-about { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 48px; } .poster .pc-photo { width: 100%; max-width: none; max-height: none; } }
+.poster .pc-about h2 { font-size: clamp(48px, 6.4vw, 96px); }
+@media (max-width: 899px) { .poster .pc-about { padding-block: 36px 40px; gap: 24px; } .poster .pc-photo { width: 100%; max-height: none; } .poster .pc-about-copy p:not(.sk-no) { font-size: 16px; } }
+
+/* Contact band: content height, two-line headline like the mockup */
+.poster .pc-contact { min-height: 0; padding-block: clamp(56px, 10svh, 96px); }
+.poster .pc-contact h2 { max-width: 9ch; line-height: .88; }
+@media (max-width: 899px) { .poster .pc-contact { padding-block: 50px; gap: 18px; } .poster .pc-contact h2 { font-size: 52px; } }
+.poster .pc-contact h2 { max-width: none; }
+.poster .pc-contact h2 em { display: block; }
+@media (min-width: 900px) {
+  .poster .pc-feat .pc-feat-cta { grid-column: 1 / -1; grid-row: 2; }
+  .pc-feat .sample-carousel { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 18px; }
+  .pc-feat .sample-carousel > .carousel-stage { grid-column: 1 / -1; }
+  .pc-feat .sample-carousel > .carousel-current { grid-column: 1; margin: 0; text-align: left; }
+  .pc-feat .sample-carousel > .carousel-controls { grid-column: 2; display: flex; gap: 18px; margin: 0; }
+  .pc-feat .carousel-arrows { order: 2; }
+}
+@media (min-width: 900px) { .pc-feat-visual { height: 540px !important; } .poster .pc-feat .pc-feat-cta { margin-top: 18px; } }
+.poster .pc-feat .carousel-card[data-active="true"] .clip-pause { width: 64px !important; height: 64px !important; margin: -32px 0 0 -32px !important; box-shadow: 0 0 0 4px rgb(0 0 0 / .4); }
+.poster .pc-feat .carousel-card[data-active="true"] .clip-pause svg { width: 24px; height: 24px; fill: currentColor; }
+@media (max-width: 899px) { .poster .pc-feat .carousel-card[data-active="true"] .clip-pause { width: 54px !important; height: 54px !important; margin: -27px 0 0 -27px !important; } }
