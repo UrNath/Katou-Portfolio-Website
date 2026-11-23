@@ -143,7 +143,8 @@ export default function WorksFilters() {
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       // Leaving a profile the avatar has scrolled out of: skip the avatar flight and use the plain fade.
       const avatarRect = leaving ? document.querySelector<HTMLElement>(`[data-profile="${prev.creator}"] .pw-avatar`)?.getBoundingClientRect() : null;
-      const avatarSeen = !leaving || (!!avatarRect && avatarRect.bottom > 130 && avatarRect.top < window.innerHeight);
+      const barBottom = document.querySelector('.site-bar')?.getBoundingClientRect().bottom ?? 0;
+      const avatarSeen = !leaving || (!!avatarRect && avatarRect.bottom > barBottom + 8 && avatarRect.top < window.innerHeight);
       if (!reduce && (entering || leaving) && avatarSeen && 'startViewTransition' in document) {
         if (entering) nameAvatar(chipAvatar(next.creator));
         html.dataset.vt = 'view';

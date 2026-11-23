@@ -881,3 +881,39 @@ html[data-creator-filter] .poster .pc-works .pc-tabs-sm { margin-left: 0; }
 .poster .pc-works .pw-lane { position: relative !important; }
 .poster .pc-works .pw-lane { top: auto !important; }
 html[data-creator-filter] .poster .pc-works .pc-wsec-head { justify-content: flex-start !important; }
+
+/* ===================================================================
+   WORKS, pass 3: seamless all <-> profile transition, contained rows
+   =================================================================== */
+/* The banner is one shared layer: it never fades to blank, only its contents cross-fade. */
+.poster .pc-works .pw-frame { view-transition-name: pw-frame; }
+.poster .pc-works .pw-top { view-transition-name: none !important; }
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(pw-frame) { animation-duration: .55s; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+  ::view-transition-old(pw-frame) { animation: sk-fade-out .22s ease both; height: 100%; object-fit: none; object-position: left top; }
+  ::view-transition-new(pw-frame) { animation: sk-fade-in .32s ease .12s both; height: 100%; object-fit: none; object-position: left top; }
+  /* Content: old slides left while the new rises, overlapping so there is no empty frame. */
+  html[data-vt="view"]::view-transition-old(root) { animation: pw-out .32s cubic-bezier(.55, 0, .8, .3) both !important; }
+  html[data-vt="view"]::view-transition-new(root) { animation: pw-in .55s cubic-bezier(.22, 1, .36, 1) .16s both !important; }
+  ::view-transition-group(pw-avatar) { animation-duration: .6s !important; z-index: 3; }
+  ::view-transition-group(pw-search) { z-index: 2; }
+}
+@keyframes sk-fade-out { to { opacity: 0; } }
+@keyframes sk-fade-in { from { opacity: 0; } }
+/* Back button slides in on the profile and out on return */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-creator-filter] .poster .pc-works .pw-back { animation: sk-back-in .5s cubic-bezier(.22, 1, .36, 1) .12s both; }
+}
+@keyframes sk-back-in { from { opacity: 0; transform: translateX(-30px) skewX(-12deg); } }
+
+/* Rows stay inside the content column (no bleed to the screen edge) */
+.poster .pc-works .pc-rowwrap { margin-inline: 0 !important; }
+.poster .pc-works .pc-rows { padding-inline: 0 !important; scroll-padding-inline: 0 !important; }
+html[data-creator-filter] .poster .pc-works .pc-rows { padding-inline: 0 !important; }
+.poster .pc-works .pc-rows .clip-frame img { background: var(--sk-plate); }
+@media (max-width: 899px) {
+  html[data-creator-filter] .poster .pc-works .pw-search input::placeholder { color: transparent; }
+}
+::view-transition-old(pw-avatar), ::view-transition-new(pw-avatar) { mix-blend-mode: normal !important; }
+html:not([data-creator-filter])::view-transition-new(pw-avatar) { animation: sk-fade-in .2s ease .45s both; }
+html:not([data-creator-filter])::view-transition-old(pw-avatar) { animation: sk-to-diamond .6s cubic-bezier(.65, 0, .25, 1) both !important; }
