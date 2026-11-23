@@ -1,0 +1,150 @@
+---
+/**
+ * Public site shell, built from the approved mockup (docs/redesign/mockup-source.html):
+ * header with nav and section tabs, phone menu, footer, the slash page wipe, the video
+ * player, scroll reveals and the effects tier for slow devices.
+ */
+import '@fontsource/barlow-condensed/latin-700-italic.css';
+import '@fontsource/barlow-condensed/latin-800-italic.css';
+import '@fontsource/barlow-condensed/latin-900-italic.css';
+import '@fontsource/barlow/latin-400.css';
+import '@fontsource/barlow/latin-500.css';
+import '@fontsource/barlow/latin-600.css';
+import '@fontsource/chakra-petch/latin-600.css';
+import '@fontsource/chakra-petch/latin-700.css';
+import '../styles/site.css';
+import nameUrl from '@fontsource/barlow-condensed/files/barlow-condensed-latin-900-italic.woff2?url';
+import bodyUrl from '@fontsource/barlow/files/barlow-latin-400-normal.woff2?url';
+import uiUrl from '@fontsource/chakra-petch/files/chakra-petch-latin-700-normal.woff2?url';
+import BrandIcon from '../components/BrandIcon.astro';
+import { site, socials } from '../data/site';
+import { loadServicePrices } from '../lib/services';
+
+interface Props {
+  title?: string;
+  description?: string;
+  page: 'home' | 'works' | 'clients' | 'pricing' | 'contact' | 'terms' | 'other';
+}
+const { title, description = site.description, page } = Astro.props;
+const pageTitle = title ? `${title} · ${site.name}` : site.name;
+const { editing } = await loadServicePrices();
+const social = (id: string) => socials.find((item) => item.id === id);
+const nav = [
+  ['home', '/', 'Home', 'Meet the editor'],
+  ['works', '/works', 'Works', 'Shorts & long form'],
+  ['clients', '/clients', 'Clients', 'Meet the roster'],
+  ['pricing', '/pricing', 'Pricing', `from ${editing}`],
+  ['terms', '/terms', 'Terms', 'Read first'],
+] as const;
+const mailIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0e1015" />
+    <meta name="color-scheme" content="dark" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="/og.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href={nameUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bodyUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={uiUrl} as="font" type="font/woff2" crossorigin />
+    <title>{pageTitle}</title>
+    <slot name="head" />
+    <script is:inline>
+      // Effects tier: old or busy devices get "fx-lite" (same layout and motion, cheaper paint).
+      (function () {
+        var root = document.documentElement, n = navigator;
+        var lite = (n.hardwareConcurrency && n.hardwareConcurrency <= 4) || (n.deviceMemory && n.deviceMemory <= 4);
+        try { var saved = localStorage.getItem('nk-fx'); if (saved === 'lite') lite = true; if (saved === 'full') lite = false; } catch (e) {}
+        if (lite) root.classList.add('fx-lite');
+        // Arriving through the page wipe: start covered so the new page is uncovered, not flashed.
+        try { var w = JSON.parse(sessionStorage.getItem('nk-wipe') || 'null'); if (w && Date.now() - w.t < 6000 && !matchMedia('(prefers-reduced-motion: reduce)').matches) root.classList.add('wipe-arrive'); } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="site" id="site" data-page={page}>
+      <div class="wipe" id="wipe" aria-hidden="true"><i class="w1"></i><i class="w2"></i><i class="w3"><b><small id="wipe-sub">Loading</small><span id="wipe-label"></span></b></i></div>
+
+      <header class="bar">
+        <div class="wrap bar-main">
+          <a class="logo" href="/" aria-label="NassuKatou, home"><span class="logo-word">Nassu<b>Katou</b></span></a>
+          <nav class="nav" aria-label="Primary">
+            {nav.map(([key, href, label]) => <a href={href} data-p={key} aria-current={page === key ? 'page' : undefined}>{label}</a>)}
+          </nav>
+          <div class="bar-right">
+            {['discord', 'youtube'].map((id) => social(id) && (
+              <a class="soc" href={social(id)!.href} target="_blank" rel="noopener noreferrer" aria-label={social(id)!.label}><BrandIcon name={id as 'discord'} /></a>
+            ))}
+            <a class="btn line" href="/contact" data-p="contact" aria-current={page === 'contact' ? 'page' : undefined} style="min-height:40px;padding:0 20px"><span>Contact</span></a>
+          </div>
+          <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="sheet"><i></i></button>
+        </div>
+        {page === 'home' && (
+          <div class="subnav show" id="subnav">
+            <div class="wrap">
+              <a href="#top" class="on" data-sub="top">Intro</a>
+              <a href="#feat-sec" data-sub="feat-sec">Featured</a>
+              <a href="#about-sec" data-sub="about-sec">About</a>
+              <a href="#home-contact" data-sub="home-contact">Contact</a>
+            </div>
+          </div>
+        )}
+        <div class="sheet" id="sheet" hidden>
+          <div class="wrap">
+            <nav aria-label="Mobile">
+              {nav.map(([key, href, label, meta]) => <a href={href} data-p={key} aria-current={page === key ? 'page' : undefined}>{label} <small>{meta}</small></a>)}
+              <a href="/contact" data-p="contact" aria-current={page === 'contact' ? 'page' : undefined}>Contact <small>Discord or email</small></a>
+            </nav>
+            <div class="sheet-foot">
+              <div class="socs">
+                {socials.map((item) => (
+                  <a class="soc" href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.label}><BrandIcon name={item.id} /></a>
+                ))}
+              </div>
+              <code class="ui" style="color:var(--mute)">{site.email}</code>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <slot />
+
+      <footer class="foot">
+        <div class="wrap">
+          <div class="socs">
+            {socials.map((item) => (
+              <a class="soc" href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.label}><BrandIcon name={item.id} /></a>
+            ))}
+            <a class="soc" href={`mailto:${site.email}`} aria-label={`Email ${site.email}`} set:html={mailIcon} />
+          </div>
+          <code>{site.email}</code>
+        </div>
+      </footer>
+
+      <dialog class="player" id="player" aria-labelledby="player-title">
+        <div class="player-card">
+          <button class="player-close" type="button" data-player-close aria-label="Close video">✕</button>
+          <div class="player-frame" id="player-frame"></div>
+          <div class="player-foot">
+            <p class="player-title" id="player-title"></p>
+            <div class="player-links" id="player-links"></div>
+          </div>
+        </div>
+      </dialog>
+    </div>
+
+    <script>
+      import '../lib/site';
+    </script>
+  </body>
+</html>

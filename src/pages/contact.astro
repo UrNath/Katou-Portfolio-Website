@@ -1,16 +1,79 @@
 ---
-import BaseLayout from '../components/BaseLayout.astro';
-import ContactSection from '../components/ContactSection.astro';
+import Site from '../layouts/Site.astro';
+import { site, socials } from '../data/site';
+import { status, labelFor } from '../data/status';
+import { contactServices, guidelines } from '../data/contact';
+
+const discord = socials.find((s) => s.id === 'discord');
+const tag = discord?.href.split('/').filter(Boolean).pop() ?? 'nassukatou';
 ---
-<BaseLayout title="Contact" description="Message Katou on Discord (nassukatou) or send a commission request by email.">
-  <div class="pc-page">
-    <header class="pc-page-head">
-      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
-      <p class="pc-eyebrow">Say hi on Discord</p>
-      <h1>Contact</h1>
-    </header>
-    <section class="pc-page-body" id="commission" aria-label="Commission Katou">
-      <ContactSection />
+<Site page="contact" title="Contact" description={`Message Katou on Discord (${tag}) or send a commission request by email.`}>
+  <main class="page on" id="p-contact">
+    <section class="page-head slim dots" style="--hh: var(--katou)">
+      <div class="wrap"><div class="ph-row"><div class="ph-title"><p class="kicker ui"><span class="slashes"></span><span>Say hi on Discord</span></p><h1 class="name">Contact</h1></div></div></div>
     </section>
-  </div>
-</BaseLayout>
+    <div class="wrap ct-grid">
+      <div style="display:grid;gap:16px">
+        <section class="dc-card" aria-labelledby="dc-title">
+          <p class="ui" style="margin:0;color:#dce8ff">Fastest way to reach me</p>
+          <h2 id="dc-title">Message me on Discord</h2>
+          <span class="dc-tag" id="dc-tag">@{tag}</span>
+          <div class="dc-actions">
+            {discord && <a class="btn gold" href={discord.href} target="_blank" rel="noopener noreferrer">Open Discord</a>}
+            <button class="btn" type="button" id="copy-tag" data-copy={tag} data-label="Copy tag">Copy tag</button>
+          </div>
+          <div class="dc-status"><span class="status">Editing {labelFor(status.editing).toLowerCase()}</span><span class="status">Web design {labelFor(status.webDesign).toLowerCase()}</span></div>
+        </section>
+        <section class="write" aria-labelledby="bw-title">
+          <p class="ui lbl" id="bw-title" style="margin:0">Before you write</p>
+          <ul>{guidelines.map((g) => <li>{g.includes('Terms') ? <Fragment set:html={g.replace('Terms', '<a href="/terms" style="text-decoration:underline">Terms</a>')} /> : g}</li>)}</ul>
+        </section>
+        <div class="mailrow ui"><span>Prefer email?</span><code id="mail-addr">{site.email}</code><button class="mini" type="button" data-copy={site.email} data-label="Copy">Copy</button></div>
+      </div>
+      <form class="form" id="ct-form" aria-labelledby="form-title" action={`mailto:${site.email}`} method="post" enctype="text/plain" data-email={site.email}>
+        <h2 id="form-title">Email Katou</h2>
+        <p class="form-note">Prefer email? This form opens a draft in your email app and nothing is stored on a server.</p>
+        <div class="two">
+          <div class="field"><label class="ui" for="f-name">Name</label><input id="f-name" name="name" autocomplete="name" required /></div>
+          <div class="field"><label class="ui" for="f-handle">Handle / channel</label><input id="f-handle" name="handle" autocomplete="nickname" required /></div>
+        </div>
+        <div class="two">
+          <div class="field"><label class="ui" for="f-service">Service</label><select id="f-service" name="service">{contactServices.map((o) => <option value={o.value}>{o.label}</option>)}</select></div>
+          <div class="field"><label class="ui" for="f-links">Links</label><input id="f-links" name="links" inputmode="url" placeholder="VOD or reference (optional)" /></div>
+        </div>
+        <div class="field"><label class="ui" for="f-msg">Message</label><textarea id="f-msg" name="message" required></textarea></div>
+        <button class="btn gold" type="submit">Email Katou</button>
+        <p class="form-note">This opens a draft in your email app. It does not send mail by itself.</p>
+        <p class="sent" id="sent" role="status" hidden></p>
+        <textarea class="draft" id="draft" hidden readonly aria-label="Message draft"></textarea>
+      </form>
+    </div>
+  </main>
+</Site>
+
+<script>
+  const select = document.querySelector<HTMLSelectElement>('#f-service');
+  const requested = new URLSearchParams(location.search).get('service');
+  if (select && requested && Array.from(select.options).some((o) => o.value === requested)) select.value = requested;
+
+  const form = document.querySelector<HTMLFormElement>('#ct-form');
+  form?.addEventListener('submit', (event) => {
+    if (!form.reportValidity()) return;
+    event.preventDefault();
+    const data = new FormData(form);
+    const body = [`Name: ${data.get('name') ?? ''}`, `Handle: ${data.get('handle') ?? ''}`, `Service: ${data.get('service') ?? ''}`, `Links: ${data.get('links') || '(none)'}`, '', String(data.get('message') ?? '')].join('\n');
+    const sent = document.querySelector<HTMLElement>('#sent')!;
+    const draft = document.querySelector<HTMLTextAreaElement>('#draft')!;
+    sent.hidden = false;
+    sent.textContent = 'Opening your email app with this draft. If nothing opens, copy the message below.';
+    draft.hidden = false;
+    draft.value = body;
+    location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent('Commission request')}&body=${encodeURIComponent(body)}`;
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => btn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(btn.dataset.copy!); btn.textContent = 'Copied'; }
+    catch { btn.textContent = 'Select it'; }
+    setTimeout(() => { btn.textContent = btn.dataset.label!; }, 1500);
+  }));
+</script>

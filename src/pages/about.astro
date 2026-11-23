@@ -1,21 +1,4 @@
 ---
-import BaseLayout from '../components/BaseLayout.astro';
-import { site } from '../data/site';
+import SectionRedirect from '../components/SectionRedirect.astro';
 ---
-<BaseLayout title="About" description={site.description}>
-  <div class="pc-page">
-    <header class="pc-page-head">
-      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
-      <h1>About</h1>
-    </header>
-    <section class="pc-page-body pc-about-page" aria-label="About Katou">
-      <p class="pc-lead">{site.description}</p>
-      {/* PLACEHOLDER: Katou to supply the About text. Replace the paragraph below; do not invent experience or achievements. */}
-      <p class="pc-placeholder" data-placeholder="about-copy">About text placeholder. Katou will supply this.</p>
-      <div class="pc-actions">
-        <a class="pc-btn pc-btn-blue" href="/works">View Works</a>
-        <a class="pc-btn pc-btn-peach" href="/contact">Contact</a>
-      </div>
-    </section>
-  </div>
-</BaseLayout>
+<SectionRedirect to="/#about-sec" title="About" />

@@ -246,3 +246,13 @@ Works profile banners: Pidgeira slab `#3f78e0` deep `#16295c`; Chi `#d23c55`/`#4
 - Section head: title + status + description on one line on desktop; the "minor vs major" box and the
   editing pick-note are hidden (they live on Terms). Steps fit in one row on phones.
 - Fix: scroll-reveal "revealed" state now beats the per-type start offsets (steps/tiers/terms were stuck offset).
+
+## Rebuild (branch redesign/mockup-rebuild)
+The public site was rebuilt from the mockup itself instead of restyling the old layout.
+- `src/styles/site.css` is the mockup stylesheet (container queries on `.site`) plus a short
+  "real-site additions" block (cross-page wipe, video player, hover previews, fx-lite).
+- `src/layouts/Site.astro` is the shell (header, menu, footer, wipe, player). `src/lib/site.ts` holds the
+  shared behaviour. Each page in `src/pages` is the mockup's markup filled with real data, with the
+  mockup's script adapted.
+- Admin pages use `src/components/AdminLayout.astro` (the old layout and stylesheets, admin only).
+- Old addresses redirect: /editing -> /pricing#ed-sec, /web-design -> /pricing#web-sec, /about -> /#about-sec.

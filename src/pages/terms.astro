@@ -1,24 +1,54 @@
 ---
-import BaseLayout from '../components/BaseLayout.astro';
-import TermsSection from '../components/TermsSection.astro';
+import Site from '../layouts/Site.astro';
+import { status } from '../data/status';
+import { termsSections } from '../data/terms';
 ---
-<BaseLayout title="Terms" description="How an edit or a site is commissioned, revised, and delivered.">
-  <div class="pc-page">
-    <header class="pc-page-head">
-      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
-      <p class="pc-eyebrow">The details, up front</p>
-      <h1>Terms</h1>
-    </header>
-    <section class="pc-page-body" id="terms" aria-label="Commission terms">
-      <TermsSection />
+<Site page="terms" title="Terms" description="How an edit or a site is commissioned, revised, and delivered.">
+  <main class="page on" id="p-terms">
+    <section class="page-head slim dots" style="--hh: var(--gold)">
+      <div class="wrap"><div class="ph-row"><div class="ph-title"><p class="kicker ui"><span class="slashes"></span><span>The details, up front</span></p><h1 class="name">Terms</h1></div></div></div>
     </section>
-  </div>
-</BaseLayout>
-<script is:inline>
-  // Old links such as /terms#revisions open the matching term.
-  (function () {
-    var id = location.hash.slice(1).replace(/^term-/, '');
-    var item = id ? document.getElementById('term-' + id) : null;
-    if (item) { item.open = true; item.scrollIntoView(); }
-  })();
+    <div class="wrap">
+      <div class="tm">
+        <div class="tm-head"><h2>Before we begin.</h2><p>How an edit or a site is commissioned, revised, and delivered.</p><span class="ui">Terms updated {status.termsUpdated}</span></div>
+        <div class="acc">
+          {termsSections.map((section, i) => (
+            <details id={`term-${section.id}`} open={i === 0}>
+              <summary><span class="idx"><span>{String(i + 1).padStart(2, '0')}</span></span>{section.title}<i class="chev" aria-hidden="true"></i></summary>
+              <div class="body"><div class="inner">{section.paragraphs.map((p) => <p>{p}</p>)}</div></div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </div>
+  </main>
+</Site>
+
+<script>
+  // Smooth open and close; old links such as /terms#revisions open the matching term.
+  const items = Array.from(document.querySelectorAll<HTMLDetailsElement>('.acc details'));
+  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  items.forEach((d) => {
+    const body = d.querySelector<HTMLElement>('.body')!;
+    d.querySelector('summary')!.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (d.dataset.busy) return;
+      if (d.open) {
+        if (reduce()) { d.open = false; return; }
+        d.dataset.busy = '1'; d.classList.add('closing');
+        const a = body.animate([{ height: `${body.offsetHeight}px`, opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 320, easing: 'cubic-bezier(.4, 0, .2, 1)' });
+        a.onfinish = () => { d.open = false; d.classList.remove('closing'); delete d.dataset.busy; };
+      } else {
+        d.open = true;
+        if (reduce()) return;
+        d.dataset.busy = '1';
+        const a = body.animate([{ height: '0px', opacity: 0 }, { height: `${body.offsetHeight}px`, opacity: 1 }], { duration: 420, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+        body.querySelectorAll('p').forEach((p, i) => p.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 380, delay: 90 + i * 55, easing: 'cubic-bezier(.2, .8, .2, 1)', fill: 'backwards' }));
+        a.onfinish = () => { delete d.dataset.busy; };
+      }
+    });
+  });
+  const id = location.hash.slice(1).replace(/^term-/, '');
+  const hit = id ? document.getElementById(`term-${id}`) : null;
+  if (hit instanceof HTMLDetailsElement) { hit.open = true; hit.scrollIntoView(); }
 </script>

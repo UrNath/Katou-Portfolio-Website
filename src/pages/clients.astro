@@ -1,32 +1,158 @@
 ---
-import BaseLayout from '../components/BaseLayout.astro';
-import ClientGallery from '../components/ClientGallery.astro';
+import Site from '../layouts/Site.astro';
 import { creators } from '../data/tags';
 import { hasProfile, hiddenOnClientsPage, profileFor } from '../data/clients';
 import { loadClips } from '../lib/clips';
+import { cleanTitle, creatorLook } from '../lib/site-data';
 
 const clips = await loadClips();
 const clients = creators
-  // A creator chip appears here once it has videos or a profile in src/data/clients.ts.
-  .filter((creator) => hasProfile(creator.id) || clips.some((clip) => clip.creatorId === creator.id))
-  // Clients left off this page only (they still appear on Works).
-  .filter((creator) => !hiddenOnClientsPage.includes(creator.id))
-  .map((creator) => {
-    // Highlight reels are this client's real edits that have a preview loop,
-    // featured ones first. Missing slots stay empty and render as placeholders.
-    const own = clips.filter((clip) => clip.creatorId === creator.id && clip.previewSrc && !clip.wide);
-    const profile = profileFor(creator.id);
-    const chosen = (profile.reels ?? []).map((id) => clips.find((clip) => clip.id === id && clip.previewSrc)).filter((clip) => clip !== undefined);
-    const picked = (profile.reels ? chosen : [...own.filter((clip) => clip.featured), ...own.filter((clip) => !clip.featured)]).slice(0, 3);
-    const reels = Array.from({ length: 3 }, (_, index) => {
-      const clip = picked[index];
-      return clip
-        ? { title: clip.title, poster: clip.posterImage?.src ?? clip.poster, preview: clip.previewSrc!, youtube: clip.youtube }
-        : null;
-    });
-    return { ...creator, profile, reels };
+  // A client shows once it has videos or a profile in src/data/clients.ts; some stay off this page only.
+  .filter((cr) => hasProfile(cr.id) || clips.some((clip) => clip.creatorId === cr.id))
+  .filter((cr) => !hiddenOnClientsPage.includes(cr.id))
+  .map((cr) => {
+    const p = profileFor(cr.id);
+    const own = clips.filter((clip) => clip.creatorId === cr.id && !clip.wide);
+    const chosen = p.reels ? p.reels.map((id) => own.find((clip) => clip.id === id)).filter(Boolean) : [...own.filter((c) => c.featured), ...own.filter((c) => !c.featured)];
+    return {
+      id: cr.id,
+      name: cr.label,
+      avatar: creatorLook[cr.id]?.avatar ?? '',
+      pal: { slab: p.palette.panel, deep: p.palette.deep, acc: p.palette.accent, rim: p.palette.rim },
+      tags: [['Type', p.type], ['Class', p.role], ['Element', p.element]],
+      weapon: p.weapon,
+      quote: p.description,
+      socials: [['YouTube', p.socials.youtube], ['Discord', p.socials.discord], ['TikTok', p.socials.tiktok]],
+      skins: p.skins.map((s) => ({ label: s.label, note: s.note, art: s.art?.src ?? null, eyes: s.art?.eyes ?? null, fadeFoot: !!s.art?.fadeFoot, framed: !!s.art?.framed, bg: s.background ?? null })),
+      reels: chosen.slice(0, 3).map((c) => c && ({ title: cleanTitle(c.title), poster: c.poster, yt: c.youtube, tt: c.tiktok, priv: c.youtubePrivate, preview: c.previewSrc ?? '' })),
+    };
   });
+const icon = {
+  youtube: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
+  discord: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>',
+  tiktok: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>',
+};
 ---
-<BaseLayout title="Meet the Clients" immersive>
-  <ClientGallery clients={clients} />
-</BaseLayout>
+<Site page="clients" title="Meet the Clients" description="The VTubers Katou edits for.">
+  <main class="page on cl" id="p-clients">
+    <section class="screen dots" aria-labelledby="cl-name">
+      <div class="bg-slab" aria-hidden="true"></div>
+      <p class="ghost-name" id="cl-ghost" aria-hidden="true"></p>
+      <div class="wrap screen-grid">
+        <div class="cl-info">
+          <div class="switch-row" data-rise>
+            <div class="cl-tab-row" id="cl-tabs" role="group" aria-label="Clients"></div>
+            <button type="button" class="switch-btn" id="switch-btn" aria-label="Switch client">⇄ Switch<span class="sw-long">&nbsp;client</span></button>
+          </div>
+          <h1 class="name" id="cl-name" data-rise style="--i:1"></h1>
+          <div class="cl-tags" id="cl-tags" data-rise style="--i:2"></div>
+          <p class="cl-desc ph" id="cl-desc" data-rise style="--i:3">Description placeholder. To be supplied.</p>
+          <div class="cl-tabs" role="tablist" data-rise style="--i:4">
+            <button class="ui" role="tab" id="t-hl" aria-selected="true">Highlights</button>
+            <button class="ui" role="tab" id="t-sk" aria-selected="false">Skins</button>
+          </div>
+          <div id="cl-panel" data-rise style="--i:5"></div>
+          <div class="weapon ui" id="cl-weapon" data-rise style="--i:6"></div>
+          <div class="cl-socs ui" id="cl-socs" data-rise style="--i:7"></div>
+        </div>
+        <div class="art-stage">
+          <span class="hatch decal-b" aria-hidden="true"></span>
+          <div class="cl-art" id="cl-art"></div>
+        </div>
+      </div>
+      <div class="roster" id="roster" aria-label="Client roster"></div>
+      <div class="cutin" id="cutin" aria-hidden="true">
+        <div class="ci-band ci-b0"></div><div class="ci-band ci-b1"></div>
+        <div class="ci-band ci-w ci-w1"></div><div class="ci-band ci-w ci-w2"></div>
+        <div class="ci-band ci-shadow"></div>
+        <div class="ci-band ci-strip"><img id="ci-img" src="" alt="" decoding="async" /></div>
+        <span class="ci-star ci-s1"></span><span class="ci-star ci-s2"></span>
+        <p class="ci-tag">Next up!</p><p class="ci-name" id="ci-name"></p>
+        <div class="ci-flash"></div>
+      </div>
+      <output class="sr-only" id="cl-live" aria-live="polite"></output>
+    </section>
+  </main>
+</Site>
+
+<script is:inline define:vars={{ CLIENTS: clients, ICON: icon }}>
+  (function () {
+    var $ = function (s) { return document.querySelector(s); };
+    var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    var ci = 0, skin = 0, tab = 'hl', cutting = false;
+    // Warm the portraits so the cut-in never shows an empty strip.
+    CLIENTS.forEach(function (c) { c.skins.forEach(function (s) { if (s.art) { var i = new Image(); i.src = s.art; } }); });
+    function drawClient(animate) {
+      var c = CLIENTS[ci], root = $('#p-clients');
+      root.style.setProperty('--slab', c.pal.slab); root.style.setProperty('--slab-deep', c.pal.deep);
+      root.style.setProperty('--acc', c.pal.acc); root.style.setProperty('--rim', c.pal.rim);
+      $('#cl-tabs').innerHTML = CLIENTS.map(function (x, i) { return '<button type="button" class="tab" aria-pressed="' + (i === ci) + '" data-i="' + i + '">' + esc(x.name) + '</button>'; }).join('');
+      $('#roster').innerHTML = CLIENTS.map(function (x, i) { return '<button type="button" aria-pressed="' + (i === ci) + '" data-i="' + i + '" aria-label="' + esc(x.name) + '"><img src="' + x.avatar + '" alt=""></button>'; }).join('');
+      $('#cl-name').textContent = c.name; $('#cl-ghost').textContent = c.name; $('#cl-live').textContent = c.name;
+      var d = $('#cl-desc'); d.classList.toggle('ph', !c.quote); d.classList.toggle('quote', !!c.quote);
+      d.textContent = c.quote || 'Description placeholder. To be supplied.';
+      $('#cl-tags').innerHTML = c.tags.map(function (t) { return '<span class="' + (t[1] ? '' : 'ph') + '"><i>' + t[0] + '</i>' + esc(t[1] || 'Placeholder') + '</span>'; }).join('') + '<span class="w-tag ' + (c.weapon ? '' : 'ph') + '"><i>Weapon</i>' + esc(c.weapon || 'Placeholder') + '</span>';
+      $('#t-hl').setAttribute('aria-selected', String(tab === 'hl')); $('#t-sk').setAttribute('aria-selected', String(tab === 'sk'));
+      $('#cl-panel').innerHTML = tab === 'hl'
+        ? '<div class="reels">' + [0, 1, 2].map(function (i) {
+            var r = c.reels[i];
+            var attrs = r ? ' data-play data-title="' + esc(r.title) + '" data-yt="' + esc(r.yt) + '"' + (r.tt ? ' data-tt="' + esc(r.tt) + '"' : '') + (r.priv ? ' data-private="true"' : '') + (r.preview ? ' data-preview="' + esc(r.preview) + '"' : '') + ' aria-label="Highlight reel ' + (i + 1) + ': ' + esc(r.title) + '"' : ' disabled aria-label="Highlight reel ' + (i + 1) + ': placeholder"';
+            return '<button type="button" class="reel"' + attrs + '><span class="dia"><span class="pf">' + (r ? '<img src="' + esc(r.poster) + '" alt="">' : '') + '<i class="play"></i></span></span><span class="ui">' + (r ? 'Reel ' + pad(i + 1) : 'Placeholder') + '</span></button>';
+          }).join('') + '</div>'
+        : '<div class="skins">' + c.skins.map(function (s, i) { return '<button type="button" class="skin" aria-pressed="' + (i === skin) + '" data-s="' + i + '"><b>' + esc(s.label) + '</b><small>' + esc(s.note) + '</small></button>'; }).join('') + '</div>';
+      $('#cl-weapon').innerHTML = '<i>Main weapon</i><span style="' + (c.weapon ? '' : 'font-style:italic;color:var(--mute)') + '">' + esc(c.weapon || 'Placeholder') + '</span>';
+      $('#cl-socs').innerHTML = c.socials.map(function (s) { var ic = ICON[s[0].toLowerCase()]; return s[1] ? '<a href="' + esc(s[1]) + '" target="_blank" rel="noopener noreferrer">' + ic + s[0] + '</a>' : '<span title="Placeholder">' + ic + s[0] + '</span>'; }).join('');
+      var s = c.skins[skin] || c.skins[0];
+      $('#cl-art').innerHTML = s.art
+        ? '<img class="rim ' + (s.framed ? 'framed ' : '') + (s.fadeFoot ? 'fade-foot ' : '') + (animate ? 'swap' : '') + '" src="' + esc(s.art) + '" alt="' + esc(c.name + ', ' + s.label) + '">'
+        : '<div class="silhouette ui">' + esc(s.label) + ' art placeholder</div>';
+      if (animate) requestAnimationFrame(function () { requestAnimationFrame(function () { var i = $('#cl-art img'); if (i) i.classList.remove('swap'); }); });
+    }
+    // Ransom-note lettering: each letter in its own box, alternating paper, ink and the client colour.
+    function ransom(name) {
+      var fonts = ['var(--f-name)', 'Georgia, "Times New Roman", serif', 'var(--f-ui)', 'Impact, "Arial Black", sans-serif'];
+      return name.split('').map(function (ch, i) {
+        var r = ((i * 37) % 13) - 6, fs = [78, 96, 70, 104, 84][i % 5], f = fonts[(i * 3) % 4];
+        return '<span class="r' + (i % 3) + '" style="--r:' + r + 'deg;--fs:clamp(' + Math.round(fs * .55) + 'px, ' + (fs / 10) + 'cqi, ' + (fs + 30) + 'px);--ff:' + f + '">' + esc(ch) + '</span>';
+      }).join('');
+    }
+    function pick(i) {
+      i = (i + CLIENTS.length) % CLIENTS.length;
+      if (i === ci || cutting) return;
+      var c = CLIENTS[i];
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { ci = i; skin = 0; drawClient(true); return; }
+      cutting = true;
+      var cut = $('#cutin');
+      cut.style.setProperty('--ci', c.pal.acc);
+      var img = $('#ci-img'), s0 = c.skins[0], e = s0.eyes || { x: 50, y: 45, w: .5 };
+      img.src = s0.art || c.avatar;
+      img.style.setProperty('--ex', e.x + '%'); img.style.setProperty('--ey', e.y + '%'); img.style.setProperty('--ew', e.w);
+      $('#ci-name').innerHTML = ransom(c.name);
+      var root = $('#p-clients');
+      root.classList.remove('cl-in'); root.classList.add('cl-out');
+      cut.classList.remove('go'); void cut.offsetWidth; cut.classList.add('go');
+      setTimeout(function () { ci = i; skin = 0; drawClient(false); root.classList.remove('cl-out'); void root.offsetWidth; root.classList.add('cl-in'); }, 640);
+      setTimeout(function () { cut.classList.remove('go'); cutting = false; }, 1560);
+    }
+    $('#cl-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (b) pick(+b.dataset.i); });
+    $('#roster').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (b) pick(+b.dataset.i); });
+    $('#switch-btn').addEventListener('click', function () { pick(ci + 1); });
+    $('#t-hl').addEventListener('click', function () { tab = 'hl'; drawClient(); });
+    $('#t-sk').addEventListener('click', function () { tab = 'sk'; drawClient(); });
+    $('#cl-panel').addEventListener('click', function (e) { var b = e.target.closest('[data-s]'); if (b) { skin = +b.dataset.s; drawClient(true); } });
+    document.addEventListener('keydown', function (e) {
+      if (e.target.closest && e.target.closest('input, textarea, select, dialog')) return;
+      if (e.key === 'ArrowRight') pick(ci + 1); else if (e.key === 'ArrowLeft') pick(ci - 1);
+    });
+    // Swipe left or right on the character to switch.
+    var sx = null, sy = 0;
+    var stage = document.querySelector('#p-clients .screen');
+    stage.addEventListener('pointerdown', function (e) { if (e.pointerType === 'touch') { sx = e.clientX; sy = e.clientY; } });
+    stage.addEventListener('pointerup', function (e) {
+      if (sx === null) return; var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) pick(ci + (dx < 0 ? 1 : -1));
+    });
+    drawClient();
+  })();
+</script>

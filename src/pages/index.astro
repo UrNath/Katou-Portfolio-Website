@@ -1,142 +1,151 @@
 ---
 import { Image } from 'astro:assets';
-import BaseLayout from '../components/BaseLayout.astro';
-import SiteIntro from '../components/SiteIntro.astro';
-import FeaturedCarousel from '../components/FeaturedCarousel.astro';
-import StatusChip from '../components/StatusChip.astro';
-import ClipPreview from '../islands/ClipPreview';
-import ClipViewer from '../islands/ClipViewer';
+import Site from '../layouts/Site.astro';
 import chibi from '../assets/character/katou-chibi.webp';
 import { site } from '../data/site';
-import { status } from '../data/status';
-import { heroReel, hubClips, loadClips, toViewerClip } from '../lib/clips';
+import { status, labelFor } from '../data/status';
+import { hubClips, loadClips } from '../lib/clips';
 import { loadService } from '../lib/services';
+import { cleanTitle, playAttrs } from '../lib/site-data';
 
 const clips = await loadClips();
-const featured = hubClips(clips);
-const { hero } = heroReel(clips);
-const art = site.characterArt;
-
-const viewerClips = featured;
+const featured = hubClips(clips).slice(0, 7);
+const start = Math.max(0, featured.findIndex((clip) => clip.heroFeatured));
 const editing = await loadService('editing');
 const turnaround = editing.data.compare.find((row) => row.feature === 'Turnaround')?.values[0]?.replace(/ days?$/, ' d').replace(' to ', '–');
 const tagline = site.role.replace(/^Short-form\s+/i, '');
+const art = site.characterArt;
 ---
-<BaseLayout>
-  <SiteIntro />
-  <script is:inline>
-    // Reveals are opt-in: content stays visible without scripting and for reduced motion.
-    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.documentElement.classList.add('reveal-ready');
-    }
-  </script>
-  <div class="pc-home">
-    <section class="pc-screen pc-fit pc-hero" id="home" aria-labelledby="intro-title">
-      <p class="sk-index" aria-hidden="true"><span>Editor</span><b>01 <small>/ 01</small></b></p>
-      <span class="pc-blob pc-blob-peach" aria-hidden="true"></span>
-      <span class="pc-blob pc-blob-gold" aria-hidden="true"></span>
-      <span class="sk-slab" aria-hidden="true"></span>
-      <span class="sk-ghost" aria-hidden="true">Katou</span>
-      <div class="pc-art">
-        <div class="pc-figure">
-          <div class="pc-card" aria-hidden="true"></div>
-          {art.enabled && (
-            <div class="pc-pop">
-              <Image class="pc-oc" src={chibi} alt={art.alt} widths={[420, 698]} sizes="(min-width: 900px) 520px, 80vw" loading="eager" fetchpriority="high" />
+<Site page="home">
+  <main class="page on" id="p-home">
+    <section class="screen dots" id="top" aria-labelledby="intro-title">
+      <div class="bg-slab" aria-hidden="true"></div>
+      <p class="ghost-name" aria-hidden="true">Katou</p>
+      <div class="wrap screen-grid">
+        <div class="hero-copy">
+          <p class="kicker ui" data-rise><span class="slashes"></span><span>Professor Number <b>67</b></span><span class="hatch"></span></p>
+          <p class="pre" data-rise style="--i:1">Meet the editor!</p>
+          <h1 class="name" id="intro-title" data-rise style="--i:2"><span>Katou</span></h1>
+          <div class="tags" data-rise style="--i:3"><span class="t1">Video editor</span><span class="t2">UI/UX Developer</span>{status.editing !== 'closed' && <span class="t3">★ Commissions open</span>}</div>
+          <p class="tagline" data-rise style="--i:4">{tagline}</p>
+          <div class="skills" data-rise style="--i:5" aria-label="Services">
+            <a class="skill" href="/pricing#ed-sec"><span class="dia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg></span><b>Editing<small>{labelFor(status.editing)}</small></b></a>
+            <a class="skill" href="/pricing#web-sec"><span class="dia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></span><b>UI/UX Developer<small>{labelFor(status.webDesign)}</small></b></a>
+          </div>
+          <div class="actions" data-rise style="--i:6">
+            <a class="btn" href="/works"><span class="tri"></span>View works</a>
+            <a class="btn peach" href="/contact">Contact</a>
+          </div>
+          <a class="scroll-cue ui" href="#feat-sec" data-rise style="--i:7">Scroll to see my edits <i></i></a>
+        </div>
+        <div class="art-stage" data-rise style="--i:2">
+          <span class="hatch decal-a" aria-hidden="true"></span>
+          <div class="katou-frame">
+            <div class="card" aria-hidden="true"></div>
+            <Image class="rim" src={chibi} alt={art.alt} widths={[440, 880]} sizes="(min-width: 900px) 440px, 240px" loading="eager" fetchpriority="high" />
+            {art.artist && <p class="credit ui">Art illust: {art.artist.toLowerCase()}</p>}
+          </div>
+        </div>
+      </div>
+      <div class="index-strip" aria-hidden="true"><span class="ui" style="color:rgb(255 255 255 / .6)">Editor</span><span class="big">01 <small>/ 01</small></span></div>
+    </section>
+
+    <section class="feat" id="feat-sec" aria-labelledby="featured-title">
+      <div class="wrap">
+        <div>
+          <p class="sec-no" data-rise><b>02</b> Featured</p>
+          <h2 class="h2" id="featured-title" data-rise style="--i:1">Featured works</h2>
+          <p class="sub" data-rise style="--i:2">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
+        </div>
+        <div class="carousel" data-rise style="--i:2" data-start={start}>
+          <div class="car-track" id="car">
+            {featured.map((clip, i) => (
+              <button type="button" class="car-card" data-i={i} data-preview-off {...playAttrs(clip)} data-play="off" aria-label={cleanTitle(clip.title)}>
+                <span class="pf"><img src={clip.poster} alt="" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" /></span><span class="frame"></span>
+              </button>
+            ))}
+          </div>
+          <div class="car-foot">
+            <p class="car-title" id="car-title"></p>
+            <div class="pips" id="pips">
+              {featured.map((_, i) => <button type="button" aria-label={`Clip ${i + 1}`} data-i={i}></button>)}
             </div>
-          )}
-          {art.enabled && art.artist && <p class="pc-credit">ART ILLUST: {art.artist}</p>}
-          <span class="sk-hatch sk-decal" aria-hidden="true"></span>
+            <div class="arrows car-arrows"><button type="button" id="car-prev" aria-label="Previous clip">‹</button><button type="button" id="car-next" aria-label="Next clip">›</button></div>
+          </div>
         </div>
-      </div>
-      <div class="pc-hero-copy">
-        <p class="sk-kicker" data-reveal><span class="sk-slashes" aria-hidden="true"></span><span>Professor Number <b>67</b></span><span class="sk-hatch" aria-hidden="true"></span></p>
-        <h1 id="intro-title" data-reveal style="--i:1"><span class="sk-pre">Meet the Editor!</span> <span class="sk-name">Katou</span></h1>
-        <p class="sk-tags" data-reveal style="--i:2">
-          <span class="t1">Video editor</span><span class="t2">UI/UX Developer</span>{status.editing !== 'closed' && <span class="t3">★ Commissions open</span>}
-        </p>
-        <p class="pc-tagline" data-reveal style="--i:2">{tagline}</p>
-        <ul class="sk-skills" data-reveal style="--i:3" aria-label="Services">
-          <li><a class="sk-skill" href="/pricing#editing"><span class="sk-dia" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg></span><b>Editing<small><StatusChip status={status.editing} /></small></b></a></li>
-          <li><a class="sk-skill" href="/pricing#web-design"><span class="sk-dia" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></span><b>UI/UX Developer<small><StatusChip status={status.webDesign} /></small></b></a></li>
-        </ul>
-        <div class="pc-actions" data-reveal style="--i:4">
-          <a class="pc-btn pc-btn-white" href="/works"><span class="sk-tri" aria-hidden="true"></span>View Works</a>
-          <a class="pc-btn pc-btn-peach" href="/contact">Contact</a>
-        </div>
-        <a class="pc-scroll" href="#featured" data-reveal style="--i:5" aria-label="Scroll down to see featured works">
-          <span class="pc-scroll-text">Scroll to see my edits</span>
-          <span class="pc-scroll-arrows" aria-hidden="true"><i></i><i></i></span>
-        </a>
+        <div class="feat-cta"><a class="btn gold" href="/works">See all works →</a></div>
       </div>
     </section>
 
-    <section class="pc-screen pc-fit pc-feat" id="featured" aria-labelledby="featured-title">
-      <div class="pc-feat-copy">
-        <p class="sk-no" data-reveal><b>02</b> Featured</p>
-        <h2 id="featured-title" data-reveal>Featured works</h2>
-        <p class="pc-feat-sub" data-reveal style="--i:1">Shorts for TikTok and YouTube, with dynamic subtitles, motion graphics, and comedic timing.</p>
-      </div>
-      <div class="pc-feat-visual" data-reveal>
-        <FeaturedCarousel clips={featured} initialId={hero.id} />
-      </div>
-      <div class="pc-feat-cta">
-        <a class="pc-btn pc-btn-gold pc-btn-lg" href="/works">See all works <span aria-hidden="true">→</span></a>
-      </div>
-    </section>
-
-    <section class="pc-screen pc-about" id="about" aria-labelledby="about-title">
-      {/* PLACEHOLDER VIDEO: set site.aboutVideo.src (and .poster) in src/data/site.ts once the About video is edited. */}
-      <div class="pc-photo">
+    <section class="about" id="about-sec" aria-labelledby="about-title">
+      <div class="wrap">
         {site.aboutVideo.src ? (
-          <video src={site.aboutVideo.src} poster={site.aboutVideo.poster || undefined} muted loop playsinline controls preload="metadata" aria-label="About Katou video"></video>
+          <div class="vid"><video src={site.aboutVideo.src} poster={site.aboutVideo.poster || undefined} muted loop playsinline controls preload="metadata" aria-label="About Katou video"></video></div>
         ) : (
-          <div class="pc-vid-ph" role="img" aria-label="Placeholder: About video coming soon">
-            <span class="pc-vid-play" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
-            <span class="pc-vid-cap">About video coming soon</span>
-            <span class="sk-rec" aria-hidden="true">Rec</span><span class="sk-tc" aria-hidden="true">00:00:00:00</span>
+          <div class="vid" role="img" aria-label="Placeholder: About video coming soon">
+            <span class="rec ui">Rec</span><span class="tc ui">00:00:00:00</span>
+            <div class="mid"><span class="dia"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="ui" style="color:var(--mute)">About video coming soon</span></div>
           </div>
         )}
-      </div>
-      <div class="pc-about-copy">
-        <p class="sk-no"><b>03</b> Profile</p>
-        <h2 id="about-title">About Katou</h2>
-        <p>{site.description}</p>
-        <dl class="sk-stats">
-          <div><dt>Edits</dt><dd>{clips.length}</dd></div>
-          {turnaround && <div><dt>Turnaround</dt><dd>{turnaround}</dd></div>}
-        </dl>
+        <div>
+          <p class="sec-no"><b>03</b> Profile</p>
+          <h2 class="h2" id="about-title">About Katou</h2>
+          <p class="body">{site.description}</p>
+          <dl class="statline ui">
+            <div><dt>Edits</dt><dd>{clips.length}</dd></div>
+            {turnaround && <div><dt>Turnaround</dt><dd>{turnaround}</dd></div>}
+          </dl>
+        </div>
       </div>
     </section>
 
-    <section class="pc-screen pc-contact" id="contact" aria-labelledby="contact-title">
-      <span class="pc-blob pc-blob-blue" aria-hidden="true"></span>
-      <span class="pc-blob pc-blob-gold2" aria-hidden="true"></span>
-      <p class="sk-no"><b>04</b> Contact</p>
-      <h2 id="contact-title">Let’s make <em>something.</em></h2>
-      <a class="pc-btn pc-btn-gold" href="/contact">Contact</a>
+    <section class="cta-band" id="home-contact" aria-labelledby="contact-title">
+      <div class="wrap">
+        <p class="sec-no"><b>04</b> Contact</p>
+        <h2 class="name" id="contact-title">Let’s make <em>something.</em></h2>
+        <a class="btn gold" href="/contact">Contact</a>
+      </div>
     </section>
-  </div>
-  <ClipPreview client:idle />
-  <ClipViewer client:idle clips={viewerClips.map(toViewerClip)} />
-</BaseLayout>
+  </main>
+</Site>
 
 <script>
-  // Light staggered reveals. Transform and opacity only; each element animates once.
-  if (document.documentElement.classList.contains('reveal-ready')) {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const reveal = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        entry.target.classList.add('is-in');
-        reveal.unobserve(entry.target);
-      }
-    }, { rootMargin: '0px 0px -8% 0px', threshold: .1 });
-    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => reveal.observe(element));
-    reduced.addEventListener('change', () => {
-      if (!reduced.matches) return;
-      document.documentElement.classList.remove('reveal-ready');
-      reveal.disconnect();
+  // Featured carousel: centre card plays, side cards step the carousel; swipe, dots and arrows.
+  const car = document.querySelector<HTMLElement>('.carousel');
+  if (car) {
+    const cards = Array.from(car.querySelectorAll<HTMLElement>('.car-card'));
+    const pips = Array.from(car.querySelectorAll<HTMLButtonElement>('#pips button'));
+    const title = car.querySelector('#car-title')!;
+    const n = cards.length;
+    let fi = Number(car.dataset.start) || 0;
+    const draw = () => {
+      cards.forEach((card, i) => {
+        let d = (i - fi + n) % n; if (d > n / 2) d -= n;
+        card.className = `car-card c${Math.max(-3, Math.min(3, d))}`;
+        card.dataset.play = d === 0 ? '' : 'off';
+        card.tabIndex = Math.abs(d) <= 1 ? 0 : -1;
+        card.setAttribute('aria-hidden', String(Math.abs(d) > 1));
+      });
+      pips.forEach((p, i) => p.setAttribute('aria-current', String(i === fi)));
+      title.textContent = cards[fi]?.dataset.title ?? '';
+    };
+    const go = (i: number) => { fi = (i + n) % n; draw(); };
+    car.querySelector('#car')!.addEventListener('click', (e) => {
+      const b = (e.target as Element).closest<HTMLElement>('.car-card');
+      if (b && Number(b.dataset.i) !== fi) { e.stopPropagation(); go(Number(b.dataset.i)); }
+    }, true);
+    pips.forEach((p, i) => p.addEventListener('click', () => go(i)));
+    car.querySelector('#car-prev')!.addEventListener('click', () => go(fi - 1));
+    car.querySelector('#car-next')!.addEventListener('click', () => go(fi + 1));
+    let sx: number | null = null; let swiped = false;
+    const track = car.querySelector<HTMLElement>('#car')!;
+    track.style.touchAction = 'pan-y';
+    track.addEventListener('pointerdown', (e) => { sx = e.clientX; swiped = false; });
+    track.addEventListener('pointerup', (e) => {
+      if (sx === null) return; const dx = e.clientX - sx; sx = null;
+      if (Math.abs(dx) > 40) { swiped = true; go(fi + (dx < 0 ? 1 : -1)); }
     });
+    track.addEventListener('click', (e) => { if (swiped) { swiped = false; e.stopPropagation(); e.preventDefault(); } }, true);
+    draw();
   }
 </script>

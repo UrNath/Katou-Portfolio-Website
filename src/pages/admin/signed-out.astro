@@ -1,8 +1,8 @@
 ---
-import BaseLayout from '../../components/BaseLayout.astro';
+import AdminLayout from '../../components/AdminLayout.astro';
 ---
 
-<BaseLayout title="Signed out" description="The studio is signed out.">
+<AdminLayout title="Signed out" description="The studio is signed out.">
   <meta slot="head" name="robots" content="noindex, nofollow" />
   <section class="studio">
     <h1 class="page-title">Signed out</h1>
@@ -11,4 +11,4 @@ import BaseLayout from '../../components/BaseLayout.astro';
       <a class="cta" href="/api/admin/login">Sign in with GitHub</a>
     </p>
   </section>
-</BaseLayout>
+</AdminLayout>
