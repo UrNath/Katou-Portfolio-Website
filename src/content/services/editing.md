@@ -1,6 +1,6 @@
 ---
 title: Editing
-subtitle: Short-form 9:16 edits for VTuber clips.
+subtitle: Short-form, long-form, and normal video edits for VTuber content.
 track: lavender
 icon: scissors
 cta: Commission an edit
@@ -14,6 +14,9 @@ includes:
   - 1 to 3 day turnaround
 # TODO: Katou must review this drafted "I take" list before it is treated as policy.
 take:
+  - Short-form clips
+  - Long-form videos, vlogs, and MVs
+  - Normal videos
   - Stream highlights
   - Karaoke cuts
   - Collab clips
@@ -51,6 +54,7 @@ addons:
     price: PHP 250 (≈ $4)
   - name: Thumbnail
     price: PHP 500 each (≈ $8)
+longNote: Long-form videos, vlogs, MVs, and normal videos are also available. Message me on Discord to talk it through.
 pickNote: Katou reads each request. A yes is not first-come. (Sample note.)
 ---
 

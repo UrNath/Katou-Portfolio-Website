@@ -9,13 +9,13 @@ interface Props {
   variant?: 'grid' | 'hero' | 'neighbor';
   eager?: boolean;
   priority?: boolean;
+  previewHero?: boolean;
   sizes: string;
 }
 
-const { clip, variant = 'grid', eager = false, priority = false, sizes } = Astro.props;
+const { clip, variant = 'grid', eager = false, priority = false, sizes, previewHero = variant === 'hero' } = Astro.props;
 const widths = clip.wide ? [480, 960] : [270, 540];
 const credit = editCredit(clip.channelHandle);
-const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
 ---
 
 <article
@@ -27,7 +27,7 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
   data-find={`${clip.title} ${clip.creator} ${clip.channelHandle} ${clip.tags.join(' ')}`}
 >
   <div class="clip-anim">
-    <div class:list={['clip-frame', clip.wide && 'is-wide']} style={morph ? `view-transition-name: ${morph}` : undefined}>
+    <div class:list={['clip-frame', clip.wide && 'is-wide']}>
       <button class="clip-open" type="button" data-open-clip={clip.id}>
         <span class="sr-only">Play {clip.title}, {credit}, {clip.duration}</span>
       </button>
@@ -56,7 +56,7 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
             class="clip-video"
             data-preview
             data-src={clip.previewSrc}
-            data-hero={variant === 'hero' ? 'true' : undefined}
+            data-hero={previewHero ? 'true' : undefined}
             muted
             playsinline
             loop
@@ -72,7 +72,7 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
             type="button"
             data-pause
             aria-pressed="false"
-            aria-label="Pause preview"
+            aria-label="Play preview"
           >
             <span class="when-playing"><Icon name="pause" size={18} /></span>
             <span class="when-paused"><Icon name="play" size={18} /></span>
@@ -88,4 +88,5 @@ const morph = clip.heroFeatured ? `clip-${clip.id}` : undefined;
       <span class="clip-progress" aria-hidden="true"></span>
     </div>
   </div>
+  {variant === 'grid' && <p class="clip-caption" aria-hidden="true"><b>{clip.title}</b><span>{credit}</span></p>}
 </article>

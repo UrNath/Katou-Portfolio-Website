@@ -1,0 +1,79 @@
+---
+import Icon from './Icon.astro';
+import { status } from '../data/status';
+import { termsSections } from '../data/terms';
+---
+
+  <article class="narrow">
+    <div class="terms-head">
+      <h2 class="page-title">Before we begin.</h2>
+      <p class="page-sub">How an edit or a site is commissioned, revised, and delivered.</p>
+      <p class="updated">Terms updated {status.termsUpdated}</p>
+    </div>
+    <div class="terms-list">
+      {
+        termsSections.map((section, index) => (
+          <details class="terms" id={`term-${section.id}`} name="terms">
+            <summary>
+              <span class="term-idx" aria-hidden="true"><span>{String(index + 1).padStart(2, '0')}</span></span>
+              <h2 class="term-title">{section.title}</h2>
+              <span class="chevron">
+                <Icon name="chevron-down" size={18} />
+              </span>
+            </summary>
+            <div class="terms-body">
+              <div class="terms-inner">
+                {section.paragraphs.map((paragraph) => (
+                  <p>{paragraph}</p>
+                ))}
+              </div>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </article>
+  <script>
+    function openFromHash() {
+      const id = location.hash.replace('#', '');
+      if (!id) return;
+      const target = document.getElementById(id);
+      if (target instanceof HTMLDetailsElement) {
+        target.open = true;
+      }
+    }
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+
+    // Smooth open and close: height and opacity, paragraphs stagger in. Only one term is open at a time.
+    const items = Array.from(document.querySelectorAll<HTMLDetailsElement>('details.terms'));
+    const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function close(item: HTMLDetailsElement) {
+      const body = item.querySelector<HTMLElement>('.terms-body')!;
+      if (reduce()) { item.open = false; return; }
+      item.dataset.busy = '1';
+      item.classList.add('is-closing');
+      const run = body.animate([{ height: `${body.offsetHeight}px`, opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 320, easing: 'cubic-bezier(.4, 0, .2, 1)' });
+      run.onfinish = () => { item.open = false; item.classList.remove('is-closing'); delete item.dataset.busy; };
+    }
+    function open(item: HTMLDetailsElement) {
+      // Drop the shared name while animating so the browser doesn't snap the other one shut.
+      items.forEach((other) => other.removeAttribute('name'));
+      items.forEach((other) => { if (other !== item && other.open && !other.dataset.busy) close(other); });
+      item.open = true;
+      if (reduce()) return;
+      const body = item.querySelector<HTMLElement>('.terms-body')!;
+      item.dataset.busy = '1';
+      const run = body.animate([{ height: '0px', opacity: 0 }, { height: `${body.offsetHeight}px`, opacity: 1 }], { duration: 420, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+      body.querySelectorAll('p').forEach((p, i) => p.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 380, delay: 90 + i * 55, easing: 'cubic-bezier(.2, .8, .2, 1)', fill: 'backwards' }));
+      run.onfinish = () => { delete item.dataset.busy; };
+    }
+    items.forEach((item) => {
+      item.querySelector('summary')!.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (item.dataset.busy) return;
+        if (item.open) close(item); else open(item);
+      });
+    });
+  </script>
+

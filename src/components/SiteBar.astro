@@ -17,12 +17,11 @@ const routes = getRoutes(prices);
 
 <header class="site-bar">
   <a class="brand" href="/" aria-label="NassuKatou, home">
-    <span class="nk-tile" aria-hidden="true">NK</span>
     <span class="wordmark-lockup"><Wordmark /></span>
   </a>
   <nav class="desk-nav" aria-label="Primary">
     {
-      navLinks.map((link) => (
+      navLinks.filter((link) => link.href !== '/contact').map((link) => (
         <a
           class="bar-link"
           href={link.href}
@@ -33,6 +32,16 @@ const routes = getRoutes(prices);
       ))
     }
   </nav>
+  <div class="bar-right">
+    {
+      socials.filter((item) => item.id === 'discord' || item.id === 'youtube').map((item) => (
+        <a class="dia-btn" href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.label}>
+          <BrandIcon name={item.id} />
+        </a>
+      ))
+    }
+    <a class="bar-contact" href="/contact" aria-current={isCurrent(pathname, '/contact') ? 'page' : undefined}><span>Contact</span></a>
+  </div>
   <button
     class="menu-btn"
     type="button"
@@ -43,6 +52,16 @@ const routes = getRoutes(prices);
   >
     <Icon name="menu" size={22} />
   </button>
+  {
+    isCurrent(pathname, '/') && (
+      <nav class="sub-nav" aria-label="Home sections">
+        <a href="#home" data-sub="home">Intro</a>
+        <a href="#featured" data-sub="featured">Featured</a>
+        <a href="#about" data-sub="about">About</a>
+        <a href="#contact" data-sub="contact">Contact</a>
+      </nav>
+    )
+  }
 </header>
 
 <dialog class="sheet" id="site-menu" aria-label="Menu">
@@ -60,7 +79,7 @@ const routes = getRoutes(prices);
       {
         socials.map((item) => (
           <a
-            class="icon-btn"
+            class="icon-btn dia-btn"
             href={item.href}
             target={item.href.startsWith('http') ? '_blank' : undefined}
             rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
@@ -78,6 +97,31 @@ const routes = getRoutes(prices);
 </dialog>
 
 <script>
+  // Home section tabs: highlight the section on screen.
+  const subLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.sub-nav a'));
+  if (subLinks.length && 'IntersectionObserver' in window) {
+    const mark = (id: string) => subLinks.forEach((link) => link.toggleAttribute('data-on', link.dataset.sub === id));
+    mark('home');
+    const seen = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) mark(entry.target.id); });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    subLinks.forEach((link) => { const target = document.getElementById(link.dataset.sub!); if (target) seen.observe(target); });
+  }
+
+  const header = document.querySelector<HTMLElement>('.site-bar');
+  if (header) {
+    let previous = 0;
+    const updateSize = () => {
+      const height = header.getBoundingClientRect().height;
+      if (Math.abs(height - previous) < .5) return;
+      previous = height;
+      document.documentElement.style.setProperty('--site-header-height', `${height}px`);
+      window.dispatchEvent(new Event('nk-layout'));
+    };
+    new ResizeObserver(updateSize).observe(header);
+    updateSize();
+  }
+
   const dialog = document.getElementById('site-menu');
   const openBtn = document.getElementById('menu-open');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -120,6 +164,7 @@ const routes = getRoutes(prices);
     });
 
     dialog.querySelector('[data-sheet-close]')?.addEventListener('click', closeSheet);
+    dialog.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeSheet));
 
     const grab = dialog.querySelector('[data-sheet-grab]');
     let startY = 0;

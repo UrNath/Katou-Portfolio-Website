@@ -1,0 +1,172 @@
+---
+/**
+ * Pricing page block for one service, in the game-UI skin.
+ * Editing: one package card (with an MV switch), scope chips, add-ons and the CTA in one view.
+ * Web design: process steps and the tier cards.
+ * Data comes from src/content/services/*.md; MV details come from `mv` there when set,
+ * otherwise the placeholder below is shown and clearly marked.
+ */
+import StatusChip from './StatusChip.astro';
+import { status, type ServiceStatus, type StatusKey } from '../data/status';
+import { termsSections } from '../data/terms';
+import type { ServiceEntry } from '../lib/services';
+
+interface Props {
+  service: ServiceEntry;
+}
+
+const { service } = Astro.props;
+const data = service.data;
+const isWeb = service.id === 'web-design';
+const statusKey: StatusKey = isWeb ? 'webDesign' : 'editing';
+const serviceStatus: ServiceStatus = status[statusKey];
+const ctaLabel = serviceStatus === 'closed' ? 'Join the waitlist' : data.cta;
+const cta = `/contact?service=${data.contactService}`;
+const revisions = termsSections.find((section) => section.id === 'revisions');
+const tier = data.tiers[0];
+const addonLabel = (price: string) => (price.startsWith('+') || price.startsWith('$') || price.startsWith('≈') ? price : `+ ${price}`);
+const ranks = ['B', 'A', 'S', 'S+'];
+// PLACEHOLDER: MV pricing is not set yet. Replace with real values (or add them to editing.md).
+const mv = {
+  name: 'MV edit',
+  tag: 'Placeholder',
+  price: 'PHP 3,500',
+  unit: 'MV',
+  rows: [
+    ['Length', 'Up to 4 minutes'],
+    ['Format', 'YouTube, 16:9'],
+    ['Revisions', 'Unlimited minor, 2 major'],
+    ['Turnaround', '7 to 10 days'],
+  ],
+  note: 'Sample MV info. Real MV pricing is still to be set.',
+};
+---
+
+<article class="sv" data-sv={service.id}>
+  <header class="sv-head">
+    <h2>{data.title}</h2>
+    <StatusChip status={serviceStatus} />
+    <p>
+      {isWeb ? <>{data.subtitle} {data.proof}</> : <>{data.subtitle} {data.longNote && <><b>Not only shorts.</b> {data.longNote}</>}</>}
+    </p>
+  </header>
+
+  {
+    !isWeb ? (
+      <div class="sv-grid">
+        <section class="sv-pkg" data-mode="short" aria-label="Package" data-pkg>
+          <button class="sv-toggle" type="button" aria-pressed="false" data-pkg-toggle><span>⇄ MVs</span></button>
+          <div class="sv-face" data-face="short">
+            <span class="sv-stars" aria-hidden="true">◆◆◆◆◆</span>
+            <h3>{tier.name}</h3>
+            <span class="sv-tag">Real price</span>
+            <p class="sv-price"><b>{tier.price}</b>{tier.unit && <span>/ {tier.unit}</span>}</p>
+            <dl class="sv-stats">
+              {data.compare.map((row) => (
+                <div><dt>{row.feature}</dt><dd>{row.values[0]}</dd></div>
+              ))}
+            </dl>
+          </div>
+          <div class="sv-face" data-face="mv" hidden>
+            <span class="sv-stars" aria-hidden="true">◆◆◆◆◆</span>
+            <h3>{mv.name}</h3>
+            <span class="sv-tag">{mv.tag}</span>
+            <p class="sv-price"><b>{mv.price}</b><span>/ {mv.unit}</span></p>
+            <dl class="sv-stats">
+              {mv.rows.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+            </dl>
+            <p class="sv-ph">{mv.note}</p>
+          </div>
+        </section>
+        <div class="sv-side">
+          <div class="sv-takes">
+            <div>
+              <p class="sv-lbl">I take</p>
+              <ul class="sv-chips">{data.take.map((item) => <li>{item}</li>)}</ul>
+            </div>
+            {data.dont.length > 0 && (
+              <div>
+                <p class="sv-lbl">I don't take</p>
+                <ul class="sv-chips no">{data.dont.map((item) => <li>{item}</li>)}</ul>
+              </div>
+            )}
+          </div>
+          {data.addons.length > 0 && (
+            <div>
+              <p class="sv-lbl">Add-ons</p>
+              {data.addons.map((addon) => (
+                <div class="sv-addon"><span>{addon.name}</span><span>{addonLabel(addon.price)}</span></div>
+              ))}
+            </div>
+          )}
+          {revisions && (
+            <details class="sv-revisions">
+              <summary>What counts as minor vs major?</summary>
+              <div>{revisions.paragraphs.map((paragraph) => <p>{paragraph}</p>)}</div>
+            </details>
+          )}
+          <div class="sv-cta">
+            <a class="pc-btn pc-btn-gold" href={cta}>{ctaLabel}</a>
+            <a class="sv-link" href="/terms">Read the Terms first</a>
+          </div>
+          {data.pickNote && <p class="sv-pick">{data.pickNote}</p>}
+        </div>
+      </div>
+    ) : (
+      <>
+        {data.process && data.process.length > 0 && (
+          <ol class="sv-steps" aria-label="Process">{data.process.map((step) => <li>{step}</li>)}</ol>
+        )}
+        <div class="sv-tiers">
+          {data.tiers.map((item, index) => (
+            <article class:list={['sv-tier', item.popular && 'pop']}>
+              <span class="sv-rank" aria-hidden="true">{ranks[index] ?? ''}</span>
+              {item.popular && <span class="sv-pop">Popular</span>}
+              <h3>{item.name}</h3>
+              <p class="sv-price"><b>{item.price}</b>{item.approx && <span>{item.approx}</span>}</p>
+              <ul>{item.points.map((point) => <li>{point}</li>)}</ul>
+              <a class:list={['pc-btn', item.popular ? 'pc-btn-signal' : 'pc-btn-line']} href={cta}><span>{ctaLabel}</span></a>
+            </article>
+          ))}
+        </div>
+        {data.addons.length > 0 && (
+          <div>
+            <p class="sv-lbl">Add-ons</p>
+            {data.addons.map((addon) => (
+              <div class="sv-addon"><span>{addon.name}</span><span>{addonLabel(addon.price)}</span></div>
+            ))}
+          </div>
+        )}
+        {data.pickNote && <p class="sv-pick sv-note">{data.pickNote}</p>}
+      </>
+    )
+  }
+</article>
+
+<script>
+  // Package card: switch between the short edit and the MV info.
+  document.querySelectorAll<HTMLElement>('[data-pkg]').forEach((pkg) => {
+    const toggle = pkg.querySelector<HTMLButtonElement>('[data-pkg-toggle]')!;
+    const faces = Array.from(pkg.querySelectorAll<HTMLElement>('[data-face]'));
+    let busy = false;
+    toggle.addEventListener('click', () => {
+      if (busy) return;
+      const next = pkg.dataset.mode === 'mv' ? 'short' : 'mv';
+      const from = faces.find((face) => !face.hidden)!;
+      const to = faces.find((face) => face.dataset.face === next)!;
+      const swap = () => {
+        from.hidden = true; from.classList.remove('is-out');
+        to.hidden = false; to.classList.add('is-in');
+        to.addEventListener('animationend', () => to.classList.remove('is-in'), { once: true });
+        pkg.dataset.mode = next;
+        toggle.setAttribute('aria-pressed', String(next === 'mv'));
+        toggle.querySelector('span')!.textContent = next === 'mv' ? '⇄ Short edit' : '⇄ MVs';
+        busy = false;
+      };
+      busy = true;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { swap(); return; }
+      from.classList.add('is-out');
+      setTimeout(swap, 220);
+    });
+  });
+</script>
