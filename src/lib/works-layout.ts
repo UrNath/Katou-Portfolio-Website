@@ -27,7 +27,9 @@ export function loadThumbnails(clips: ClipRecord[]): StudioThumbnail[] {
   const items = (Array.isArray(rawThumbnails) ? rawThumbnails : []) as StudioThumbnail[];
   return items.map((thumb) => {
     const linked = thumb.image.startsWith('clip:') ? clipMap.get(thumb.image.slice(5)) : null;
-    return { ...thumb, image: linked?.poster ?? (thumb.image.startsWith('clip:') ? '/og.png' : thumb.image) };
+    const meta = linked?.posterImage;
+    const ratio = meta ? Math.round((meta.width / meta.height) * 1000) / 1000 : thumb.orientation === 'vertical' ? 9 / 16 : 16 / 9;
+    return { ...thumb, ratio, image: linked?.poster ?? (thumb.image.startsWith('clip:') ? '/og.png' : thumb.image) };
   });
 }
 

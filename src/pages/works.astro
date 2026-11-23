@@ -1,224 +1,186 @@
 ---
-import BaseLayout from '../components/BaseLayout.astro';
-import ClipCard from '../components/ClipCard.astro';
-import ClipPreview from '../islands/ClipPreview';
-import ClipViewer from '../islands/ClipViewer';
-import ThumbnailViewer from '../islands/ThumbnailViewer';
-import WorksFilters from '../islands/WorksFilters';
-import { clipTags, creators, filterBoot, filterCss } from '../data/tags';
-import { loadClips, toViewerClip } from '../lib/clips';
-import { clipsInSection, creatorIdOf, loadThumbnails, longFormCategories, workSections } from '../lib/works-layout';
+import Site from '../layouts/Site.astro';
+import { loadClips } from '../lib/clips';
+import { creatorIdOf, loadThumbnails, longFormCategories, workCreators } from '../lib/works-layout';
+import { cleanTitle, creatorLook } from '../lib/site-data';
 
 const clips = await loadClips();
-const thumbnails = loadThumbnails(clips);
-const blocks = workSections
-  .map((section) => {
-    if (section.kind === 'thumbnail') {
-      return { section, clips: [], thumbs: thumbnails };
-    }
-    return { section, clips: clipsInSection(section, clips), thumbs: [] };
-  })
-  .filter((block) => block.clips.length > 0 || block.thumbs.length > 0);
-const editLabel = `${clips.length} video edits · ${thumbnails.length} thumbnails`;
-const names = creators.map((creator) => creator.label).join(', ');
-const sectionNames = blocks.map((block) => block.section.label).join(', ');
-const cardSizes = '(min-width: 1280px) 220px, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 46vw';
-const wideSizes = '(min-width: 768px) 46vw, 100vw';
+const data = {
+  clips: clips.map((c) => ({
+    id: c.id, title: cleanTitle(c.title), handle: c.channelHandle, who: c.creatorId, type: c.wide ? 'video' : 'short',
+    dur: /\d:\d\d/.test(c.duration) ? c.duration : '', poster: c.poster, cat: c.longFormCategory,
+    yt: c.youtube, tt: c.tiktok, priv: c.youtubePrivate, preview: c.previewSrc ?? '',
+  })),
+  thumbs: loadThumbnails(clips).map((t) => ({ title: cleanTitle(t.title), image: t.image, link: t.videoUrl, who: creatorIdOf(t.creator), wide: (t.ratio ?? 16 / 9) >= 1 })),
+  creators: workCreators
+    .filter((cr) => clips.some((c) => c.creatorId === cr.id))
+    .map((cr) => ({ id: cr.id, label: cr.label, handle: clips.find((c) => c.creatorId === cr.id && c.channelHandle !== '@unknown')?.channelHandle ?? '', avatar: creatorLook[cr.id]?.avatar ?? '', acc: creatorLook[cr.id]?.acc ?? '#c6f432' })),
+  cats: longFormCategories.map((c) => ({ id: c.id, label: c.label })),
+};
 ---
-
-<BaseLayout
-  title="Works"
-  description={`${editLabel} for ${names}. ${sectionNames}, with content type, creator, and tag filters.`}
->
-  <style slot="head" is:inline set:html={filterCss()} />
-  <script slot="head" is:inline set:html={filterBoot()} />
-  <section class="works">
-    <header class="works-head">
-      <h1 class="page-title reveal">Works</h1>
-      <p class="clip-count" data-clip-count aria-live="polite">{editLabel}</p>
-    </header>
-    <form class="works-search" role="search">
-      <label>
-        <span class="sr-only">Search edits</span>
-        <input id="works-search" type="search" name="q" placeholder="Search titles or clients" autocomplete="off" enterkeyhint="search" />
-      </label>
-    </form>
-    <div class="works-filter-groups" aria-label="Filter works">
-      <div class="works-filter-row">
-        <span class="works-filter-label" id="filter-type-heading">Content</span>
-        <div class="filters" role="group" aria-labelledby="filter-type-heading">
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="" aria-pressed="true">All types</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="short" aria-pressed="false">Short Form</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="long" aria-pressed="false">Long Form</button>
-          <button class="filter-chip" type="button" data-filter-kind="type" data-filter-value="thumbnail" aria-pressed="false">Thumbnails</button>
-        </div>
-      </div>
-      <div class="works-filter-row">
-        <span class="works-filter-label" id="filter-creator-heading">VTuber</span>
-        <div class="filters" role="group" aria-labelledby="filter-creator-heading">
-          <button class="filter-chip" type="button" data-filter-kind="creator" data-filter-value="" aria-pressed="true">All creators</button>
-          {
-            creators.map((creator) => (
-              <button class="filter-chip" type="button" data-filter-kind="creator" data-filter-value={creator.id} aria-pressed="false">
-                {creator.label}
-              </button>
-            ))
-          }
-        </div>
-      </div>
-      {
-        clipTags.length > 0 && (
-          <div class="works-filter-row">
-            <span class="works-filter-label" id="filter-tags-heading">Tags</span>
-            <div class="filters" role="group" aria-labelledby="filter-tags-heading">
-              <button class="filter-chip" type="button" data-filter-kind="tag" data-filter-value="" aria-pressed="true">All tags</button>
-              {clipTags.map((tag) => (
-                <button class="filter-chip" type="button" data-filter-kind="tag" data-filter-value={tag.id} aria-pressed="false">
-                  {tag.label}
-                </button>
-              ))}
-            </div>
+<Site page="works" title="Works" description={`${clips.length} video edits for VTubers: shorts, long-form videos and thumbnails.`}>
+  <main class="page on" id="p-works">
+    <section class="page-head slim dots">
+      <div class="wrap">
+        <div class="ph-row">
+          <div class="ph-title all-only">
+            <p class="kicker ui"><span class="slashes"></span><span>Portfolio</span></p>
+            <h1 class="name">Works</h1>
           </div>
-        )
-      }
-    </div>
-    <WorksFilters client:visible />
-    <ClipPreview client:visible />
-    {
-      blocks.map((block) => (
-        <div class="works-block" data-block={block.section.id} data-section-kind={block.section.kind}>
-          <h2 class="works-kicker">{block.section.label}</h2>
-          {block.section.kind === 'thumbnail' && (
-            <p class="works-thumbnails-note">A gallery of thumbnails used for these videos. Design credit may vary.</p>
-          )}
-          {
-            block.section.kind === 'thumbnail' ? (
-              <div class="works-grid works-grid-wide thumb-grid">
-                {block.thumbs.map((thumb) => (
-                  <article
-                    class:list={['clip-card', 'thumb-card', thumb.orientation === 'vertical' && 'is-portrait']}
-                    data-creator={creatorIdOf(thumb.creator)}
-                    data-content-type="thumbnail"
-                    data-tags=""
-                    data-find={`${thumb.title} ${thumb.creator} ${thumb.channelHandle}`}
-                  >
-                    <button
-                      class="thumb-open"
-                      type="button"
-                      data-open-thumb={thumb.id}
-                      aria-label={`View thumbnail for ${thumb.title}, ${thumb.creator}`}
-                    >
-                      <span class:list={['clip-frame', thumb.orientation !== 'vertical' && 'is-wide']}>
-                        <img src={thumb.image} alt="" loading="lazy" decoding="async" />
-                      </span>
-                    </button>
-                  </article>
-                ))}
-              </div>
-            ) : block.section.kind === 'landscape' ? (
-              <div class="works-long-form">
-                {longFormCategories.map((category) => {
-                  const group = block.clips.filter((clip) => clip.longFormCategory === category.id);
-                  if (group.length === 0) return null;
-                  return (
-                    <section class="works-subgroup" data-long-form-category={category.id}>
-                      <h3 class="works-subtitle">{category.label}</h3>
-                      <div class="works-grid works-grid-wide">
-                        {group.map((clip) => <ClipCard clip={clip} sizes={wideSizes} />)}
-                      </div>
-                    </section>
-                  );
-                })}
-              </div>
-            ) : (
-              <div class="works-grid">
-                {block.clips.map((clip, index) => (
-                  <ClipCard
-                    clip={clip}
-                    sizes={cardSizes}
-                    eager={index < 2 && block.section.kind === 'vertical'}
-                    priority={index === 0 && block.section.kind === 'vertical'}
-                  />
-                ))}
-              </div>
-            )
-          }
+          <div class="prof prof-head">
+            <button class="back" type="button" id="prof-back" aria-label="Back to all works">‹</button>
+            <span class="prof-av" id="prof-av"><img src="" alt="" /></span>
+            <div class="prof-info"><h1 class="name" id="prof-name"></h1><p><b id="prof-handle"></b></p></div>
+          </div>
+          <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="works-search" type="search" placeholder="Search titles or clients" autocomplete="off" aria-label="Search titles or clients" /></label>
         </div>
-      ))
+        <div class="chips all-only" id="chips" role="group" aria-label="Filter by client"></div>
+        <div class="prof prof-tabs" role="tablist" id="prof-tabs" aria-label="Works by format"></div>
+      </div>
+    </section>
+    <div class="wrap all-only" id="works-all">
+      <section class="row">
+        <div class="row-head"><h2>Shorts <span class="count" id="n-short"></span></h2>
+          <div class="arrows"><button type="button" data-scroll="s-short" data-d="-1" aria-label="Scroll shorts left">‹</button><button type="button" data-scroll="s-short" data-d="1" aria-label="Scroll shorts right">›</button></div></div>
+        <div class="strip" id="s-short"></div>
+      </section>
+      <section class="row">
+        <div class="row-head"><h2>Long form videos <span class="count" id="n-long"></span></h2>
+          <div class="subtabs" role="group" aria-label="Long form type" data-lf></div></div>
+        <div class="strip" id="s-long"></div>
+      </section>
+      <section class="row" style="padding-bottom:40px">
+        <div class="row-head"><h2>Thumbnails <span class="count" id="n-thumb"></span></h2></div>
+        <div class="strip" id="s-thumb"></div>
+      </section>
+    </div>
+    <div class="wrap">
+      <div class="prof-sub" id="prof-sub" hidden><div class="subtabs" role="group" aria-label="Long form type" data-lf></div></div>
+      <div class="prof-grid" id="prof-grid" hidden></div>
+    </div>
+  </main>
+</Site>
+
+<script is:inline define:vars={{ DATA: data }}>
+  (function () {
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+    var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var TAB_ICON = {
+      short: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="m10.5 9 4 3-4 3z" fill="currentColor"/></svg>',
+      video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg>',
+      thumb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>'
+    };
+    var TAB_LABEL = { short: 'Shorts', video: 'Long form', thumb: 'Thumbnails' };
+    var shuffle = function (a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+    // Fresh order on every visit.
+    var order = { creators: shuffle(DATA.creators), clips: shuffle(DATA.clips), thumbs: shuffle(DATA.thumbs) };
+    var who = null, q = '', ptab = 'short';
+    var cat = { all: null, prof: null };
+    var ok = function (c) { return !q || (c.title + ' ' + c.handle + ' ' + c.who).toLowerCase().indexOf(q) >= 0; };
+    var play = function (c) {
+      return ' data-play data-title="' + esc(c.title) + '" data-yt="' + esc(c.yt) + '"' + (c.tt ? ' data-tt="' + esc(c.tt) + '"' : '') +
+        (c.priv ? ' data-private="true"' : '') + (c.preview ? ' data-preview="' + esc(c.preview) + '"' : '') + ' data-poster="' + esc(c.poster) + '"' + (c.type === 'video' ? ' data-wide="true"' : '');
+    };
+    function tile(c) {
+      return '<a class="tile ' + (c.type === 'video' ? 'wide' : '') + '" href="' + esc(c.yt) + '" data-id="' + c.id + '" data-h="' + c.who + '"' + play(c) + '><span class="pf"><img src="' + esc(c.poster) + '" alt="" loading="lazy" decoding="async"><span class="type ui">' + (c.type === 'video' ? 'Video' : 'Short') + '</span>' + (c.dur ? '<span class="dur ui">' + c.dur + '</span>' : '') + '</span><h3>' + esc(c.title) + '</h3><p>Edit for <b>' + esc(c.handle) + '</b></p></a>';
     }
-    <p class="works-empty" data-empty hidden>No edits match.</p>
-    <ClipViewer client:idle clips={clips.map(toViewerClip)} />
-    <ThumbnailViewer client:idle items={thumbnails} />
-  </section>
-  <script is:inline>
-    (function () {
-      var input = document.getElementById('works-search');
-      if (input) input.value = new URLSearchParams(location.search).get('q') || '';
-
-      function words(value) {
-        return value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    function thumbTile(t) {
+      return '<a class="tile wide" href="' + esc(t.link) + '" data-play data-image="' + esc(t.image) + '" data-title="' + esc(t.title) + '" data-link="' + esc(t.link) + '"><span class="pf"><img src="' + esc(t.image) + '" alt="" loading="lazy" decoding="async"></span><h3>' + esc(t.title) + '</h3></a>';
+    }
+    function catsFor(list) { return DATA.cats.filter(function (k) { return list.some(function (c) { return c.cat === k.id; }); }); }
+    function drawCats(box, list, key) {
+      var cats = catsFor(list);
+      if (!cats.some(function (k) { return k.id === cat[key]; })) cat[key] = cats.length ? cats[0].id : null;
+      box.innerHTML = cats.map(function (k) { return '<button class="tab' + (k.id === cat[key] ? ' on' : '') + '" type="button" data-cat="' + k.id + '">' + k.label + '</button>'; }).join('');
+      box.hidden = cats.length < 2;
+    }
+    function drawChips() {
+      $('#chips').innerHTML = '<button type="button" class="chip all" aria-pressed="true">All</button>' +
+        order.creators.map(function (c) { return '<button type="button" class="chip" aria-pressed="false" data-k="' + c.id + '"><img src="' + c.avatar + '" alt=""><span class="chip-l">' + esc(c.label) + '</span></button>'; }).join('');
+    }
+    function drawAll() {
+      var shorts = order.clips.filter(function (c) { return c.type === 'short' && ok(c); });
+      var longsAll = order.clips.filter(function (c) { return c.type === 'video' && ok(c); });
+      drawCats($('#works-all [data-lf]'), longsAll, 'all');
+      var longs = longsAll.filter(function (c) { return !cat.all || c.cat === cat.all; });
+      $('#s-short').innerHTML = shorts.map(tile).join('') || '<p class="empty-note">No shorts match.</p>';
+      $('#s-long').innerHTML = longs.map(tile).join('') || '<p class="empty-note">No long form videos match.</p>';
+      $('#n-short').textContent = shorts.length; $('#n-long').textContent = longsAll.length;
+      var th = order.thumbs.filter(function (t) { return !q || t.title.toLowerCase().indexOf(q) >= 0; });
+      $('#n-thumb').textContent = th.length;
+      $('#s-thumb').innerHTML = th.map(thumbTile).join('') || '<p class="empty-note">No thumbnails match.</p>';
+    }
+    function typesFor(id) {
+      var t = [];
+      if (DATA.clips.some(function (c) { return c.who === id && c.type === 'short'; })) t.push('short');
+      if (DATA.clips.some(function (c) { return c.who === id && c.type === 'video'; })) t.push('video');
+      if (DATA.thumbs.some(function (x) { return x.who === id; })) t.push('thumb');
+      return t;
+    }
+    function drawProfile() {
+      var cr = DATA.creators.find(function (x) { return x.id === who; });
+      var box = $('#p-works'); box.style.setProperty('--pacc', cr.acc);
+      $('#prof-av img').src = cr.avatar; $('#prof-av').style.setProperty('--acc', cr.acc);
+      $('#prof-name').textContent = cr.label; $('#prof-handle').textContent = cr.handle;
+      var types = typesFor(who);
+      if (types.indexOf(ptab) < 0) ptab = types[0];
+      $('#prof-tabs').innerHTML = types.map(function (t) { return '<button type="button" role="tab" class="ui" aria-selected="' + (t === ptab) + '" data-t="' + t + '" aria-label="' + TAB_LABEL[t] + '">' + TAB_ICON[t] + '<span class="lab">' + TAB_LABEL[t] + '</span></button>'; }).join('');
+      var g = $('#prof-grid');
+      g.hidden = false; g.classList.toggle('wide', ptab !== 'short');
+      var sub = $('#prof-sub');
+      if (ptab === 'thumb') {
+        sub.hidden = true;
+        var th = order.thumbs.filter(function (t) { return t.who === who && (!q || t.title.toLowerCase().indexOf(q) >= 0); });
+        g.innerHTML = th.map(function (t, n) { return '<a class="pg" href="' + esc(t.link) + '" style="--n:' + n + '" data-play data-image="' + esc(t.image) + '" data-title="' + esc(t.title) + '" data-link="' + esc(t.link) + '" aria-label="' + esc(t.title) + '"><span class="pf"><img src="' + esc(t.image) + '" alt="" loading="lazy" decoding="async"></span></a>'; }).join('') || '<p class="empty-note">Nothing matches.</p>';
+        return;
       }
-
-      function hit(card, query) {
-        if (!query.length) return true;
-        var hay = (card.getAttribute('data-find') || '').toLowerCase();
-        return query.every(function (word) { return hay.indexOf(word) !== -1; });
+      var mine = order.clips.filter(function (c) { return c.who === who && c.type === ptab && ok(c); });
+      if (ptab === 'video') { drawCats($('[data-lf]', sub), mine, 'prof'); sub.hidden = false; mine = mine.filter(function (c) { return !cat.prof || c.cat === cat.prof; }); } else sub.hidden = true;
+      g.innerHTML = mine.map(function (c, n) { return '<a class="pg" href="' + esc(c.yt) + '" data-id="' + c.id + '" style="--n:' + n + '"' + play(c) + ' aria-label="' + esc(c.title) + '"><span class="pf"><img src="' + esc(c.poster) + '" alt="" loading="lazy" decoding="async"></span><span class="meta"><i></i>' + c.dur + '</span></a>'; }).join('') || '<p class="empty-note">Nothing matches.</p>';
+    }
+    function vtClear() { $$('#p-works [style*="view-transition-name"], .bar').forEach(function (e) { e.style.viewTransitionName = ''; }); }
+    function vtName(el, n) { if (el) el.style.viewTransitionName = n; }
+    // Name the pieces that exist in both views so they travel to their new place.
+    function vtTag(k) {
+      vtName($('.bar'), 'w-bar');
+      vtName($('#p-works .page-head'), 'w-head');
+      vtName($('#p-works .search'), 'w-search');
+      if (who) { vtName($('#prof-av'), 'w-av'); vtName($('#prof-name'), 'w-name'); vtName($('#prof-back'), 'w-back'); vtName($('#prof-tabs'), 'w-row'); }
+      else { var chip = $('#chips [data-k="' + k + '"]'); vtName(chip && chip.querySelector('img'), 'w-av'); vtName($('#p-works .ph-title'), 'w-name'); vtName($('#chips'), 'w-row'); }
+    }
+    function setView(next) {
+      var k = next || who;
+      var apply = function () {
+        who = next;
+        var box = $('#p-works');
+        box.classList.toggle('is-profile', !!who);
+        var av = $('#prof-av'); av.classList.remove('pop'); if (who) { void av.offsetWidth; av.classList.add('pop'); }
+        if (who) drawProfile(); else { $('#prof-grid').hidden = true; $('#prof-sub').hidden = true; box.style.removeProperty('--pacc'); drawAll(); }
+        window.scrollTo(0, 0);
+      };
+      var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && document.startViewTransition) {
+        vtClear(); vtTag(k);
+        document.documentElement.classList.add('vt-works', next ? 'vt-open' : 'vt-close');
+        var t = document.startViewTransition(function () { vtClear(); apply(); vtTag(k); });
+        t.finished.finally(function () { vtClear(); document.documentElement.classList.remove('vt-works', 'vt-open', 'vt-close'); });
+      } else {
+        apply();
+        var box = $('#p-works'); box.classList.remove('fallback-in'); void box.offsetWidth; box.classList.add('fallback-in');
       }
-
-      function sync() {
-        var query = words(input ? input.value : '');
-        document.querySelectorAll('.clip-card').forEach(function (card) {
-          card.style.display = hit(card, query) ? '' : 'none';
-        });
-        document.querySelectorAll('.works-subgroup').forEach(function (group) {
-          var hasVisible = Array.from(group.querySelectorAll('.clip-card')).some(function (card) {
-            return getComputedStyle(card).display !== 'none';
-          });
-          group.hidden = !hasVisible;
-        });
-        document.querySelectorAll('.works-block').forEach(function (block) {
-          var any = false;
-          block.querySelectorAll('.clip-card').forEach(function (card) {
-            if (getComputedStyle(card).display !== 'none') any = true;
-          });
-          block.style.display = any ? '' : 'none';
-        });
-        var shown = 0;
-        document.querySelectorAll('.clip-card').forEach(function (card) {
-          if (getComputedStyle(card).display !== 'none') shown += 1;
-        });
-        var count = document.querySelector('[data-clip-count]');
-        if (count) count.textContent = shown + (shown === 1 ? ' work shown' : ' works shown');
-        var empty = document.querySelector('[data-empty]');
-        if (empty) {
-          empty.hidden = shown !== 0;
-          empty.textContent = query.length
-            ? 'No works match that search and filter combination.'
-            : 'No works match these filters.';
-        }
-      }
-
-      window.__nkWorksSync = sync;
-      if (input) {
-        input.form.addEventListener('submit', function (event) { event.preventDefault(); });
-        input.addEventListener('input', function () {
-          var params = new URLSearchParams(location.search);
-          var text = input.value.trim();
-          if (text) params.set('q', text);
-          else params.delete('q');
-          var next = params.toString();
-          history.replaceState(null, '', next ? '/works?' + next : '/works');
-          sync();
-        });
-      }
-      window.addEventListener('popstate', function () {
-        if (input) {
-          var text = new URLSearchParams(location.search).get('q') || '';
-          if (input.value !== text) input.value = text;
-        }
-        sync();
+    }
+    $('#chips').addEventListener('click', function (e) { var b = e.target.closest('[data-k]'); if (b) { ptab = 'short'; cat.prof = null; setView(b.dataset.k); } });
+    $('#prof-back').addEventListener('click', function () { setView(null); });
+    $('#prof-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-t]'); if (b) { ptab = b.dataset.t; drawProfile(); } });
+    $('#works-search').addEventListener('input', function (e) { q = e.target.value.trim().toLowerCase(); if (who) drawProfile(); else drawAll(); });
+    $$('[data-scroll]').forEach(function (b) { b.addEventListener('click', function () { $('#' + b.dataset.scroll).scrollBy({ left: +b.dataset.d * 420, behavior: 'smooth' }); }); });
+    $$('#p-works [data-lf]').forEach(function (g) {
+      g.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-cat]'); if (!b) return;
+        if (g.closest('#prof-sub')) { cat.prof = b.dataset.cat; drawProfile(); } else { cat.all = b.dataset.cat; drawAll(); }
       });
-      sync();
-    })();
-  </script>
-</BaseLayout>
+    });
+    drawChips(); drawAll();
+  })();
+</script>

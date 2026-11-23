@@ -23,6 +23,8 @@ export interface StudioThumbnail {
   image: string;
   videoUrl: string;
   orientation?: 'vertical' | 'landscape';
+  /** Width divided by height of the artwork, filled in by loadThumbnails so frames match the image. */
+  ratio?: number;
 }
 
 export interface StudioClip extends Record<string, unknown> {

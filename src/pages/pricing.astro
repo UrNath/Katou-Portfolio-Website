@@ -1,0 +1,126 @@
+---
+import Site from '../layouts/Site.astro';
+import { status, labelFor } from '../data/status';
+import { loadService } from '../lib/services';
+
+const editing = (await loadService('editing')).data;
+const web = (await loadService('web-design')).data;
+const short = editing.tiers[0];
+const ctaLabel = (key: 'editing' | 'webDesign', label: string) => (status[key] === 'closed' ? 'Join the waitlist' : label);
+const addon = (price: string) => (/^[+$≈]/.test(price) ? price : `+ ${price}`);
+// PLACEHOLDER: MV pricing is not set yet. Replace these values when it is.
+const mv = {
+  name: 'MV edit', tag: 'Placeholder', price: 'PHP 3,500', unit: '/ MV',
+  rows: [['Length', 'Up to 4 minutes'], ['Format', 'YouTube, 16:9'], ['Revisions', 'Unlimited minor, 2 major'], ['Turnaround', '7 to 10 days']],
+  note: 'Sample MV info. Real MV pricing is still to be set.',
+};
+const ranks = ['B', 'A', 'S', 'S+'];
+---
+<Site page="pricing" title="Pricing" description="Editing and web design pricing for NassuKatou.">
+  <main class="page on" id="p-pricing">
+    <section class="page-head slim dots" style="--hh: var(--katou)">
+      <div class="wrap">
+        <div class="ph-row">
+          <div class="ph-title"><p class="kicker ui"><span class="slashes"></span><span>Services</span></p><h1 class="name">Pricing</h1></div>
+          <div class="svc-tabs" role="group" aria-label="Jump to service"><button class="tab on" type="button" data-jump="ed-sec">Editing</button><button class="tab" type="button" data-jump="web-sec">Web design</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="svc-sec" id="ed-sec" aria-labelledby="ed-title">
+      <div class="wrap">
+        <div class="svc-head"><h2 id="ed-title">{editing.title}</h2><span class="status">{labelFor(status.editing)}</span>
+          <p>{editing.subtitle} {editing.longNote && <><b>Not only shorts.</b> {editing.longNote}</>}</p></div>
+        <div class="ed-grid">
+          <article class="item pkg" id="pkg" data-mode="short" aria-live="polite">
+            <button class="pkg-toggle" id="pkg-toggle" type="button" aria-pressed="false"><span id="pkg-toggle-label">⇄ MVs</span></button>
+            <div class="pkg-face" data-face="short">
+              <span class="stars" aria-hidden="true">◆◆◆◆◆</span><h3 class="name">{short.name}</h3>
+              <div class="pkg-top"><span class="real ui">Real price</span></div>
+              <div class="big-price"><b>{short.price}</b>{short.unit && <span class="ui">/ {short.unit}</span>}</div>
+              <dl class="stat-table">{editing.compare.map((row) => <div><dt class="ui">{row.feature}</dt><dd>{row.values[0]}</dd></div>)}</dl>
+            </div>
+            <div class="pkg-face" data-face="mv" hidden>
+              <span class="stars" aria-hidden="true">◆◆◆◆◆</span><h3 class="name">{mv.name}</h3>
+              <div class="pkg-top"><span class="real ui">{mv.tag}</span></div>
+              <div class="big-price"><b>{mv.price}</b><span class="ui">{mv.unit}</span></div>
+              <dl class="stat-table">{mv.rows.map(([k, v]) => <div><dt class="ui">{k}</dt><dd>{v}</dd></div>)}</dl>
+              <p class="ph-note">{mv.note}</p>
+            </div>
+          </article>
+          <div class="ed-side">
+            <div class="takes">
+              <div><p class="ui lbl">I take</p><div class="chiplist">{editing.take.map((t) => <span>{t}</span>)}</div></div>
+              {editing.dont.length > 0 && <div><p class="ui lbl">I don't take</p><div class="chiplist no">{editing.dont.map((t) => <span>{t}</span>)}</div></div>}
+            </div>
+            {editing.addons.length > 0 && (
+              <div><p class="ui lbl">Add-ons</p>{editing.addons.map((a) => <div class="addon-row"><span>{a.name}</span><span>{addon(a.price)}</span></div>)}</div>
+            )}
+            <div class="cta-row"><a class="btn gold" href={`/contact?service=${editing.contactService}`}>{ctaLabel('editing', editing.cta)}</a><a class="ui link" href="/terms">Read the Terms first</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="svc-sec" id="web-sec" aria-labelledby="web-title">
+      <div class="wrap">
+        <div class="svc-head"><h2 id="web-title">{web.title}</h2><span class="status">{labelFor(status.webDesign)}</span>
+          <p>{web.subtitle} {web.proof}</p></div>
+        {web.process && <ol class="steps" aria-label="Process">{web.process.map((s) => <li>{s}</li>)}</ol>}
+        <div class="tier-strip">
+          {web.tiers.map((t, i) => (
+            <article class:list={['tier', t.popular && 'pop']}>
+              <span class="rank" aria-hidden="true">{ranks[i] ?? ''}</span>
+              {t.popular && <span class="popular ui">Popular</span>}
+              <h3>{t.name}</h3>
+              <div class="pr"><b>{t.price}</b>{t.approx && <span>{t.approx}</span>}</div>
+              <ul>{t.points.map((p) => <li>{p}</li>)}</ul>
+              {t.popular
+                ? <a class="btn signal" href={`/contact?service=${web.contactService}`}>{ctaLabel('webDesign', 'Start a brief')}</a>
+                : <a class="btn line" href={`/contact?service=${web.contactService}`}><span>{ctaLabel('webDesign', 'Start a brief')}</span></a>}
+            </article>
+          ))}
+        </div>
+        {web.addons.length > 0 && (
+          <div class="web-addons"><p class="ui lbl">Add-ons</p>{web.addons.map((a) => <div class="addon-row"><span>{a.name}</span><span>{addon(a.price)}</span></div>)}</div>
+        )}
+        {web.pickNote && <p class="notes" style="margin:0">{web.pickNote}</p>}
+      </div>
+    </section>
+  </main>
+</Site>
+
+<script>
+  // Package card: switch between the short edit and the MV info.
+  const pkg = document.querySelector<HTMLElement>('#pkg');
+  const toggle = document.querySelector<HTMLButtonElement>('#pkg-toggle');
+  if (pkg && toggle) {
+    const faces = Array.from(pkg.querySelectorAll<HTMLElement>('[data-face]'));
+    let busy = false;
+    toggle.addEventListener('click', () => {
+      if (busy) return;
+      busy = true;
+      const next = pkg.dataset.mode === 'mv' ? 'short' : 'mv';
+      const from = faces.find((f) => !f.hidden)!;
+      const to = faces.find((f) => f.dataset.face === next)!;
+      const swap = () => {
+        from.hidden = true; from.classList.remove('out');
+        to.hidden = false; to.classList.add('in');
+        to.addEventListener('animationend', () => to.classList.remove('in'), { once: true });
+        pkg.dataset.mode = next;
+        toggle.setAttribute('aria-pressed', String(next === 'mv'));
+        document.querySelector('#pkg-toggle-label')!.textContent = next === 'mv' ? '⇄ Short edit' : '⇄ MVs';
+        busy = false;
+      };
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { swap(); return; }
+      from.classList.add('out');
+      setTimeout(swap, 220);
+    });
+  }
+  // Jump tabs.
+  const jumps = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-jump]'));
+  jumps.forEach((b) => b.addEventListener('click', () => {
+    jumps.forEach((x) => x.classList.toggle('on', x === b));
+    document.getElementById(b.dataset.jump!)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
+</script>

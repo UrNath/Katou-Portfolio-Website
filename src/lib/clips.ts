@@ -19,6 +19,7 @@ const clipSchema = z.object({
   title: z.string(),
   youtubeUrl: z.string().url(),
   tiktokUrl: z.string().url().nullable(),
+  youtubePrivate: z.boolean().optional(),
   uploadDate: z.string(),
   durationSec: z.number(),
   orientation: z.enum(['vertical', 'landscape']),
@@ -124,6 +125,7 @@ async function buildClips(): Promise<ClipRecord[]> {
         previewSrc: clip.preview && previewExists(clip.preview) ? previewUrl(clip.preview) : undefined,
         youtube: clip.youtubeUrl,
         tiktok: clip.tiktokUrl,
+        youtubePrivate: clip.youtubePrivate ?? false,
         wide,
         featured: clip.featured,
         heroFeatured: clip.heroFeatured,
@@ -147,6 +149,7 @@ export function toViewerClip(clip: ClipRecord): ViewerClip {
     previewSrc: clip.previewSrc,
     youtube: clip.youtube,
     tiktok: clip.tiktok,
+    youtubePrivate: clip.youtubePrivate,
     wide: clip.wide,
     heroFeatured: clip.heroFeatured,
   };

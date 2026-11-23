@@ -116,7 +116,7 @@ export default config({
               label: 'Clip id',
               description: 'Short unique name, like chi-c3. Do not reuse miu-ms25, miu-mv1, miu-mv40, or pidge-p6.',
             }),
-            creator: fields.text({ label: 'Creator', description: 'Pidge, Chi, Miu, or a new name.' }),
+            creator: fields.text({ label: 'Creator', description: 'Pidgeira, Chi, Miu, or a new name.' }),
             channelHandle: fields.text({ label: 'Channel handle', description: 'Include the @.' }),
             title: fields.text({ label: 'Title', multiline: true }),
             youtubeUrl: fields.url({

@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 
-import BaseLayout from '../../components/BaseLayout.astro';
+import AdminLayout from '../../components/AdminLayout.astro';
 import AdminStudio from '../../islands/AdminStudio';
 import { githubOAuthConfigured, readSession } from '../../lib/admin-session';
 
@@ -14,7 +14,7 @@ if (oauth) {
 }
 ---
 
-<BaseLayout title="Editor" description="Private editor for Works, the home reel, client filters, tag filters, and the Terms page.">
+<AdminLayout title="Editor" description="Private editor for Works, the home reel, client filters, tag filters, and the Terms page.">
   <meta slot="head" name="robots" content="noindex, nofollow" />
   <AdminStudio client:load oauth={oauth} login={login} />
-</BaseLayout>
+</AdminLayout>

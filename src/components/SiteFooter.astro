@@ -10,7 +10,7 @@ import { isPlaceholder, site, socials } from '../data/site';
       {
         socials.map((item) => (
           <a
-            class="icon-btn"
+            class="icon-btn dia-btn"
             href={item.href}
             target={item.href.startsWith('http') ? '_blank' : undefined}
             rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
@@ -23,7 +23,7 @@ import { isPlaceholder, site, socials } from '../data/site';
           </a>
         ))
       }
-      <a class="icon-btn" href={`mailto:${site.email}`} aria-label={`Email ${site.email}`}>
+      <a class="icon-btn dia-btn" href={`mailto:${site.email}`} aria-label={`Email ${site.email}`}>
         <Icon name="mail" size={18} />
       </a>
     </div>
