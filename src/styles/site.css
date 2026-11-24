@@ -185,7 +185,7 @@ html:not(.entered) :is(.page-head .name, .name[data-rise], .art-stage, .client .
 .hero-copy .pre { font-family: var(--f-name); font-weight: 800; font-style: italic; font-size: clamp(30px, 6cqi, 52px); text-transform: uppercase; line-height: .9; margin: 18px 0 0; }
 .hero-copy .name { font-size: clamp(92px, 21cqi, 200px); }
 /* Home follows the approved mockup: content sits in a 1280px column, not the full width. */
-.site[data-page="home"] .wrap { max-width: 1280px; }
+.site[data-page="home"] .wrap:not(.bar-main) { max-width: 1280px; }
 .hero-copy .name span { display: inline-block; background: var(--gold); color: var(--void); padding: 0 .1em 0 .06em; box-shadow: 10px 10px 0 var(--katou); }
 @container site (min-width: 900px) {
   .hero-copy .name { font-size: clamp(120px, 12cqi, 190px); }
@@ -489,16 +489,18 @@ html:not(.entered) :is(.page-head .name, .name[data-rise], .art-stage, .client .
    --ui-scale is the 125% browser-zoom look, applied as CSS zoom on the main layout (the site is built in px, so one
    factor scales text, icons, buttons, cards and spacing together). Viewport units are divided by the scale (--u-*)
    so "one screen" still means one screen. Phones and small tablets stay at 1. Works scales with the window height
-   so its Shorts row and the Long Form Videos heading stay in the same view. */
-.site { --ui-scale: 1; }
+   so its Shorts row and the Long Form Videos heading stay in the same view (content only, never the navbar). */
+.site { --ui-scale: 1; --works-scale: 1; }
 @media (min-width: 1130px) {
   .site { --ui-scale: 1.25; }
-  .site[data-page="works"] { --ui-scale: 1; }
+  .site { --works-scale: 1; }
 }
-@media (min-width: 1130px) and (min-height: 930px) { .site[data-page="works"] { --ui-scale: 1.05; } }
-@media (min-width: 1130px) and (min-height: 1010px) { .site[data-page="works"] { --ui-scale: 1.15; } }
-@media (min-width: 1130px) and (min-height: 1112px) { .site[data-page="works"] { --ui-scale: 1.25; } }
+@media (min-width: 1130px) and (min-height: 930px) { .site { --works-scale: 1.05; } }
+@media (min-width: 1130px) and (min-height: 1010px) { .site { --works-scale: 1.15; } }
+@media (min-width: 1130px) and (min-height: 1112px) { .site { --works-scale: 1.25; } }
 .site { zoom: var(--ui-scale); --u-vw: calc(1vw / var(--ui-scale)); --u-vh: calc(1vh / var(--ui-scale)); --u-svh: calc(1svh / var(--ui-scale)); --u-dvh: calc(1dvh / var(--ui-scale)); }
+/* Works sizes its content by window height, but the header keeps the site scale so the navbar is identical on every page. */
+.site[data-page="works"] > main.page { zoom: calc(var(--works-scale) / var(--ui-scale)); }
 /* Modal players are laid out against the real viewport, so they undo the zoom. */
 .player, .reel-dialog { zoom: calc(1 / var(--ui-scale)); }
 /* Viewport height: 100vh first, 100svh where supported, so mobile toolbars never hide the bottom of a screen. */
