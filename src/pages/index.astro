@@ -253,9 +253,9 @@ const art = site.characterArt;
       suppress = true; setTimeout(() => { suppress = false; }, 80);
       const [t0, p0] = d.samples[0], [t1, p1] = d.samples[d.samples.length - 1];
       const fast = e.type === 'pointerup' && e.timeStamp - t1 < 80 && t1 > t0;
-      vel = fast ? Math.max(-14, Math.min(14, ((p1 - p0) / (t1 - t0)) * 1000)) : 0;
+      vel = fast ? Math.max(-8, Math.min(8, ((p1 - p0) / (t1 - t0)) * 1000)) : 0;
       if (reduced.matches) { target = Math.round(pos); pos = target; vel = 0; render(); }
-      else target = Math.round(pos + vel * .3);
+      else target = Math.round(pos + vel * .25);
       kick();
     };
     track.addEventListener('pointerup', release);
