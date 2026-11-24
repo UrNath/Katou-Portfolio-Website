@@ -41,8 +41,6 @@ export interface ClientProfile {
   socials: { youtube: string | null; discord: string | null; tiktok: string | null };
   /** Backdrop, accent and rim-light colours for this client's stage. */
   palette: { panel: string; deep: string; accent: string; rim: string };
-  /** Colour of the soft silhouette shadow behind the model. Set it per model; it falls back to the accent colour. */
-  themeColor?: string;
   skins: ClientSkin[];
   /**
    * Optional: up to three clip ids from clips.json to use as the highlight
@@ -64,7 +62,6 @@ export const clientProfiles: Record<string, ClientProfile> = {
     // profile of the credited TikTok posts in clips.json.
     socials: { youtube: 'https://www.youtube.com/@pidgeira', discord: 'https://discord.com/users/pidgeira', tiktok: 'https://www.tiktok.com/@pidgeira' },
     palette: { panel: '#2b4378', deep: '#131d3a', accent: '#8fc8ff', rim: '#eef7ff' },
-    themeColor: '#8fc8ff',
     skins: [
       {
         id: 'cat',
@@ -89,7 +86,6 @@ export const clientProfiles: Record<string, ClientProfile> = {
     weapon: 'Blood scythe, made from her blood',
     socials: { youtube: 'https://www.youtube.com/@chiseyi', discord: 'https://discord.com/users/chiseyi', tiktok: 'https://www.tiktok.com/@chiseyivt' },
     palette: { panel: '#5a1622', deep: '#22070d', accent: '#ff6b78', rim: '#ffe9ec' },
-    themeColor: '#ff6b78',
     skins: [
       {
         id: 'default',
