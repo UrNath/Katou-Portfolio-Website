@@ -569,18 +569,18 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   :global(.immersive-clients) { --nav-accent: var(--scene-accent, #8fc8ff); --nav-on: #0d1320; --nav-line: rgb(255 255 255 / .4); }
 
   /* Clients is one screen: the header floats over the stage (as on the previous page) and the footer is left out here only. */
-  :global(.site[data-page="clients"]) { height: 100vh; height: var(--vh, 100svh); min-height: 0; overflow: clip; }
+  :global(.site[data-page="clients"]) { height: calc(100 * var(--u-vh)); height: var(--vh, calc(100 * var(--u-svh))); min-height: 0; overflow: clip; }
   :global(.site[data-page="clients"] .bar) { position: absolute; inset: 0 0 auto; }
   :global(.site[data-page="clients"] .foot) { display: none; }
 
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .roster {
     --bar: 65px;
-    --pad: max(clamp(1.1rem, 4vw, 4.5rem), env(safe-area-inset-left));
+    --pad: max(clamp(1.1rem, calc(4 * var(--u-vw)), 4.5rem), env(safe-area-inset-left));
     position: relative;
     display: grid;
-    height: 100vh;
-    height: var(--vh, 100svh);
+    height: calc(100 * var(--u-vh));
+    height: var(--vh, calc(100 * var(--u-svh)));
     overflow: clip;
     color: white;
     isolation: isolate;
@@ -609,7 +609,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .client[hidden] { display: none; }
   .stage { position: absolute; inset: 0; overflow: clip; background: linear-gradient(105deg, var(--panel) 0 46%, var(--deep) 46.1%); }
   .stage-bg { position: absolute; inset: -4%; background-image: radial-gradient(rgb(255 255 255 / .09) 1.2px, transparent 1.6px); background-size: 18px 18px; }
-  .bg-band { position: absolute; top: 50%; left: 30%; width: 180%; padding: .1em 0; background: rgb(255 255 255 / .06); color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / .16); font-size: clamp(5rem, 15vw, 15rem); font-weight: 800; letter-spacing: -.04em; line-height: 1; text-transform: uppercase; white-space: nowrap; transform: translate(-30%, -50%) rotate(-74deg); user-select: none; }
+  .bg-band { position: absolute; top: 50%; left: 30%; width: 180%; padding: .1em 0; background: rgb(255 255 255 / .06); color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / .16); font-size: clamp(5rem, calc(15 * var(--u-vw)), 15rem); font-weight: 800; letter-spacing: -.04em; line-height: 1; text-transform: uppercase; white-space: nowrap; transform: translate(-30%, -50%) rotate(-74deg); user-select: none; }
   .bg-paint { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s ease; }
   .bg-paint[data-on] { opacity: 1; }
   .bg-paint[data-on] ~ .bg-band { opacity: .35; }
@@ -627,7 +627,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   /* Rectangular art without a cutout: the whole illustration in a lit frame. */
   .is-framed .char-art { object-fit: cover; object-position: var(--focus, 50% 50%); border: 3px solid var(--rim); border-radius: 14px; rotate: -2.5deg; filter: none; box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 55%, transparent), 16px 24px 30px rgb(0 0 0 / .42); }
   .is-framed .char-echo { -webkit-mask: none; mask: none; border-radius: 14px; rotate: -2.5deg; transform: translate(-4.5%, 5%); opacity: .55; }
-  .art-placeholder { display: grid; place-content: center; gap: .35rem; width: 100%; height: 100%; border: 2px dashed var(--accent); border-radius: 18px; background: repeating-linear-gradient(-45deg, rgb(255 255 255 / .05) 0 14px, transparent 14px 28px), rgb(0 0 0 / .22); color: var(--rim); text-align: center; text-transform: uppercase; letter-spacing: .14em; font-size: clamp(.7rem, 1vw, .85rem); box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 35%, transparent), 16px 22px 30px rgb(0 0 0 / .35); }
+  .art-placeholder { display: grid; place-content: center; gap: .35rem; width: 100%; height: 100%; border: 2px dashed var(--accent); border-radius: 18px; background: repeating-linear-gradient(-45deg, rgb(255 255 255 / .05) 0 14px, transparent 14px 28px), rgb(0 0 0 / .22); color: var(--rim); text-align: center; text-transform: uppercase; letter-spacing: .14em; font-size: clamp(.7rem, calc(1 * var(--u-vw)), .85rem); box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 35%, transparent), 16px 22px 30px rgb(0 0 0 / .35); }
   .art-placeholder strong { font-size: 1.6em; letter-spacing: .08em; }
   @media (prefers-reduced-motion: no-preference) {
     .character-depth { transform: translate(var(--pointer-x, 0px), calc(var(--pointer-y, 0px) + var(--float, 0px))); will-change: transform; }
@@ -635,19 +635,19 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   }
 
   /* ---- Info block ---- */
-  .info { position: relative; z-index: 1; display: flex; flex-direction: column; gap: clamp(.7rem, 1.6dvh, 1.1rem); width: min(100%, 39rem); padding: calc(var(--bar) + 78px) var(--pad) max(clamp(1.2rem, 4dvh, 2.6rem), env(safe-area-inset-bottom)); align-self: center; }
-  .name { margin: 0; font-size: clamp(3.2rem, min(9vw, 17dvh), 8.5rem); font-weight: 800; line-height: .88; letter-spacing: -.05em; text-transform: uppercase; text-shadow: 0 3px 30px rgb(0 0 0 / .3); }
+  .info { position: relative; z-index: 1; display: flex; flex-direction: column; gap: clamp(.7rem, calc(1.6 * var(--u-dvh)), 1.1rem); width: min(100%, 39rem); padding: calc(var(--bar) + 78px) var(--pad) max(clamp(1.2rem, calc(4 * var(--u-dvh)), 2.6rem), env(safe-area-inset-bottom)); align-self: center; }
+  .name { margin: 0; font-size: clamp(3.2rem, min(calc(9 * var(--u-vw)), calc(17 * var(--u-dvh))), 8.5rem); font-weight: 800; line-height: .88; letter-spacing: -.05em; text-transform: uppercase; text-shadow: 0 3px 30px rgb(0 0 0 / .3); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
   .chips li { padding: 5px 12px 5px 10px; background: rgb(0 0 0 / .4); border-left: 3px solid var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
   .chips span { color: var(--accent); margin-right: 4px; font-weight: 600; }
   .chips .is-placeholder { border-left-style: dashed; }
-  .desc { max-width: 46ch; margin: 0; font-size: clamp(.9rem, 1.05vw, 1rem); line-height: 1.55; color: rgb(255 255 255 / .88); }
+  .desc { max-width: 46ch; margin: 0; font-size: clamp(.9rem, calc(1.05 * var(--u-vw)), 1rem); line-height: 1.55; color: rgb(255 255 255 / .88); }
   .tabs { display: flex; gap: 4px; margin-top: .3rem; border-bottom: 1px solid rgb(255 255 255 / .2); }
   .tabs button { position: relative; min-height: 44px; padding: 0 16px; border: 0; background: none; color: rgb(255 255 255 / .7); font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
   .tabs button::after { content: ""; position: absolute; inset: auto 0 -1px; height: 3px; background: var(--accent); transform: scaleX(0); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
   .tabs button[aria-selected="true"] { color: white; }
   .tabs button[aria-selected="true"]::after { transform: scaleX(1); }
-  .panel { display: flex; flex-direction: column; gap: clamp(.7rem, 1.6dvh, 1.1rem); min-height: 178px; }
+  .panel { display: flex; flex-direction: column; gap: clamp(.7rem, calc(1.6 * var(--u-dvh)), 1.1rem); min-height: 178px; }
   .panel[hidden] { display: none; }
   /* Both tab panels share one grid cell: the column always reserves the taller panel, so switching tabs never moves the title, tabs, or buttons. */
   .panels { display: grid; }
@@ -655,7 +655,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .panels > .panel[hidden] { display: flex; visibility: hidden; pointer-events: none; }
 
   /* ---- Highlight diamonds ---- */
-  .gems { display: flex; gap: clamp(22px, 3vw, 38px); margin: 0; padding: 22px 16px 0; list-style: none; }
+  .gems { display: flex; gap: clamp(22px, calc(3 * var(--u-vw)), 38px); margin: 0; padding: 22px 16px 0; list-style: none; }
   .gem { display: grid; justify-items: center; gap: 22px; padding: 0; border: 0; background: none; color: white; font: inherit; }
   .gem-face { position: relative; display: block; width: 76px; height: 76px; border: 2px solid var(--accent); background: rgb(0 0 0 / .5); overflow: hidden; transform: rotate(45deg); transition: transform .45s cubic-bezier(.2, .8, .2, 1); box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent); }
   .gem-media, .gem-icon { position: absolute; inset: 0; transform: rotate(-45deg); transition: transform .45s cubic-bezier(.2, .8, .2, 1), opacity .3s ease; }
@@ -726,7 +726,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .reel-dialog { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); border: 0; background: transparent; color: white; }
   .reel-dialog[open] { display: grid; place-items: center; }
   .reel-dialog::backdrop { background: rgb(5 8 14 / .82); }
-  .reel-card { position: relative; display: grid; gap: 10px; justify-items: start; width: min(100%, calc((100dvh - 190px) * 9 / 16), 420px); }
+  .reel-card { position: relative; display: grid; gap: 10px; justify-items: start; width: min(100%, calc((calc(100 * var(--u-dvh)) - 190px) * 9 / 16), 420px); }
   .reel-frame { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; border: 2px solid var(--scene-accent, white); background: #05080e; box-shadow: 0 0 40px color-mix(in srgb, var(--scene-accent, white) 40%, transparent); }
   .reel-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
   .reel-frame [hidden] { display: none; }
@@ -738,11 +738,23 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .reel-close { position: absolute; top: -6px; right: -6px; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: white; color: #0d1320; transform: translate(40%, -40%); }
   .reel-dialog :is(button, a):focus-visible { outline: 2px solid var(--scene-accent, white); outline-offset: 3px; }
 
+  /* Short desktop windows (a 768px-tall screen at the default scale leaves about 614 css px; media queries see real pixels): trim the column so nothing is clipped. */
+  @media (min-aspect-ratio: 1/1) and (max-height: 880px) {
+    .info { padding-top: calc(var(--bar) + 66px); padding-bottom: 12px; gap: .55rem; }
+    .name { font-size: clamp(3rem, min(calc(9 * var(--u-vw)), calc(13 * var(--u-dvh))), 8.5rem); }
+    .tabs button { min-height: 38px; }
+    .panel { min-height: 0; gap: .55rem; }
+    .gems { padding-top: 16px; }
+    .gem { gap: 16px; }
+    .gem-face { width: 62px; height: 62px; }
+    .strip { padding-block: 7px; }
+    .socials :is(a, span) { min-height: 40px; }
+  }
   /* ---- Portrait screens (phones, upright tablets): the whole page is one
      screen tall, sized to fit a 9:16 display under the navbar. Art fills the
      flexible top row; the details stack beneath it and never scroll. ---- */
   @media (max-aspect-ratio: 1/1) {
-    .roster { height: 100svh; min-height: 0; }
+    .roster { height: calc(100 * var(--u-svh)); min-height: 0; }
     .client { display: grid; grid-template: minmax(0, 1fr) auto / minmax(0, 1fr); align-items: stretch; height: 100%; min-height: 0; }
     .stage { position: relative; min-height: 0; background: linear-gradient(165deg, var(--panel) 0 55%, var(--deep) 55.1%); }
     .stage::after { background: linear-gradient(to top, var(--deep), transparent 34%); }
@@ -752,16 +764,16 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
     .char[data-skin="rat-thief"] { height: calc(100% - var(--bar) - 20px); inset-block-end: -6%; }
     .char:has(.art-placeholder) { height: calc((100% - var(--bar) - 58px) * .74); inset-block-end: 3.4rem; }
     .char.is-framed { width: 90%; height: auto; max-height: calc(100% - var(--bar) - 58px - 3rem); inset-block-end: 3.2rem; }
-    .info { align-self: end; gap: clamp(5px, 1.1svh, 12px); width: 100%; margin-top: -3.1rem; padding: 0 max(16px, env(safe-area-inset-right)) max(clamp(8px, 1.8svh, 20px), env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
-    .name { font-size: clamp(2.3rem, min(15vw, 7.4svh), 5.4rem); }
+    .info { align-self: end; gap: clamp(5px, calc(1.1 * var(--u-svh)), 12px); width: 100%; margin-top: -3.1rem; padding: 0 max(16px, env(safe-area-inset-right)) max(clamp(8px, calc(1.8 * var(--u-svh)), 20px), env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+    .name { font-size: clamp(2.3rem, min(calc(15 * var(--u-vw)), calc(7.4 * var(--u-svh))), 5.4rem); }
     .chips { gap: 4px; }
     .chips li { padding: 3px 9px 3px 7px; font-size: 11px; }
     .desc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 13px; line-height: 1.4; }
     .tabs { margin-top: 0; }
-    .panel { gap: clamp(5px, 1.1svh, 12px); min-height: calc(clamp(44px, 7.6svh, 68px) * 1.42 + 62px); }
-    .gems { justify-content: space-around; gap: 8px; padding: calc(clamp(44px, 7.6svh, 68px) * .21 + 2px) 8px 0; }
-    .gem { gap: calc(clamp(44px, 7.6svh, 68px) * .21 + 3px); min-width: 64px; }
-    .gem-face { width: clamp(44px, 7.6svh, 68px); height: clamp(44px, 7.6svh, 68px); }
+    .panel { gap: clamp(5px, calc(1.1 * var(--u-svh)), 12px); min-height: calc(clamp(44px, calc(7.6 * var(--u-svh)), 68px) * 1.42 + 62px); }
+    .gems { justify-content: space-around; gap: 8px; padding: calc(clamp(44px, calc(7.6 * var(--u-svh)), 68px) * .21 + 2px) 8px 0; }
+    .gem { gap: calc(clamp(44px, calc(7.6 * var(--u-svh)), 68px) * .21 + 3px); min-width: 64px; }
+    .gem-face { width: clamp(44px, calc(7.6 * var(--u-svh)), 68px); height: clamp(44px, calc(7.6 * var(--u-svh)), 68px); }
     .gem[data-live] .gem-face { transform: rotate(0deg) scale(1.34); }
     .gem-label { font-size: 11px; }
     .strip { padding: 6px 12px; font-size: 12px; }
@@ -788,13 +800,13 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   @media (max-aspect-ratio: 1/1) and (max-height: 700px) {
     .desc { -webkit-line-clamp: 1; }
     .gem-label { display: none; }
-    .gem { gap: 0; padding-bottom: calc(clamp(44px, 7.6svh, 68px) * .21); }
-    .panel { min-height: calc(clamp(44px, 7.6svh, 68px) * 1.42 + 40px); }
+    .gem { gap: 0; padding-bottom: calc(clamp(44px, calc(7.6 * var(--u-svh)), 68px) * .21); }
+    .panel { min-height: calc(clamp(44px, calc(7.6 * var(--u-svh)), 68px) * 1.42 + 40px); }
   }
   /* Narrow landscape windows keep the side-by-side layout and may scroll. */
   @media (min-aspect-ratio: 1/1) and (max-width: 899px) {
     .info { width: min(100%, 52%); }
-    .name { font-size: clamp(2.4rem, 8vw, 4rem); }
+    .name { font-size: clamp(2.4rem, calc(8 * var(--u-vw)), 4rem); }
     .char { max-width: 46%; }
   }
 </style>
