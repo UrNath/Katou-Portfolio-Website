@@ -38,11 +38,11 @@ const art = site.characterArt;
           </div>
           <a class="scroll-cue ui" href="#feat-sec" data-rise style="--i:7">Scroll to see my edits <i></i></a>
         </div>
-        <div class="art-stage" data-rise style="--i:2">
+        <div class="art-stage" data-rise style="--i:2" data-float>
           <span class="hatch decal-a" aria-hidden="true"></span>
           <div class="katou-frame">
-            <div class="card" aria-hidden="true"></div>
-            <Image class="rim" src={chibi} alt={art.alt} widths={[440, 880]} sizes="(min-width: 900px) 440px, 240px" loading="eager" fetchpriority="high" />
+            <div class="card float-back" aria-hidden="true"></div>
+            <Image class="rim float-model" src={chibi} alt={art.alt} widths={[440, 880]} sizes="(min-width: 900px) 440px, 240px" loading="eager" fetchpriority="high" />
             {art.artist && <p class="credit ui">Art illust: {art.artist.toLowerCase()}</p>}
           </div>
         </div>

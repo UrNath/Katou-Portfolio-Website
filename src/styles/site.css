@@ -202,8 +202,8 @@ html:has(.wipe.go) .bar { backdrop-filter: none; }
 @keyframes bob { 50% { transform: translateY(5px) rotate(45deg); } }
 
 .katou-frame { position: relative; width: min(78%, 440px); }
-.katou-frame .card { position: absolute; inset: 9% 2% 0 6%; background: #2a1f1c; border: 3px solid var(--text); transform: rotate(-4deg); clip-path: polygon(0 0, 92% 0, 100% 8%, 100% 100%, 8% 100%, 0 92%); }
-.katou-frame img { position: relative; width: 100%; height: auto; transform: rotate(-2deg); }
+.katou-frame .card { position: absolute; inset: 9% 2% 0 6%; background: #2a1f1c; border: 3px solid var(--text); rotate: -4deg; clip-path: polygon(0 0, 92% 0, 100% 8%, 100% 100%, 8% 100%, 0 92%); }
+.katou-frame img { position: relative; width: 100%; height: auto; rotate: -2deg; }
 .credit { position: absolute; left: 50%; bottom: -14px; translate: -50% 0; background: var(--void); padding: 5px 14px; white-space: nowrap; border: 1px solid var(--line); }
 .index-strip { position: absolute; right: 12px; bottom: 16px; display: grid; gap: 4px; justify-items: end; z-index: 2; }
 .index-strip .big { font-family: var(--f-name); font-weight: 800; font-style: italic; font-size: 30px; line-height: 1; }
@@ -300,7 +300,9 @@ html:has(.wipe.go) .bar { backdrop-filter: none; }
 .tile .pf { position: relative; aspect-ratio: 9 / 16; overflow: hidden; background: var(--plate); clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%); }
 .tile.wide .pf { aspect-ratio: 16 / 9; }
 .tile img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
-.tile:hover img { transform: scale(1.06); }
+@media (prefers-reduced-motion: no-preference) {
+  .tile:hover img { transform: scale(1.02); transition: transform 180ms ease; }
+}
 .tile .pf::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 2px transparent; transition: box-shadow .2s; }
 .tile:hover .pf::after { box-shadow: inset 0 0 0 3px var(--signal); }
 .tile .type { position: absolute; left: 0; top: 10px; background: var(--void); color: var(--text); padding: 3px 10px 3px 8px; clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
@@ -345,14 +347,20 @@ html:has(.wipe.go) .bar { backdrop-filter: none; }
 .cl-tabs { display: flex; gap: 0; margin-top: 22px; border-bottom: 1px solid var(--line); max-width: 100%; }
 .cl-tabs button { background: none; border: 0; padding: 10px 18px; color: var(--mute); box-shadow: inset 0 -3px 0 transparent; }
 .cl-tabs button[aria-selected="true"] { color: var(--text); box-shadow: inset 0 -3px 0 var(--acc); }
-.reels { display: flex; gap: 26px; margin-top: 26px; flex-wrap: wrap; }
+.reels { display: flex; gap: 26px; margin-top: 0; flex-wrap: wrap; }
 .reel { display: grid; justify-items: center; gap: 16px; background: none; border: 0; padding: 0; }
 .reel .dia { width: 74px; height: 74px; background: #0b1020; border-color: var(--acc); box-shadow: 0 0 18px color-mix(in srgb, var(--acc) 45%, transparent); overflow: hidden; }
 .reel .dia img { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 145%; height: 145%; object-fit: cover; max-width: none; opacity: .75; }
 .reel .dia .play { position: absolute; width: 0; height: 0; border-left: 14px solid #fff; border-top: 9px solid transparent; border-bottom: 9px solid transparent; filter: drop-shadow(0 0 4px #000); }
 .reel .dia > span { position: relative; display: grid; place-items: center; width: 100%; height: 100%; }
-.reel:hover .dia { transform: rotate(45deg) scale(1.08); }
-.skins { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+.reel .dia { transition: transform 180ms ease, box-shadow 180ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .reel:hover .dia { box-shadow: 0 0 0 2px var(--acc), 0 14px 30px rgb(0 0 0 / .45); }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .reel:hover .dia { transform: rotate(45deg) scale(1.02); }
+}
+.skins { display: flex; gap: 12px; margin-top: 0; flex-wrap: wrap; }
 .skin { display: grid; gap: 6px; text-align: left; padding: 12px 16px; min-width: 150px; background: rgb(0 0 0 / .3); border: 1px solid var(--line); }
 .skin[aria-pressed="true"] { border-color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc); }
 .skin b { font-family: var(--f-name); font-style: italic; font-size: 22px; text-transform: uppercase; line-height: 1; }
@@ -1045,3 +1053,25 @@ html.wipe-arrive .page.on [data-rise] { animation-delay: calc(var(--i, 0) * 70ms
 .draft { width: 100%; min-height: 140px; padding: 10px 12px; background: var(--void); color: var(--text); border: 1px solid var(--line); font: inherit; }
 .web-addons { display: grid; }
 .pkg-face[hidden] { display: none; }
+
+/* ---------- character float and shadow backdrop (cursor-follow, see lib/site.ts) ----------
+   The model moves a little more than its backdrop, in the same direction, so the two read as layers.
+   Transform-only motion. Mouse with hover only; touch and reduced motion keep everything still. */
+.float-back { position: absolute; pointer-events: none; z-index: 0; }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-float] .float-model { translate: calc(var(--fx, 0) * 1.6%) calc(var(--fy, 0) * 1.2%); animation: model-bob 7s ease-in-out infinite; }
+  [data-float] .float-back { translate: calc(var(--fx, 0) * .9%) calc(var(--fy, 0) * .7%); animation: backdrop-drift 9s ease-in-out infinite; }
+}
+@keyframes model-bob { 50% { transform: translateY(-1.2%); } }
+@keyframes backdrop-drift { 50% { transform: translateY(.8%); } }
+.cl-backdrop {
+  inset: 8% 14% 6% 14%; rotate: -4deg;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--slab-deep) 55%, #000) 0%, color-mix(in srgb, var(--slab) 30%, #000) 100%);
+  border: 2px solid rgb(255 255 255 / .18);
+  clip-path: polygon(0 0, 92% 0, 100% 8%, 100% 100%, 8% 100%, 0 92%);
+  box-shadow: 0 34px 60px rgb(0 0 0 / .35);
+}
+#cl-art { position: relative; z-index: 1; }
+
+/* Both tab panels start at the same offset, so switching Highlights / Skins never moves the blocks below. */
+#cl-panel { padding-top: 26px; }

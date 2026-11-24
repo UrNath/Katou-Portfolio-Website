@@ -205,4 +205,37 @@ function probe() {
 }
 if (document.readyState === 'complete') probe(); else addEventListener('load', probe, { once: true });
 
+/* ---------- cursor-follow for character stages ----------
+   The model eases toward the pointer (--fx / --fy, -1 to 1) and the backdrop eases a little
+   less, so the two move together with depth. Only a mouse with hover moves it; touch and
+   reduced motion keep the model still. Movement runs in rAF only while the pointer is moving. */
+const floatFine = matchMedia('(hover: hover) and (pointer: fine)');
+$$<HTMLElement>('[data-float]').forEach((stage) => {
+  if (!floatFine.matches || reduced()) return;
+  const zone = stage.closest('section') ?? stage;
+  let tx = 0, ty = 0, x = 0, y = 0, frame = 0, last = 0;
+  const step = (now: number) => {
+    const dt = last ? now - last : 16;
+    last = now;
+    const k = 1 - Math.exp(-dt / 240);
+    x += (tx - x) * k;
+    y += (ty - y) * k;
+    stage.style.setProperty('--fx', x.toFixed(4));
+    stage.style.setProperty('--fy', y.toFixed(4));
+    if (Math.abs(tx - x) > 0.001 || Math.abs(ty - y) > 0.001) frame = requestAnimationFrame(step);
+    else { frame = 0; last = 0; }
+  };
+  const kick = () => { if (!frame) frame = requestAnimationFrame(step); };
+  zone.addEventListener('pointermove', (event) => {
+    if (event.pointerType !== 'mouse') return;
+    const box = zone.getBoundingClientRect();
+    tx = Math.max(-1, Math.min(1, ((event.clientX - box.left) / box.width - 0.5) * 2));
+    ty = Math.max(-1, Math.min(1, ((event.clientY - box.top) / box.height - 0.5) * 2));
+    kick();
+  });
+  const settle = () => { tx = 0; ty = 0; kick(); };
+  zone.addEventListener('pointerleave', settle);
+  addEventListener('blur', settle);
+});
+
 export {};

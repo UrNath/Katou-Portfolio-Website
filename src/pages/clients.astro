@@ -55,9 +55,10 @@ const icon = {
           <div class="weapon ui" id="cl-weapon" data-rise style="--i:6"></div>
           <div class="cl-socs ui" id="cl-socs" data-rise style="--i:7"></div>
         </div>
-        <div class="art-stage">
+        <div class="art-stage" data-float>
           <span class="hatch decal-b" aria-hidden="true"></span>
-          <div class="cl-art" id="cl-art"></div>
+          <div class="cl-backdrop float-back" aria-hidden="true"></div>
+          <div class="cl-art float-model" id="cl-art"></div>
         </div>
       </div>
       <div class="roster" id="roster" aria-label="Client roster"></div>
@@ -154,5 +155,29 @@ const icon = {
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) pick(ci + (dx < 0 ? 1 : -1));
     });
     drawClient();
+
+    // Reserve the tallest state of each block, so switching client or tab never moves the layout.
+    var RESERVE = ['#cl-name', '#cl-tags', '#cl-desc', '#cl-panel', '#cl-weapon', '#cl-socs'];
+    var reserving = false;
+    function reserve() {
+      if (cutting || reserving) return;
+      reserving = true;
+      var saved = [ci, tab, skin];
+      RESERVE.forEach(function (sel) { $(sel).style.minHeight = ''; });
+      var max = RESERVE.map(function () { return 0; });
+      for (var i = 0; i < CLIENTS.length; i++) {
+        ['hl', 'sk'].forEach(function (t) {
+          ci = i; tab = t; skin = 0; drawClient(false);
+          RESERVE.forEach(function (sel, n) { max[n] = Math.max(max[n], $(sel).offsetHeight); });
+        });
+      }
+      ci = saved[0]; tab = saved[1]; skin = saved[2]; drawClient(false);
+      RESERVE.forEach(function (sel, n) { $(sel).style.minHeight = max[n] + 'px'; });
+      reserving = false;
+    }
+    reserve();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(reserve);
+    var resizeTimer = 0;
+    addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(reserve, 150); });
   })();
 </script>
