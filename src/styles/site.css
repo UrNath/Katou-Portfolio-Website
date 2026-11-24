@@ -287,6 +287,9 @@ html:not(.entered) .hero-copy .name span { animation: katou-in var(--e-big) var(
 .h2 { font-family: var(--f-name); font-weight: 900; font-style: italic; text-transform: uppercase; font-size: clamp(56px, 11cqi, 104px); line-height: .86; margin: 14px 0 0; }
 .sub { color: #dde2ea; max-width: 38ch; margin: 16px 0 0; }
 .feat .h2 { font-size: clamp(48px, 8cqi, 88px); }
+.feat .sec-no { text-transform: uppercase; }
+/* two lines at every desktop width: FEATURED over WORKS (it ran onto one line on wide screens and crossed the diagonal) */
+@container site (min-width: 900px) { .feat .h2 { width: min-content; } }
 .feat .sub { max-width: 34ch; }
 .carousel { --th: clamp(220px, calc(var(--vh) - var(--barh, 65px) - 204px), 520px); position: relative; min-width: 0; --cx1: 62; --cx2: 110; --cs1: .82; --cs2: .66; --c2o: 1; }
 .car-track { user-select: none; -webkit-user-select: none; cursor: grab; }
