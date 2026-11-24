@@ -19,14 +19,26 @@ const art = site.characterArt;
 <Site page="home">
   <main class="page on" id="p-home">
     <section class="screen dots" id="top" aria-labelledby="intro-title">
-      <div class="bg-slab" aria-hidden="true"></div>
-      <p class="ghost-name" aria-hidden="true">Katou</p>
+      <div class="bg-slab" aria-hidden="true"><span class="slab-lines"></span></div>
+      <p class="ghost-name" aria-hidden="true"><span>Editor</span><span>Editor</span><span>Editor</span></p>
+      <span class="edge edge-lime" aria-hidden="true"></span><span class="edge edge-gold" aria-hidden="true"></span>
+      <p class="intro-tag ui" aria-hidden="true"><b>01</b><i></i><span>Intro</span></p>
+      <p class="side-note ui" aria-hidden="true">Nassukatou · Portfolio · 2026</p>
+      <div class="art-stage" data-rise style="--i:2" data-float>
+        <span class="spark s-white" aria-hidden="true"></span><span class="spark s-gold" aria-hidden="true"></span>
+        <span class="gem g-line" aria-hidden="true"></span><span class="gem g-gold" aria-hidden="true"></span>
+        <div class="katou-frame">
+          <div class="float-back" aria-hidden="true"></div>
+          <Image class="rim float-model" src={chibi} alt={art.alt} widths={[640, 1280]} sizes="(min-width: 900px) 46vw, 100vw" loading="eager" fetchpriority="high" />
+        </div>
+        {art.artist && <p class="credit ui">Art illust: {art.artist.toLowerCase()}</p>}
+      </div>
       <div class="wrap screen-grid">
         <div class="hero-copy">
-          <p class="kicker ui" data-rise><span class="slashes"></span><span>Professor Number <b>67</b></span><span class="hatch"></span></p>
+          <p class="kicker ui" data-rise><span class="slashes"></span><span>Professor Number <b>67</b></span></p>
           <p class="pre" data-rise style="--i:1">Meet the editor!</p>
           <h1 class="name" id="intro-title" data-rise style="--i:2"><span>Katou</span></h1>
-          <div class="tags" data-rise style="--i:3"><span class="t1">Video editor</span><span class="t2">UI/UX Developer</span>{status.editing !== 'closed' && <span class="t3">★ Commissions open</span>}</div>
+          <div class="tags" data-rise style="--i:3"><span class="t1">Video editor</span><span class="t2">UI/UX Developer</span>{status.editing !== 'closed' && <span class="t3"><i class="live"></i>Commissions open</span>}</div>
           <p class="tagline" data-rise style="--i:4">{tagline}</p>
           <div class="skills" data-rise style="--i:5" aria-label="Services">
             <a class="skill" href="/pricing#ed-sec"><span class="dia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg></span><b>Editing<small>{labelFor(status.editing)}</small></b></a>
@@ -37,14 +49,6 @@ const art = site.characterArt;
             <a class="btn peach" href="/contact">Contact</a>
           </div>
           <a class="scroll-cue ui" href="#feat-sec" data-rise style="--i:7">Scroll to see my edits <i></i></a>
-        </div>
-        <div class="art-stage" data-rise style="--i:2" data-float>
-          <span class="hatch decal-a" aria-hidden="true"></span>
-          <div class="katou-frame">
-            <div class="card float-back" aria-hidden="true"></div>
-            <Image class="rim float-model" src={chibi} alt={art.alt} widths={[440, 880]} sizes="(min-width: 900px) 440px, 240px" loading="eager" fetchpriority="high" />
-            {art.artist && <p class="credit ui">Art illust: {art.artist.toLowerCase()}</p>}
-          </div>
         </div>
       </div>
     </section>
@@ -270,5 +274,22 @@ const art = site.characterArt;
     };
     track.addEventListener('pointerup', release);
     track.addEventListener('pointercancel', release);
+  }
+  // Intro scroll: the section is exactly one screen tall, so the character would be left cut in half at its bottom edge
+  // as the page scrolls. Instead `--p` (0 at the top, 1 after one screen) fades it out, scales it down a little and
+  // lifts it away (see .katou-frame in site.css); it is gone before the cut edge climbs into view.
+  {
+    const top = document.getElementById('top');
+    if (top) {
+      let raf = 0;
+      const update = () => {
+        raf = 0;
+        const p = Math.min(1, Math.max(0, scrollY / Math.max(1, top.offsetHeight)));
+        top.style.setProperty('--p', p.toFixed(3));
+      };
+      addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
+      addEventListener('resize', update);
+      update();
+    }
   }
 </script>
