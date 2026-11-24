@@ -1,6 +1,6 @@
 /**
  * Shared behaviour for every public page (see layouts/Site.astro):
- * phone menu, home section tabs, the slash page wipe, scroll reveals, the video player,
+ * phone menu, home section tabs, scroll reveals, the video player,
  * hover previews and the frame-rate probe that turns on the cheaper effects tier.
  */
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
@@ -36,67 +36,8 @@ if (subLinks.length && 'IntersectionObserver' in window) {
   }));
 }
 
-/* ---------- page wipe: three slanted bands cover, navigate, then uncover ---------- */
-const ROUTES: Record<string, [string, string, string]> = {
-  '/': ['Home', '01', '#2f6fe0'], '/works': ['Works', '02', '#ff5b34'], '/clients': ['Clients', '03', '#8fc8ff'],
-  '/pricing': ['Pricing', '04', '#2f6fe0'], '/contact': ['Contact', '05', '#2f6fe0'], '/terms': ['Terms', '06', '#f3c443'],
-};
-const norm = (p: string) => p.replace(/\/+$/, '') || '/';
-const wipe = $('#wipe')!;
-const bands = $$('i', wipe);
-const SK = 'skewX(-18deg) ';
-function label(path: string) {
-  const r = ROUTES[path];
-  if (!r) return;
-  wipe.style.setProperty('--wc', r[2]);
-  $('#wipe-label')!.textContent = r[0];
-  $('#wipe-sub')!.textContent = `Loading · ${r[1]}`;
-}
-function sweep(from: number, to: number, dur: number) {
-  const lite = root.classList.contains('fx-lite');
-  return Promise.all(bands.map((b, k) => {
-    if (lite && k < 2) { b.style.display = 'none'; return Promise.resolve(); }
-    return b.animate([{ transform: `${SK}translate3d(${from}%,0,0)` }, { transform: `${SK}translate3d(${to}%,0,0)` }],
-      { duration: dur, delay: lite ? 0 : k * 50, easing: 'cubic-bezier(.77,0,.18,1)', fill: 'forwards' }).finished.catch(() => undefined);
-  }));
-}
-let leaving = false;
-document.addEventListener('click', (e) => {
-  if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || leaving || reduced()) return;
-  const a = (e.target as Element | null)?.closest?.<HTMLAnchorElement>('a[href]');
-  if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
-  const url = new URL(a.href, location.href);
-  if (url.origin !== location.origin) return;
-  const to = norm(url.pathname);
-  if (!ROUTES[to] || to === norm(location.pathname)) return;
-  e.preventDefault();
-  leaving = true;
-  label(to);
-  wipe.classList.add('on');
-  $('main.page')?.classList.add('leaving');
-  sweep(-150, 0, 480).then(() => {
-    try { sessionStorage.setItem('nk-wipe', JSON.stringify({ t: Date.now() })); } catch { /* still navigates */ }
-    location.href = url.href;
-  });
-}, true);
-addEventListener('pageshow', (e) => {
-  if (!e.persisted) return;
-  leaving = false;
-  wipe.classList.remove('on', 'covering');
-  bands.forEach((b) => b.getAnimations().forEach((an) => an.cancel()));
-  $('main.page')?.classList.remove('leaving');
-});
-if (root.classList.contains('wipe-arrive')) {
-  try { sessionStorage.removeItem('nk-wipe'); } catch { /* ignore */ }
-  label(norm(location.pathname));
-  wipe.classList.add('on', 'covering');
-  const open = () => {
-    root.classList.remove('wipe-arrive');
-    wipe.classList.remove('covering');
-    sweep(0, 150, 560).then(() => { wipe.classList.remove('on'); bands.forEach((b) => b.getAnimations().forEach((an) => an.cancel())); });
-  };
-  (document.fonts?.ready ?? Promise.resolve()).then(() => setTimeout(open, 60), open);
-}
+/* ---------- page entrance is CSS-only (site.css); this just ends it so later show/hide toggles never replay it ---------- */
+setTimeout(() => root.classList.add('entered'), 1000);
 
 /* ---------- animate on scroll (opt-in, so content shows without scripting) ---------- */
 const AOS = ['.feat .wrap > div:first-child', '.carousel', '.feat-cta', '.about .vid', '.about .wrap > div:last-child > *', '.cta-band .wrap > *',
@@ -111,6 +52,8 @@ if ('IntersectionObserver' in window && !reduced()) {
   }), { rootMargin: '0px 0px -6% 0px', threshold: .08 });
   root.classList.add('aos-ready');
   AOS.forEach((sel) => $$(sel).forEach((el, i) => {
+    // Already on screen: the page entrance (site.css) animates it, so hiding it here would flash it.
+    if (el.getBoundingClientRect().top < innerHeight * .94) return;
     el.dataset.aos = '';
     if (!el.style.getPropertyValue('--d')) el.style.setProperty('--d', String(i % 6));
     io.observe(el);

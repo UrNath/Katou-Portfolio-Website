@@ -67,15 +67,11 @@ const mailIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
         var lite = (n.hardwareConcurrency && n.hardwareConcurrency <= 4) || (n.deviceMemory && n.deviceMemory <= 4);
         try { var saved = localStorage.getItem('nk-fx'); if (saved === 'lite') lite = true; if (saved === 'full') lite = false; } catch (e) {}
         if (lite) root.classList.add('fx-lite');
-        // Arriving through the page wipe: start covered so the new page is uncovered, not flashed.
-        try { var w = JSON.parse(sessionStorage.getItem('nk-wipe') || 'null'); if (w && Date.now() - w.t < 6000 && !matchMedia('(prefers-reduced-motion: reduce)').matches) root.classList.add('wipe-arrive'); } catch (e) {}
       })();
     </script>
   </head>
   <body class={bodyClass}>
     <div class="site" id="site" data-page={page}>
-      <div class="wipe" id="wipe" aria-hidden="true"><i class="w1"></i><i class="w2"></i><i class="w3"><b><small id="wipe-sub">Loading</small><span id="wipe-label"></span></b></i></div>
-
       <header class="bar">
         <div class="wrap bar-main">
           <a class="logo" href="/" aria-label="NassuKatou, home"><span class="logo-word">Nassu<b>Katou</b></span></a>
