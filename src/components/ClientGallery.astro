@@ -597,11 +597,11 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .roster-switch { display: inline-flex; align-items: center; gap: 10px; padding: 0 18px 0 14px; background: rgb(0 0 0 / .42); clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
   .roster-switch span { font-size: 16px; }
   .roster-names { display: flex; gap: 2px; }
-  .roster-names button { position: relative; padding: 0 14px; background: none; opacity: .68; transition: opacity .2s ease; }
-  .roster-names button::before { content: ""; position: absolute; inset: 7px 0; z-index: -1; background: var(--scene-accent, white); opacity: 0; transform: skewX(-14deg) scaleX(.6); transition: opacity .25s ease, transform .3s cubic-bezier(.2, .7, .2, 1); }
+  .roster-names button { position: relative; isolation: isolate; padding: 0 14px; background: none; opacity: .72; transition: opacity .2s ease; }
+  .roster-names button::before { content: ""; position: absolute; inset: 6px 0; z-index: -1; background: var(--scene-accent, white); opacity: 0; transform: skewX(-18deg) scaleX(.6); transition: opacity .25s ease, transform .3s cubic-bezier(.2, .7, .2, 1); }
   .roster-names button:hover { opacity: 1; }
   .roster-names button[aria-pressed="true"] { opacity: 1; color: #0d1320; }
-  .roster-names button[aria-pressed="true"]::before { opacity: 1; transform: skewX(-14deg); }
+  .roster-names button[aria-pressed="true"]::before { opacity: 1; transform: skewX(-18deg); }
   .roster :is(button, a):focus-visible { outline: 2px solid white; outline-offset: 3px; }
 
   /* ---- Stage: backdrop and character are separate layers ---- */

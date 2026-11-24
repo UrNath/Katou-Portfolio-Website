@@ -598,8 +598,12 @@ html[data-creator-filter] .pw-avatar::after { animation: sk-ring .8s var(--sk-ea
    =================================================================== */
 .immersive-clients { font-family: var(--sk-body); }
 .immersive-clients .roster .name { font-family: var(--sk-name); font-weight: 900; font-style: italic; letter-spacing: -.005em; line-height: .86; }
-.immersive-clients .roster-switch { font: 800 italic 18px/1 var(--sk-name); letter-spacing: .04em; color: var(--sk-text); border-right: 4px solid var(--scene-accent, white); clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%); padding: 0 16px 0 20px; }
-.immersive-clients .roster-names button { font-family: var(--sk-ui); }
+/* Client switcher: slanted Switch button first, then slanted name chips. One slant (the nav's -18deg) for every piece. */
+.immersive-clients .roster-nav { flex-wrap: nowrap; gap: 8px 12px; }
+.immersive-clients .roster-switch { order: -1; position: relative; isolation: isolate; clip-path: none; background: none; border: 0; padding: 0 24px 0 20px; font: 700 15px/1 var(--sk-ui); letter-spacing: .06em; color: var(--sk-text); white-space: nowrap; }
+.immersive-clients .roster-switch::before { content: ""; position: absolute; inset: 0; z-index: -1; background: color-mix(in srgb, var(--scene-panel, #131d3a) 55%, #000); transform: skewX(-18deg); }
+.immersive-clients .roster-names { gap: 6px; }
+.immersive-clients .roster-names button { font-family: var(--sk-ui); font-weight: 700; padding: 0 18px; white-space: nowrap; }
 .immersive-clients .roster .chips li, .immersive-clients .roster .strip span, .immersive-clients .roster .tabs button, .immersive-clients .roster .gem-label { font-family: var(--sk-ui); }
 .immersive-clients .roster .desc.is-quote { position: relative; align-self: flex-start; max-width: 100%; padding: 6px 18px 6px 34px; background: rgb(0 0 0 / .3); border-left: 3px solid var(--accent); font: 800 italic clamp(22px, 2vw, 28px)/1.1 var(--sk-name); color: var(--sk-text); }
 .immersive-clients .roster .desc.is-quote::before { content: "\201C"; position: absolute; left: 8px; top: -2px; font-size: 1.5em; color: var(--accent); }
@@ -661,7 +665,8 @@ html[data-creator-filter] .pw-avatar::after { animation: sk-ring .8s var(--sk-ea
 /* Wide screens: switch sits at the end of the row. Phones: one screen, art 45%, cut-in over the art. */
 @media (max-aspect-ratio: 1/1) {
   .immersive-clients .roster-nav { justify-self: stretch !important; justify-content: space-between !important; flex-wrap: nowrap !important; }
-  .immersive-clients .roster-names button { padding: 0 10px; font-size: 11px; }
+  .immersive-clients .roster-names button { padding: 0 11px; font-size: 11px; }
+  .immersive-clients .roster-switch { padding: 0 16px 0 14px; font-size: 13px; }
   .immersive-clients .switch-long { display: none; }
   .immersive-clients .client { grid-template-rows: calc(var(--bar) + (100svh - var(--bar)) * .45) minmax(0, 1fr); }
   .immersive-clients .info { align-self: start; }
