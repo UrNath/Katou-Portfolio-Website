@@ -165,10 +165,11 @@ html:not(.entered) :is(.page-head .name, .name[data-rise], .art-stage, .client .
    The edge runs from 48.9% of the width at the top to 35.7% at the bottom. */
 .screen { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); min-height: calc(100 * var(--u-vh) - var(--barh, 65px)); min-height: calc(var(--vh) - var(--barh, 65px)); display: flex; flex-direction: column; justify-content: center; }
 .screen > * { min-width: 0; }
-.bg-slab { position: absolute; inset: 0; background: linear-gradient(160deg, #3277ee, var(--slab) 45%, var(--slab-deep)); clip-path: polygon(0 0, 48.9% 0, 35.7% 100%, 0 100%); overflow: hidden; }
+/* the blue is the base of the whole section; the dark panel (with the stripes) sits on top of it and slides over it */
+.bg-slab { position: absolute; inset: 0; background: linear-gradient(160deg, #3277ee, var(--slab) 45%, var(--slab-deep)) 0 0 / 56% 100% no-repeat, var(--slab); overflow: hidden; }
 .slab-lines { position: absolute; inset: -14%; background: repeating-linear-gradient(115deg, rgb(255 255 255 / .07) 0 2px, transparent 2px 24px); }
-.dark-panel { position: absolute; inset: 0; clip-path: polygon(46.5% 0, 100% 0, 100% 100%, 33.3% 100%);
-  background: radial-gradient(ellipse 38cqi 72% at 94% 46%, rgb(44 84 170 / .32), transparent 72%), radial-gradient(rgb(255 255 255 / .1) 1px, transparent 1.5px) 0 0 / 24px 24px; }
+.dark-panel { position: absolute; inset: 0; clip-path: polygon(48.9% 0, 100% 0, 100% 100%, 35.7% 100%);
+  background: radial-gradient(ellipse 38cqi 72% at 94% 46%, rgb(44 84 170 / .32), transparent 72%), radial-gradient(rgb(255 255 255 / .1) 1px, transparent 1.5px) 0 0 / 24px 24px, var(--void); }
 .edge { position: absolute; inset: 0; pointer-events: none; }
 .edge-lime { background: var(--signal); clip-path: polygon(48.9% 0, 50.1% 0, 36.9% 100%, 35.7% 100%); }
 .edge-gold { background: var(--gold); clip-path: polygon(51% 0, 51.5% 0, 38.3% 100%, 37.8% 100%); }
@@ -253,8 +254,8 @@ html:not(.entered) .hero-copy .name span { animation: katou-in var(--e-big) var(
 @container site (max-width: 899px) {
   /* stacked: the art panel on top, the copy below; the panel edge becomes a diagonal along its bottom */
   .screen { --art-h: calc(88 * var(--u-vw)); display: block; min-height: 0; }
-  .bg-slab { inset: 0 0 auto 0; height: var(--art-h); clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%); }
-  .dark-panel { clip-path: none; }
+  .bg-slab { background: linear-gradient(160deg, #3277ee, var(--slab) 45%, var(--slab-deep)) 0 0 / 100% var(--art-h) no-repeat, var(--slab); }
+  .dark-panel { clip-path: polygon(0 var(--art-h), 100% calc(var(--art-h) * .88), 100% 100%, 0 100%); }
   .edge { inset: 0 0 auto 0; height: calc(var(--art-h) + 20px); }
   .edge-lime { clip-path: polygon(0 var(--art-h), 100% calc(var(--art-h) * .88), 100% calc(var(--art-h) * .88 + 9px), 0 calc(var(--art-h) + 9px)); }
   .edge-gold { clip-path: polygon(0 calc(var(--art-h) + 15px), 100% calc(var(--art-h) * .88 + 15px), 100% calc(var(--art-h) * .88 + 18px), 0 calc(var(--art-h) + 18px)); }
