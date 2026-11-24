@@ -164,6 +164,9 @@ html:has(.wipe.go) .bar { backdrop-filter: none; }
 .screen-grid { position: relative; display: grid; gap: 28px; padding-block: 28px 40px; }
 @container site (min-width: 900px) {
   .screen-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: center; min-height: 640px; padding-block: 40px; }
+  /* home intro fills the first screen (below the sticky bar) so Featured never peeks in */
+  #top.screen { display: grid; min-height: calc(100svh - var(--barh, 100px)); }
+  #top .screen-grid { min-height: 0; align-content: center; }
 }
 @container site (max-width: 899px) {
   .screen .bg-slab { width: 100%; height: 56%; inset: 0 0 auto 0; clip-path: polygon(0 0, 100% 0, 100% 78%, 0 100%); }
