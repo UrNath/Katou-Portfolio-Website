@@ -807,6 +807,58 @@ html.vt-works::view-transition-old(w-bar), html.vt-works::view-transition-old(w-
 .form-note { margin: 0; color: var(--mute); font-size: 13px; }
 .form .btn { width: 100%; }
 .sent { margin: 0; padding: 10px 14px; border-left: 3px solid var(--signal); background: rgb(198 244 50 / .08); font-size: 14px; }
+/* ---------- contact: one screen, no scrolling (desktop) ----------
+   The page is exactly as tall as the window, the footer is left out here only, and the sizes below follow the window
+   height (--u-svh) so the header, the Discord card, the guidelines, the email row and the form all fit at once.
+   The message box takes whatever height is left. Phones keep normal scrolling. */
+@media (min-width: 900px) {
+  .site[data-page="contact"] { height: 100vh; height: var(--vh); min-height: 0; overflow: clip; }
+  .site[data-page="contact"] .foot { display: none; }
+  #p-contact { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+  #p-contact .page-head.slim .wrap { padding-block: clamp(6px, calc(1.6 * var(--u-svh)), 14px) clamp(4px, calc(1.2 * var(--u-svh)), 12px); gap: 4px; }
+  #p-contact .page-head.slim .name { font-size: clamp(38px, calc(8 * var(--u-svh)), 64px); }
+  #p-contact .ct-grid { flex: 1 1 0; min-height: 0; align-items: stretch; padding-block: clamp(10px, calc(2.4 * var(--u-svh)), 26px); gap: clamp(14px, 2.4cqi, 28px); }
+  #p-contact .ct-grid > div:first-child { display: grid; grid-template-rows: auto 1fr auto; gap: clamp(8px, calc(1.8 * var(--u-svh)), 16px) !important; min-height: 0; }
+  #p-contact .dc-card { padding: clamp(12px, calc(2.4 * var(--u-svh)), 24px) 22px; }
+  #p-contact .dc-card h2 { font-size: clamp(26px, calc(5.2 * var(--u-svh)), 52px); margin: 4px 0 clamp(6px, calc(1.4 * var(--u-svh)), 12px); }
+  #p-contact .dc-tag { font-size: clamp(26px, calc(4.8 * var(--u-svh)), 48px); }
+  #p-contact .dc-actions { margin-top: clamp(10px, calc(2 * var(--u-svh)), 20px); }
+  #p-contact .dc-status { margin-top: clamp(8px, calc(1.6 * var(--u-svh)), 16px); }
+  #p-contact .write { padding: clamp(10px, calc(1.8 * var(--u-svh)), 16px) 18px; min-height: 0; overflow: hidden; display: grid; align-content: center; }
+  #p-contact .write ul { gap: clamp(3px, calc(.9 * var(--u-svh)), 8px); margin-top: clamp(4px, calc(1 * var(--u-svh)), 8px); }
+  #p-contact .write li { font-size: clamp(13px, calc(2.3 * var(--u-svh)), 16px); line-height: 1.35; }
+  #p-contact .form { display: flex; flex-direction: column; gap: clamp(6px, calc(1.5 * var(--u-svh)), 12px); padding: clamp(12px, calc(2.2 * var(--u-svh)), 22px) 20px; min-height: 0; overflow: auto; }
+  #p-contact .form h2 { font-size: clamp(26px, calc(4.8 * var(--u-svh)), 34px); }
+  #p-contact .form-note { font-size: clamp(11px, calc(2 * var(--u-svh)), 13px); line-height: 1.35; }
+  #p-contact .field input, #p-contact .field select { min-height: clamp(36px, calc(6.4 * var(--u-svh)), 46px); padding-block: 6px; }
+  #p-contact .field:has(textarea) { flex: 1 1 0; min-height: 70px; display: flex; flex-direction: column; }
+  #p-contact .field textarea { flex: 1 1 0; min-height: 44px; resize: none; }
+  #p-contact .form .btn { flex: none; min-height: clamp(38px, calc(6.6 * var(--u-svh)), 50px); }
+  #p-contact .form > .two, #p-contact .form > .btn, #p-contact .form > h2, #p-contact .form > .form-note { flex: none; }
+}
+/* shorter windows: tighter still, so every guideline and every form field stays fully visible */
+@media (min-width: 900px) and (max-height: 860px) {
+  #p-contact .page-head.slim .kicker { font-size: 10px; }
+  #p-contact .page-head.slim .name { font-size: clamp(34px, calc(7 * var(--u-svh)), 54px); }
+  #p-contact .ct-grid { padding-block: 8px 10px; }
+  #p-contact .dc-card { padding: 12px 20px; }
+  #p-contact .dc-card h2 { font-size: clamp(24px, calc(4.4 * var(--u-svh)), 40px); margin: 2px 0 6px; }
+  #p-contact .dc-tag { font-size: clamp(22px, calc(3.8 * var(--u-svh)), 40px); padding: 0 12px 2px; }
+  #p-contact .dc-actions { margin-top: 8px; gap: 8px; }
+  #p-contact .dc-actions .btn { min-height: 38px; padding: 0 22px; font-size: 12px; }
+  #p-contact .dc-status { margin-top: 8px; }
+  #p-contact .dc-status .status { font-size: 10px; padding-block: 2px; }
+  #p-contact .write { padding: 8px 16px; }
+  #p-contact .write li { font-size: 12.5px; line-height: 1.28; }
+  #p-contact .write ul { gap: 2px; margin-top: 3px; }
+  #p-contact .mailrow .mini { min-height: 30px; }
+  #p-contact .form { padding: 12px 18px; gap: 6px; }
+  #p-contact .form h2 { font-size: clamp(24px, calc(4.4 * var(--u-svh)), 30px); }
+  #p-contact .form-note { font-size: 11px; line-height: 1.3; }
+  #p-contact .field { gap: 3px; }
+  #p-contact .field input, #p-contact .field select { min-height: 34px; padding-block: 4px; }
+  #p-contact .form .btn { min-height: 36px; }
+}
 /* ---------- terms ---------- */
 .tm { max-width: 860px; margin-inline: auto; padding-block: 26px 56px; }
 .tm-head { display: grid; gap: 6px; margin-bottom: 20px; }
