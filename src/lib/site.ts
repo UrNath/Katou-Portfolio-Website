@@ -117,7 +117,7 @@ player.addEventListener('close', () => { frame.replaceChildren(); opener?.focus(
 /* ---------- hover previews (mouse only, full effects tier) ---------- */
 document.addEventListener('pointerover', (e) => {
   if ((e as PointerEvent).pointerType !== 'mouse' || root.classList.contains('fx-lite')) return;
-  const card = (e.target as Element | null)?.closest?.<HTMLElement>('[data-preview]');
+  const card = (e.target as Element | null)?.closest?.<HTMLElement>('[data-preview]:not([data-preview-off])');
   const box = card?.querySelector<HTMLElement>('.pf');
   if (!card || !box || box.querySelector('video')) return;
   const v = document.createElement('video');
