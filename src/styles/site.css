@@ -195,7 +195,7 @@ html:not(.entered) :is(.page-head .name, .name[data-rise], .art-stage, .client .
 .spark::after { content: ""; position: absolute; inset: -70%; z-index: -1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, currentColor 55%, transparent) 0, transparent 62%); }
 .s-white { left: 7.4cqi; top: 15.5%; width: 2.7cqi; height: 2.7cqi; }
 .s-gold { left: 3.6cqi; top: 61%; width: 1.8cqi; height: 1.8cqi; color: var(--gold); animation-delay: -2s; }
-.gem { position: absolute; width: 1.05cqi; height: 1.05cqi; rotate: 45deg; animation: gem-spin 14s linear infinite, twinkle 6s ease-in-out infinite; }
+.intro-gem { position: absolute; width: 1.05cqi; height: 1.05cqi; rotate: 45deg; animation: gem-spin 14s linear infinite, twinkle 6s ease-in-out infinite; }
 .g-line { left: 2.3cqi; top: 38.6%; border: 2px solid #fff; box-shadow: 0 0 12px rgb(255 255 255 / .55), inset 0 0 6px rgb(255 255 255 / .35); }
 .g-gold { left: 36.4cqi; top: 67%; background: var(--gold); box-shadow: 0 0 14px rgb(243 196 67 / .7); animation-delay: 0s, -3s; }
 @keyframes twinkle { 0%, 100% { opacity: .55; scale: .86; } 50% { opacity: 1; scale: 1.08; } }

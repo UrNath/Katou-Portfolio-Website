@@ -611,7 +611,7 @@ html[data-creator-filter] .pw-avatar::after { animation: sk-ring .8s var(--sk-ea
 .immersive-clients .site-bar { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .fx-lite .immersive-clients .site-bar { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgb(8 12 20 / .92); }
 .fx-lite .immersive-clients .char-art { filter: drop-shadow(12px 16px 0 rgb(0 0 0 / .3)) !important; }
-.fx-lite .immersive-clients .char-echo { display: none; }
+.fx-lite .immersive-clients .char-echo { filter: blur(5px); }
 
 /* Persona-style cut-in, ~1.55 s. Transforms only. */
 .cutin .ci-band { position: absolute; left: -35%; right: -35%; transform-origin: center; will-change: transform; backface-visibility: hidden; }
