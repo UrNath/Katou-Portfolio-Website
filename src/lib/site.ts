@@ -101,7 +101,8 @@ if (root.classList.contains('wipe-arrive')) {
 /* ---------- animate on scroll (opt-in, so content shows without scripting) ---------- */
 const AOS = ['.feat .wrap > div:first-child', '.carousel', '.feat-cta', '.about .vid', '.about .wrap > div:last-child > *', '.cta-band .wrap > *',
   '#p-works .row-head', '.svc-head', '.pkg', '.ed-side > *', '.steps li', '.tier', '.svc-sec .notes',
-  '.dc-card', '.write', '.mailrow', '.form', '.tm-head > *', '.acc details', '.foot .wrap > *'];
+  '.dc-card', '.write', '.mailrow', '.form', '.tm-head > *', '.acc details'];
+// The footer is not revealed on scroll: on short pages it sits in the observer's bottom dead zone and would stay hidden.
 if ('IntersectionObserver' in window && !reduced()) {
   const io = new IntersectionObserver((entries) => entries.forEach((e) => {
     if (!e.isIntersecting) return;
