@@ -89,7 +89,8 @@ h1, h2, h3 { text-wrap: balance; }
 .nav a[aria-current="page"] { color: var(--void); }
 .nav a[aria-current="page"]::before { content: ""; position: absolute; inset: 12px 0; background: var(--signal); transform: skewX(-18deg); z-index: -1; }
 .nav-pill { position: absolute; }
-.bar-right { display: none; align-items: center; gap: 10px; }
+/* the social icons are 34px squares turned 45deg (about 48px across), so they need a wider gap to stay clear of each other and of the Contact button */
+.bar-right { display: none; align-items: center; gap: 22px; }
 .soc { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--line); transform: rotate(45deg); }
 .soc svg { width: 15px; height: 15px; transform: rotate(-45deg); }
 .soc { transition: border-color .2s, color .2s, background .2s; }
