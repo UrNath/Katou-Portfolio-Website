@@ -164,9 +164,11 @@ html:has(.wipe.go) .bar { backdrop-filter: none; }
 .hero-copy { position: relative; z-index: 2; min-width: 0; }
 .hero-copy .pre { font-family: var(--f-name); font-weight: 800; font-style: italic; font-size: clamp(30px, 6cqi, 52px); text-transform: uppercase; line-height: .9; margin: 18px 0 0; }
 .hero-copy .name { font-size: clamp(92px, 21cqi, 200px); }
+/* Home follows the approved mockup: content sits in a 1280px column, not the full width. */
+.site[data-page="home"] .wrap { max-width: 1280px; }
 .hero-copy .name span { display: inline-block; background: var(--gold); color: var(--void); padding: 0 .1em 0 .06em; box-shadow: 10px 10px 0 var(--katou); }
 @container site (min-width: 900px) {
-  .hero-copy .name { font-size: clamp(120px, min(12cqi, calc(var(--vh) * .25)), 300px); }
+  .hero-copy .name { font-size: clamp(120px, 12cqi, 190px); }
 }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 22px; }
 .tags span { padding: 3px 10px; font-family: var(--f-ui); font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; border: 1px solid currentColor; }
@@ -473,7 +475,7 @@ html:has(.wipe.go) .bar { backdrop-filter: none; }
 .site > .page.on { flex: 1 0 auto; }
 /* Full-screen sections (home Intro / Featured / About / Contact, Clients on desktop): at least one screen
    below the sticky header, content centred, so a section reads as its own screen instead of a strip. */
-#top.screen, .feat, .about, .cta-band {
+#top.screen {
   display: flex; flex-direction: column; justify-content: center;
   min-height: calc(100vh - var(--barh, 65px));
   min-height: calc(var(--vh) - var(--barh, 65px)); }
