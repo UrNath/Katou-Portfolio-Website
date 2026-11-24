@@ -1,6 +1,7 @@
 ---
 import Site from '../layouts/Site.astro';
 import ClientGallery from '../components/ClientGallery.astro';
+import '../styles/skin.css';
 import { creators } from '../data/tags';
 import { hasProfile, hiddenOnClientsPage, profileFor } from '../data/clients';
 import { loadClips } from '../lib/clips';
@@ -27,6 +28,6 @@ const clients = creators
     return { ...creator, profile, reels };
   });
 ---
-<Site title="Meet the Clients" page="clients" bodyClass="immersive-clients">
+<Site title="Meet the Clients" page="clients" bodyClass="clean-portfolio immersive-clients">
   <ClientGallery clients={clients} />
 </Site>

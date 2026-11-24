@@ -85,6 +85,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
             <button type="button" role="tab" id={`tab-${client.id}-skins`} aria-controls={`panel-${client.id}-skins`} aria-selected="false" tabindex="-1">Skins</button>
           </div>
 
+          <div class="panels">
           <div class="panel" role="tabpanel" id={`panel-${client.id}-profile`} aria-labelledby={`tab-${client.id}-profile`}>
             <ul class="gems">
               {client.reels.map((reel, reelIndex) => (
@@ -127,6 +128,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
               ))}
             </ul>
             {profile.skins.length < 2 && <p class="strip is-placeholder">No other skins yet.</p>}
+          </div>
           </div>
 
           <ul class="socials" data-seq style="--i:6" aria-label={`${client.label} links`}>
@@ -640,6 +642,10 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .tabs button[aria-selected="true"]::after { transform: scaleX(1); }
   .panel { display: flex; flex-direction: column; gap: clamp(.7rem, 1.6dvh, 1.1rem); min-height: 178px; }
   .panel[hidden] { display: none; }
+  /* Both tab panels share one grid cell: the column always reserves the taller panel, so switching tabs never moves the title, tabs, or buttons. */
+  .panels { display: grid; }
+  .panels > .panel { grid-area: 1 / 1; min-width: 0; }
+  .panels > .panel[hidden] { display: flex; visibility: hidden; pointer-events: none; }
 
   /* ---- Highlight diamonds ---- */
   .gems { display: flex; gap: clamp(22px, 3vw, 38px); margin: 0; padding: 22px 16px 0; list-style: none; }
