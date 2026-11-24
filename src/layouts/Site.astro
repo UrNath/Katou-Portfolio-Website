@@ -24,8 +24,9 @@ interface Props {
   title?: string;
   description?: string;
   page: 'home' | 'works' | 'clients' | 'pricing' | 'contact' | 'terms' | 'other';
+  bodyClass?: string;
 }
-const { title, description = site.description, page } = Astro.props;
+const { title, description = site.description, page, bodyClass } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.name;
 const { editing } = await loadServicePrices();
 const social = (id: string) => socials.find((item) => item.id === id);
@@ -71,7 +72,7 @@ const mailIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
       })();
     </script>
   </head>
-  <body>
+  <body class={bodyClass}>
     <div class="site" id="site" data-page={page}>
       <div class="wipe" id="wipe" aria-hidden="true"><i class="w1"></i><i class="w2"></i><i class="w3"><b><small id="wipe-sub">Loading</small><span id="wipe-label"></span></b></i></div>
 
