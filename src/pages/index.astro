@@ -18,10 +18,10 @@ const art = site.characterArt;
 ---
 <Site page="home">
   <main class="page on" id="p-home">
-    <section class="screen dots" id="top" aria-labelledby="intro-title">
+    <section class="screen" id="top" aria-labelledby="intro-title">
+      <div class="dark-panel" aria-hidden="true"><span class="edge edge-lime"></span><span class="edge edge-gold"></span></div>
       <div class="bg-slab" aria-hidden="true"><span class="slab-lines"></span></div>
       <p class="ghost-name" aria-hidden="true"><span>Editor</span><span>Editor</span><span>Editor</span></p>
-      <span class="edge edge-lime" aria-hidden="true"></span><span class="edge edge-gold" aria-hidden="true"></span>
       <p class="intro-tag ui" aria-hidden="true"><b>01</b><i></i><span>Intro</span></p>
       <p class="side-note ui" aria-hidden="true">Nassukatou · Portfolio · 2026</p>
       <div class="art-stage" data-rise style="--i:2" data-float>
@@ -274,22 +274,5 @@ const art = site.characterArt;
     };
     track.addEventListener('pointerup', release);
     track.addEventListener('pointercancel', release);
-  }
-  // Intro scroll: the section is exactly one screen tall, so the character would be left cut in half at its bottom edge
-  // as the page scrolls. Instead `--p` (0 at the top, 1 after one screen) fades it out, scales it down a little and
-  // lifts it away (see .katou-frame in site.css); it is gone before the cut edge climbs into view.
-  {
-    const top = document.getElementById('top');
-    if (top) {
-      let raf = 0;
-      const update = () => {
-        raf = 0;
-        const p = Math.min(1, Math.max(0, scrollY / Math.max(1, top.offsetHeight)));
-        top.style.setProperty('--p', p.toFixed(3));
-      };
-      addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
-      addEventListener('resize', update);
-      update();
-    }
   }
 </script>

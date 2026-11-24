@@ -167,11 +167,13 @@ html:not(.entered) :is(.page-head .name, .name[data-rise], .art-stage, .client .
 .screen > * { min-width: 0; }
 .bg-slab { position: absolute; inset: 0; background: linear-gradient(160deg, #3277ee, var(--slab) 45%, var(--slab-deep)); clip-path: polygon(0 0, 48.9% 0, 35.7% 100%, 0 100%); overflow: hidden; }
 .slab-lines { position: absolute; inset: -14%; background: repeating-linear-gradient(115deg, rgb(255 255 255 / .07) 0 2px, transparent 2px 24px); }
-.edge { position: absolute; inset: 0; pointer-events: none; transform-origin: 50% 0; }
+.dark-panel { position: absolute; inset: 0; clip-path: polygon(46.5% 0, 100% 0, 100% 100%, 33.3% 100%);
+  background: radial-gradient(ellipse 38cqi 72% at 94% 46%, rgb(44 84 170 / .32), transparent 72%), radial-gradient(rgb(255 255 255 / .1) 1px, transparent 1.5px) 0 0 / 24px 24px; }
+.edge { position: absolute; inset: 0; pointer-events: none; }
 .edge-lime { background: var(--signal); clip-path: polygon(48.9% 0, 50.1% 0, 36.9% 100%, 35.7% 100%); }
 .edge-gold { background: var(--gold); clip-path: polygon(51% 0, 51.5% 0, 38.3% 100%, 37.8% 100%); }
 .ghost-name { position: absolute; left: -2.5cqi; top: 0; margin: 0; display: grid; font-family: var(--f-name); font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 21.5cqi; line-height: .88; white-space: nowrap;
-  color: transparent; -webkit-text-stroke: 2px rgb(255 255 255 / .15); pointer-events: none; clip-path: polygon(0 0, 48.9% 0, 35.7% 100%, 0 100%); }
+  color: transparent; -webkit-text-stroke: 2px rgb(255 255 255 / .18); pointer-events: none; clip-path: polygon(0 0, 48.9% 0, 35.7% 100%, 0 100%); }
 .ghost-name span:nth-child(2) { margin-left: -9cqi; }
 .ghost-name span:nth-child(3) { margin-left: -4cqi; }
 .intro-tag { position: absolute; right: 4.4cqi; top: 5.5%; display: flex; align-items: center; gap: 14px; margin: 0; color: var(--mute); letter-spacing: .24em; }
@@ -181,17 +183,17 @@ html:not(.entered) :is(.page-head .name, .name[data-rise], .art-stage, .client .
 .side-note { position: absolute; right: 15.6cqi; top: 50%; translate: 0 -50%; margin: 0; writing-mode: vertical-rl; letter-spacing: .5em; font-size: 10px; color: rgb(255 255 255 / .24); white-space: nowrap; }
 /* art: the character sits at the bottom of the blue panel; its whole layer fades and drifts away as the page scrolls (see index.astro) */
 .art-stage { position: absolute; left: 0; top: 0; bottom: 0; width: 52.5cqi; }
-.katou-frame { position: absolute; left: 4.4cqi; top: 2.8%; width: 38cqi; transform-origin: 50% 60%; will-change: transform, opacity;
-  transform: translate3d(0, calc(var(--p, 0) * -34%), 0) scale(calc(1 - var(--p, 0) * .14)); opacity: max(0, calc(1 - var(--p, 0) * 4.2)); }
+.katou-frame { position: absolute; left: 4.4cqi; top: 2.8%; width: 38cqi; }
 .katou-frame img { display: block; width: 100%; height: auto; }
-@media (prefers-reduced-motion: reduce) { .katou-frame { transform: none; } }
 .credit { position: absolute; left: 3.1cqi; bottom: 3.2%; margin: 0; padding: 6px 13px 6px 12px; background: var(--void); border-left: 3px solid var(--signal); letter-spacing: .2em; font-size: 10px; white-space: nowrap; }
-.spark { position: absolute; background: #fff; clip-path: polygon(50% 0, 59% 41%, 100% 50%, 59% 59%, 50% 100%, 41% 59%, 0 50%, 41% 41%); animation: twinkle 4.8s ease-in-out infinite; }
+.spark { position: absolute; color: #fff; animation: twinkle 4.8s ease-in-out infinite; }
+.spark::before { content: ""; position: absolute; inset: 0; background: currentColor; clip-path: polygon(50% 0, 59% 41%, 100% 50%, 59% 59%, 50% 100%, 41% 59%, 0 50%, 41% 41%); }
+.spark::after { content: ""; position: absolute; inset: -70%; z-index: -1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, currentColor 55%, transparent) 0, transparent 62%); }
 .s-white { left: 7.4cqi; top: 15.5%; width: 2.7cqi; height: 2.7cqi; }
-.s-gold { left: 3.6cqi; top: 61%; width: 1.8cqi; height: 1.8cqi; background: var(--gold); animation-delay: -2s; }
+.s-gold { left: 3.6cqi; top: 61%; width: 1.8cqi; height: 1.8cqi; color: var(--gold); animation-delay: -2s; }
 .gem { position: absolute; width: 1.05cqi; height: 1.05cqi; rotate: 45deg; animation: gem-spin 14s linear infinite, twinkle 6s ease-in-out infinite; }
-.g-line { left: 2.3cqi; top: 38.6%; border: 2px solid #fff; }
-.g-gold { left: 36.4cqi; top: 67%; background: var(--gold); animation-delay: 0s, -3s; }
+.g-line { left: 2.3cqi; top: 38.6%; border: 2px solid #fff; box-shadow: 0 0 12px rgb(255 255 255 / .55), inset 0 0 6px rgb(255 255 255 / .35); }
+.g-gold { left: 36.4cqi; top: 67%; background: var(--gold); box-shadow: 0 0 14px rgb(243 196 67 / .7); animation-delay: 0s, -3s; }
 @keyframes twinkle { 0%, 100% { opacity: .55; scale: .86; } 50% { opacity: 1; scale: 1.08; } }
 @keyframes gem-spin { to { rotate: 405deg; } }
 @keyframes slab-drift { from { transform: translate3d(-2.5%, 2%, 0); } to { transform: translate3d(2.5%, -2%, 0); } }
@@ -244,15 +246,16 @@ html:not(.entered) :is(.page-head .name, .name[data-rise], .art-stage, .client .
   .scroll-cue { margin-top: 14px; }
 }
 /* intro entrance: stripes draw in from the top, KATOU scales up out of its block */
-@keyframes edge-in { from { transform: scaleY(0); } }
+@keyframes edge-slide { from { transform: translate3d(5cqi, 0, 0); opacity: 0; } }
 @keyframes katou-in { from { opacity: 0; transform: scale(.92); } }
-html:not(.entered) .edge-lime { animation: edge-in .8s var(--e-ease) .05s backwards; }
-html:not(.entered) .edge-gold { animation: edge-in .8s var(--e-ease) .18s backwards; }
+html:not(.entered) .edge-lime { animation: edge-slide .9s var(--e-ease) .1s backwards; }
+html:not(.entered) .edge-gold { animation: edge-slide .9s var(--e-ease) .22s backwards; }
 html:not(.entered) .hero-copy .name span { animation: katou-in var(--e-big) var(--e-ease) .22s backwards; }
 @container site (max-width: 899px) {
   /* stacked: the art panel on top, the copy below; the panel edge becomes a diagonal along its bottom */
   .screen { --art-h: calc(88 * var(--u-vw)); display: block; min-height: 0; }
   .bg-slab { inset: 0 0 auto 0; height: var(--art-h); clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%); }
+  .dark-panel { clip-path: none; }
   .edge { inset: 0 0 auto 0; height: calc(var(--art-h) + 20px); }
   .edge-lime { clip-path: polygon(0 var(--art-h), 100% calc(var(--art-h) * .88), 100% calc(var(--art-h) * .88 + 9px), 0 calc(var(--art-h) + 9px)); }
   .edge-gold { clip-path: polygon(0 calc(var(--art-h) + 15px), 100% calc(var(--art-h) * .88 + 15px), 100% calc(var(--art-h) * .88 + 18px), 0 calc(var(--art-h) + 18px)); }
@@ -937,7 +940,6 @@ html.vt-works::view-transition-old(w-bar), html.vt-works::view-transition-old(w-
 .fx-lite .bar, .fx-lite .site .bar { backdrop-filter: none; background: rgb(10 11 15 / .97); }
 .fx-lite .dots, .fx-lite .site .dots { background-image: none; }
 .fx-lite .rim { filter: drop-shadow(10px 14px 0 rgb(0 0 0 / .35)) !important; }
-.fx-lite .ghost-name { display: none; }
 .fx-lite .car-card.c-1, .fx-lite .car-card.c1, .fx-lite .car-card.c-2, .fx-lite .car-card.c2 { filter: none; opacity: .5; }
 .fx-lite .cta-band::before { display: none; }
 .car-card.c-3, .car-card.c3 { transform: translateX(0) scale(.5); opacity: 0; pointer-events: none; }
