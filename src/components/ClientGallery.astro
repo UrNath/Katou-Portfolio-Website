@@ -568,20 +568,27 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   :global(.immersive-clients .site-bar .wordmark .katou) { color: var(--scene-accent, #8fc8ff); }
   :global(.immersive-clients) { --nav-accent: var(--scene-accent, #8fc8ff); --nav-on: #0d1320; --nav-line: rgb(255 255 255 / .4); }
 
+  /* Clients is one screen: the header floats over the stage (as on the previous page) and the footer is left out here only. */
+  :global(.site[data-page="clients"]) { height: 100vh; height: var(--vh, 100svh); min-height: 0; overflow: clip; }
+  :global(.site[data-page="clients"] .bar) { position: absolute; inset: 0 0 auto; }
+  :global(.site[data-page="clients"] .foot) { display: none; }
+
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .roster {
-    --bar: var(--site-header-height, 72px);
+    --bar: 65px;
     --pad: max(clamp(1.1rem, 4vw, 4.5rem), env(safe-area-inset-left));
     position: relative;
     display: grid;
-    min-height: 100svh;
-    min-height: 100dvh;
+    height: 100vh;
+    height: var(--vh, 100svh);
     overflow: clip;
     color: white;
     isolation: isolate;
     touch-action: pan-y pinch-zoom;
   }
   .roster > * { grid-area: 1 / 1; min-width: 0; }
+  /* Header height under 900px matches the phone bar. */
+  @container site (max-width: 899px) { .roster { --bar: 57px; } }
   .is-placeholder { opacity: .72; font-style: italic; }
 
   /* ---- Roster switch ---- */
@@ -608,7 +615,7 @@ const socialLabel = { youtube: 'YouTube', discord: 'Discord', tiktok: 'TikTok' }
   .bg-paint[data-on] ~ .bg-band { opacity: .35; }
   .stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to right, color-mix(in srgb, var(--deep) 82%, transparent), transparent 58%), linear-gradient(to top, color-mix(in srgb, var(--deep) 70%, transparent), transparent 30%); pointer-events: none; }
 
-  .char { position: absolute; inset: auto var(--r, 6%) var(--b, 7%) auto; height: var(--h, 74%); aspect-ratio: var(--ratio, 3 / 4); max-width: 62%; }
+  .char { position: absolute; inset: auto var(--r, 6%) var(--b, 7%) auto; height: var(--h, 74%); aspect-ratio: var(--ratio, 3 / 4); max-width: min(62%, calc(100% - 38rem)); }
   .char[hidden] { display: none; }
   .char-move { position: relative; width: 100%; height: 100%; }
   .char-art { position: relative; display: block; width: 100%; max-width: none; height: 100%; object-fit: contain; object-position: bottom;
