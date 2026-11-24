@@ -245,11 +245,10 @@ html:not(.entered) :is(.page-head .name, .name[data-rise], .art-stage, .client .
   .actions { margin-top: 14px; }
   .scroll-cue { margin-top: 14px; }
 }
-/* intro entrance: stripes draw in from the top, KATOU scales up out of its block */
-@keyframes edge-slide { from { transform: translate3d(5cqi, 0, 0); opacity: 0; } }
+/* intro entrance: the dark panel (with its lime and gold stripes) slides left into place as one piece, KATOU scales up out of its block */
+@keyframes panel-slide { from { transform: translate3d(4cqi, 0, 0); opacity: 0; } }
 @keyframes katou-in { from { opacity: 0; transform: scale(.92); } }
-html:not(.entered) .edge-lime { animation: edge-slide .9s var(--e-ease) .1s backwards; }
-html:not(.entered) .edge-gold { animation: edge-slide .9s var(--e-ease) .22s backwards; }
+html:not(.entered) .dark-panel { animation: panel-slide 1s var(--e-ease) .05s backwards; }
 html:not(.entered) .hero-copy .name span { animation: katou-in var(--e-big) var(--e-ease) .22s backwards; }
 @container site (max-width: 899px) {
   /* stacked: the art panel on top, the copy below; the panel edge becomes a diagonal along its bottom */
